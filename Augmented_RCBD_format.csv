@@ -1,0 +1,27 @@
+Genotype,Location,Block,Trait1,Trait2,Trait3
+geno1,Assam,1,152,110,199
+geno2,Assam,1,206,193,175
+geno3,Assam,1,164,202,125
+check1,Assam,1,148,183,155
+check2 ,Assam,1,144,188,162
+check3,Assam,1,175,136,164
+geno4,Assam,2,206,171,185
+geno5,Assam,2,165,143,185
+geno6,Assam,2,186,175,105
+geno7,Assam,2,195,207,196
+check1,Assam,2,178,184,209
+check2 ,Assam,2,173,204,142
+check3,Assam,2,165,115,196
+geno1,Delhi,1,156,194,210
+geno2,Delhi,1,200,154,171
+geno3,Delhi,1,167,208,124
+check1,Delhi,1,120,198,187
+check2 ,Delhi,1,154,149,201
+check3,Delhi,1,186,184,196
+geno4,Delhi,2,182,149,174
+geno5,Delhi,2,192,107,137
+geno6,Delhi,2,197,157,144
+geno7,Delhi,2,156,169,140
+check1,Delhi,2,105,171,117
+check2 ,Delhi,2,151,140,101
+check3,Delhi,2,158,119,143

@@ -1,0 +1,13 @@
+Genotype,Location,Replication,Block,Trait1,Trait2,Trait3
+geno1,Assam,1,1,16,17,12
+geno2,Assam,1,1,19,11,19
+geno3,Assam,1,2,14,17,16
+geno1,Assam,2,2,10,15,10
+geno2,Assam,2,3,13,11,20
+geno3,Assam,2,3,16,15,10
+geno1,Delhi,1,4,17,17,11
+geno2,Delhi,1,4,13,15,19
+geno3,Delhi,1,5,16,10,15
+geno1,Delhi,2,5,20,12,20
+geno2,Delhi,2,6,19,15,15
+geno3,Delhi,2,6,15,10,12
