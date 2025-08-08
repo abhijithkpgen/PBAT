@@ -32,7 +32,7 @@ Simply use the public link provided above. No installation is required.
 
 ##  Citing PbAT
 
-
+Abhijith Krishnan. (2025). PbAT: Plant breeding Analytical Tools v1.0.1 (v1.0.1). Zenodo. https://doi.org/10.5281/zenodo.16778927
 
 
 ---
