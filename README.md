@@ -1,4 +1,7 @@
 # PbAT: Plant Breeding Analytical Tools v1.0.1
+<p align="center">
+  <img src="LogoNobg.png" alt="PBAT Logo" width="150">
+</p>
 
 [![R-CMD-check](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
