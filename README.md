@@ -6,11 +6,11 @@
 
 PbAT is an interactive web application built with R and Shiny. It provides a user-friendly graphical interface for performing complex statistical analyses common in plant breeding and agricultural research, without requiring programming knowledge.
 
-**[➡️ Click here to launch the live PbAT application](https://pbat.online/)**
+**[ Click here to launch the live PbAT application](https://pbat.online/)**
 
 ---
 
-## 📋 Features
+##  Features
 
 PbAT is organized into three main analytical modules:
 
@@ -18,7 +18,7 @@ PbAT is organized into three main analytical modules:
 * **Multivariate Analysis:** Perform Principal Component Analysis (PCA), GGE Biplots for GxE interaction studies, Correlation analysis, and Path analysis to understand the relationships between multiple traits.
 * **Mating Design Analysis:** Analyze data from various mating designs, including Griffing's Diallel methods (I-IV), Partial Diallel, and Line × Tester analysis to estimate combining ability (GCA/SCA) and genetic variance components.
 
-## 🚀 Usage
+##  Usage
 
 
 
@@ -27,7 +27,7 @@ Simply use the public link provided above. No installation is required.
 
 
 
-## 📄 Citing PbAT
+##  Citing PbAT
 
 
 
