@@ -1,9 +1,7 @@
-#' Run the PBAT Shiny App
+#' Launch the PBAT Shiny App
 #'
-#' @return Invisibly returns the app object.
-#' @examplesIf interactive()
-#' PBAT::run_pbat()
+#' @param ... Additional arguments passed to shiny::runApp()
 #' @export
 run_pbat <- function(...) {
-  shiny::runApp(pbat_app(), ...)
+  shiny::runApp(system.file("app", package = "PBAT"), ...)
 }

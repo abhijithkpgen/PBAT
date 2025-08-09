@@ -189,7 +189,7 @@ tabPanel("Home",
             "Griffing Method III (F1s & Reciprocals, No Parents)" = "griffing_m3",
             "Griffing Method IV (F1s Only, No Parents, No Reciprocals)" = "griffing_m4",
             "Partial Diallel" = "diallel_partial",
-            "Line × Tester" = "line_tester"
+            "Line x Tester" = "line_tester"
           ),
           selected = "griffing_m1"
         )
@@ -224,11 +224,11 @@ tabPanel("Home",
         tags$li(tags$b("Select Analysis Type:"), " Choose Experimental Design Analysis, Multivariate Analysis, or Mating Design Analysis depending on your workflow."),
         tags$li(tags$b("Map Data Columns:"), " Assign the appropriate columns (genotype, location, replication, block, etc.) when prompted, to enable correct analysis."),
         tags$li(tags$b("Run Analysis:"), tags$ul(
-          tags$li(tags$b(" Experimental Designs:"), " Generate summary statistics, ANOVA, heritability (H²), BLUEs/BLUPs (combined and location-wise), diagnostics, and post-hoc tests. Visualize results with boxplots, QQ plots, and interaction plots."),
+          tags$li(tags$b(" Experimental Designs:"), " Generate summary statistics, ANOVA, heritability (H^2), BLUEs/BLUPs (combined and location-wise), diagnostics, and post-hoc tests. Visualize results with boxplots, QQ plots, and interaction plots."),
           tags$li(tags$b(" Multivariate Analysis:"), " Perform PCA, GGE biplot , correlation, and path analysis on selected traits. Run analyses in standalone mode or linked to your EDA results."),
-          tags$li(tags$b(" Mating Design Analysis:"), " Analyze Diallel (Griffing Methods I–IV, PartialDiallel Designs) and  Line × Tester. Obtain GCA/SCA effects, ANOVA tables, and variance components.")
+          tags$li(tags$b(" Mating Design Analysis:"), " Analyze Diallel (Griffing Methods I-IV, PartialDiallel Designs) and  Line x Tester. Obtain GCA/SCA effects, ANOVA tables, and variance components.")
         )),
-        tags$li(tags$b(" Review & Download Results:"), " All results—interactive tables, plots, and summaries—can be downloaded as publication-ready PDF/CSV ZIP files for reporting or further analysis.")
+        tags$li(tags$b(" Review & Download Results:"), " All results-interactive tables, plots, and summaries-can be downloaded as publication-ready PDF/CSV ZIP files for reporting or further analysis.")
       ),
       tags$p(style = "font-size: 11px; margin-top: 10px;",
         "PbAT is designed for plant breeders and researchers to analyze data intuitively without needing knowledge in R. ",
@@ -425,27 +425,29 @@ tabPanel(
   tabPanel("Help & Guide",
     fluidPage(
       div(style = "padding: 30px;",
-        h2("📘 Help & Guide",style = "color: #23272b;"),
+        h2(" Help & Guide",style = "color: #23272b;"),
        
-        tags$h4("📂 Sample Format Downloads",style = "color: #23272b;"),
+        tags$h4(" Sample Format Downloads",style = "color: #23272b;"),
         tags$ul(
   tags$ul(
-  tags$li(tags$a(href = "Alpha_lattice_sample.csv", "📥 Alpha Lattice Sample CSV", target = "_blank")),
-  tags$li(tags$a(href = "Augmented_RCBD_Sample.csv", "📥 Augmented RCBD Sample CSV", target = "_blank")),
-  tags$li(tags$a(href = "Diallel_Griffing_Method1_Sample.csv", "📥 Griffing Method I Diallel Sample CSV", target = "_blank")),
-  tags$li(tags$a(href = "Diallel_Griffing_Method2_Sample.csv", "📥 Griffing Method II Diallel Sample CSV", target = "_blank")),
-  tags$li(tags$a(href = "Diallel_Griffing_Method3_Sample.csv", "📥 Griffing Method III Diallel Sample CSV", target = "_blank")),
-  tags$li(tags$a(href = "Diallel_Griffing_Method4_Sample.csv", "📥 Griffing Method IV Diallel Sample CSV", target = "_blank")),
-  tags$li(tags$a(href = "Factorial_CRD_sample.csv", "📥 Factorial CRD Sample CSV", target = "_blank")),
-  tags$li(tags$a(href = "Line_x_Tester_Sample.csv", "📥 Line × Tester Sample CSV", target = "_blank")),
-  tags$li(tags$a(href = "Partial_diallel_dummy.csv", "📥 Partial Diallel Sample CSV", target = "_blank")),
-   tags$li(tags$a(href = "Biplot_Sample_Format.csv", "📥 Biplot_Sample_Format CSV", target = "_blank")),
-   tags$li(tags$a(href = "Mult_Variate_sample_format.csv", "📥 Multi variate Analysis Sample Format CSV", target = "_blank")),
-  tags$li(tags$a(href = "RCBD_sample.csv", "📥 RCBD Sample CSV", target = "_blank"))
+  tags$li(tags$a(href = "Alpha_lattice_sample.csv", " Alpha Lattice Sample CSV", target = "_blank")),
+  tags$li(tags$a(href = "Augmented_RCBD_Sample.csv", " Augmented RCBD Sample CSV", target = "_blank")),
+  tags$li(tags$a(href = "Diallel_Griffing_Method1_Sample.csv", " Griffing Method I Diallel Sample CSV", target = "_blank")),
+  tags$li(tags$a(href = "Diallel_Griffing_Method2_Sample.csv", " Griffing Method II Diallel Sample CSV", target = "_blank")),
+  tags$li(tags$a(href = "Diallel_Griffing_Method3_Sample.csv", " Griffing Method III Diallel Sample CSV", target = "_blank")),
+  tags$li(tags$a(href = "Diallel_Griffing_Method4_Sample.csv", " Griffing Method IV Diallel Sample CSV", target = "_blank")),
+  tags$li(tags$a(href = "Factorial_CRD_sample.csv", " Factorial CRD Sample CSV", target = "_blank")),
+  tags$li(tags$a(href = "Line_x_Tester_Sample.csv", " Line x Tester Sample CSV", target = "_blank")),
+  tags$li(tags$a(href = "Partial_diallel_dummy.csv", " Partial Diallel Sample CSV", target = "_blank")),
+   tags$li(tags$a(href = "Biplot_Sample_Format.csv", " Biplot_Sample_Format CSV", target = "_blank")),
+   tags$li(tags$a(href = "Mult_Variate_sample_format.csv", " Multi variate Analysis Sample Format CSV", target = "_blank")),
+  tags$li(tags$a(href = "RCBD_sample.csv", " RCBD Sample CSV", target = "_blank"))
 )
     )
   )
 )))
+
+#' @noRd
 
 server <- function(input, output, session) {
   
@@ -1320,7 +1322,7 @@ observeEvent(input$md_run_analysis, {
     } else {
       cat("SUCCESS: Analysis was successful. Storing results.\n")
       md_results(res) # Store the successful results
-      showNotification("Mating Design Analysis Completed ✅", type = "message")
+      showNotification("Mating Design Analysis Completed  (OK)", type = "message")
     }
     
   }, error = function(e) {
@@ -1381,14 +1383,14 @@ output$md_gca <- renderTable({
   return(NULL)
 }, rownames = FALSE)
 
-# For Line × Tester: GCA Effects - Lines
+# For Line x Tester: GCA Effects - Lines
 output$md_gca_lines <- renderTable({
   req(md_results())
   res <- md_results()
   if (!is.null(res$gca_lines)) res$gca_lines else NULL
 }, rownames = FALSE)
 
-# For Line × Tester: GCA Effects - Testers
+# For Line x Tester: GCA Effects - Testers
 output$md_gca_testers <- renderTable({
   req(md_results())
   res <- md_results()
@@ -1715,7 +1717,7 @@ observeEvent(input$multi_run_gge, {
     output$multi_gge_plot_type3 <- renderPlot({ plot(gge_model, type = 4) })
 
     output$multi_gge_status <- renderUI({
-      span(style = "color: green; font-weight: bold;", icon("check"), " GGE Biplot Completed ✅")
+      span(style = "color: green; font-weight: bold;", icon("check"), " GGE Biplot Completed  (OK)")
     })
 
     message("GGE Biplot generated successfully!")
@@ -1765,7 +1767,7 @@ observeEvent(input$multi_run_gge, {
         eigen_tbl
       }, rownames = TRUE)
       output$multi_pca_status <- renderUI({
-        span(style = "color: green; font-weight: bold;", icon("check"), " PCA Completed ✅")
+        span(style = "color: green; font-weight: bold;", icon("check"), " PCA Completed  (OK)")
       })
     }, error = function(e) {
       showModal(modalDialog(
@@ -1813,7 +1815,7 @@ observeEvent(input$multi_run_corr, {
     })
 
     output$multi_corr_status <- renderUI({
-      span(style = "color: green; font-weight: bold;", icon("check"), " Correlation Completed ✅")
+      span(style = "color: green; font-weight: bold;", icon("check"), " Correlation Completed  (OK)")
     })
 
     message("Correlation plots generated successfully.")
@@ -1860,7 +1862,7 @@ observeEvent(input$multi_run_path, {
   model_str <- paste0(dep, " ~ ", rhs)
   message("[PathAnalysis] Model syntax: ", model_str)
   
-  library(lavaan)
+  
   fit <- tryCatch(
     lavaan::sem(model_str, data = df_path, meanstructure = TRUE),
     error = function(e) e
@@ -1919,7 +1921,7 @@ observeEvent(input$multi_run_path, {
   
   # Status UI
   output$multi_path_status <- renderUI({
-    span(style = "color: green; font-weight: bold;", icon("check"), " Path Analysis Completed ✅")
+    span(style = "color: green; font-weight: bold;", icon("check"), " Path Analysis Completed  (OK)")
   })
   
   # Optionally: Save fit object for download ZIP
@@ -2425,7 +2427,7 @@ observeEvent(input$run_crd_interact, {
         geom_line() + geom_point() +
         facet_wrap(as.formula(paste("~", fac2))) +
         labs(
-          title = paste("3-way Interaction:", trait_local, "~", fac1, "×", fac3, ", by", fac2),
+          title = paste("3-way Interaction:", trait_local, "~", fac1, " x ", fac3, ", by", fac2),
           x = fac1, y = paste("Mean", trait_local), color = fac3
         ) +
         theme_bw() +
@@ -2451,7 +2453,7 @@ observeEvent(input$run_crd_interact, {
         )) +
           geom_line() + geom_point() +
           labs(
-            title = paste("2-way Interaction:", trait_local, "~", xfac, "×", linefac),
+            title = paste("2-way Interaction:", trait_local, "~", xfac, " x ", linefac),
             x = xfac, y = paste("Mean", trait_local), color = linefac
           ) +
           theme_bw() +
@@ -2471,7 +2473,7 @@ observeEvent(input$run_crd_interact, {
       )) +
         geom_line() + geom_point() +
         labs(
-          title = paste("2-way Interaction:", trait_local, "~", xfac, "×", linefac),
+          title = paste("2-way Interaction:", trait_local, "~", xfac, " x ", linefac),
           x = xfac, y = paste("Mean", trait_local), color = linefac
         ) +
         theme_bw() +
@@ -2563,7 +2565,7 @@ observeEvent(input$run_descriptive, {
   descriptive_results(results_list)
   
   output$descriptive_status <- renderUI({
-    span(style = "color: green; font-weight: bold;", icon("check"), " Descriptive Analysis Completed ✅")
+    span(style = "color: green; font-weight: bold;", icon("check"), " Descriptive Analysis Completed  (OK)")
   })
   shinyjs::enable("run_model")
   shinyjs::enable("download_analysis1")
@@ -2697,7 +2699,7 @@ run_model_and_extract <- function(df, trait, vc_formula_str, random_formula_str,
     )
     term_map[[entry_col_name]] <- "Genotype"
     term_map[[env_col_name]] <- "Location (Environment)"
-    term_map[[paste0(entry_col_name, ":", env_col_name)]] <- "Genotype × Environment interaction"
+    term_map[[paste0(entry_col_name, ":", env_col_name)]] <- "Genotype x Environment interaction"
     term_map[[paste0("Rep", ":", env_col_name)]] <- "Replication within Environment"
     term_map[[paste0("Block", ":", "Rep")]] <- "Block within Replication"
     term_map[[paste0("Block", ":", env_col_name)]] <- "Block within Environment"
@@ -2866,7 +2868,7 @@ output$model_ui <- renderUI({
     }
     
     if(trial_type == "Multi Environment") {
-      random_effects <- c(random_effects, "Environment", "Genotype × Environment Interaction")
+      random_effects <- c(random_effects, "Environment", "Genotype x Environment Interaction")
       if(design == "alphalattice") {
         random_effects <- c(random_effects, "Replication within Environment", "Block within Replication & Environment")
       } else { # RCBD or Augmented RCBD
@@ -3037,7 +3039,7 @@ observeEvent(input$run_gge, {
     output$gge_plot_type1 <- renderPlot({ plot(gge_model, type = 3) })
     output$gge_plot_type2 <- renderPlot({ plot(gge_model, type = 2) })
     output$gge_plot_type3 <- renderPlot({ plot(gge_model, type = 4) })
-    output$gge_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " GGE Biplot Completed ✅") })
+    output$gge_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " GGE Biplot Completed  (OK)") })
     updateTabsetPanel(session, "analysis2_tabs", selected = " GGE Biplot")
   }, error = function(e) {
     showModal(modalDialog(title = "GGE Error", paste("Error in GGE analysis:", e$message), easyClose = TRUE))
@@ -3078,7 +3080,7 @@ observeEvent(input$run_pca, {
     output$pca_plot_scree <- renderPlot({ fviz_screeplot(res.pca, addlabels = TRUE) })
     output$pca_plot_varcontrib <- renderPlot({ fviz_pca_var(res.pca, col.var = "contrib", gradient.cols = c("white", "blue", "red")) })
     output$pca_table_summary <- renderTable({ round(factoextra::get_eigenvalue(res.pca), 2) }, rownames = TRUE)
-    output$pca_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " PCA Completed ✅") })
+    output$pca_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " PCA Completed  (OK)") })
     updateTabsetPanel(session, "analysis2_tabs", selected = " PCA Plot")
   }, error = function(e) {
     showModal(modalDialog(title = "PCA Error", paste("Error in PCA analysis:", e$message), easyClose = TRUE))
@@ -3107,7 +3109,7 @@ observeEvent(input$run_corr, {
     output$corr_plot2 <- renderPlot({
       PerformanceAnalytics::chart.Correlation(df_corr, histogram = TRUE, pch = 19)
     })
-    output$corr_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " Correlation Completed ✅") })
+    output$corr_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " Correlation Completed  (OK)") })
     updateTabsetPanel(session, "analysis2_tabs", selected = " Correlation Plot")
   }, error = function(e) {
     showModal(modalDialog(title = "Correlation Error", paste("Error in correlation plotting:", e$message), easyClose = TRUE))

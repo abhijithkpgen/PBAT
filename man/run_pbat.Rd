@@ -2,18 +2,13 @@
 % Please edit documentation in R/run_pbat.R
 \name{run_pbat}
 \alias{run_pbat}
-\title{Run the PBAT Shiny App}
+\title{Launch the PBAT Shiny App}
 \usage{
 run_pbat(...)
 }
-\value{
-Invisibly returns the app object.
+\arguments{
+\item{...}{Additional arguments passed to shiny::runApp()}
 }
 \description{
-Run the PBAT Shiny App
-}
-\examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-PBAT::run_pbat()
-\dontshow{\}) # examplesIf}
+Launch the PBAT Shiny App
 }

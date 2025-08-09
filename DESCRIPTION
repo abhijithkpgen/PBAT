@@ -10,19 +10,20 @@ Encoding: UTF-8
 Authors@R: 
     person("Krishnan P", "Abhijith", , "abhijithkpgen@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8641-026X"))
-Imports: 
+Imports:
     agricolae,
     broom,
     broom.mixed,
     bslib,
     car,
     corrplot,
-    dplyr,
     DT,
+    dplyr,
     emmeans,
     factoextra,
     FactoMineR,
     ggplot2,
+    gridExtra,
     lavaan,
     lme4,
     lmerTest,
@@ -33,6 +34,7 @@ Imports:
     RColorBrewer,
     readr,
     rlang,
+    scales,
     semPlot,
     shiny,
     shinyjs,
