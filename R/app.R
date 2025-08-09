@@ -3535,12 +3535,7 @@ output$md_download_results <- downloadHandler(
 
 } # END SERVER FUNCTION
 
-
-pbAT_app <- function() { shiny::shinyApp(ui, server) }   # no roxygen, not exported
-
-#' Run the PbAT Shiny App
-#' @return Invisibly returns the app object.
-#' @examplesIf interactive()
-#'   PbAT::run_pbat()
-#' @export
-run_pbat <- function(...) shiny::runApp(pbAT_app(), ...)
+# Internal: Create PBAT Shiny app
+pbat_app <- function() {
+  shiny::shinyApp(ui, server)
+}

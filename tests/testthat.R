@@ -1,2 +1,4 @@
-library(testthat); library(PbAT)
-test_check("PbAT")
+library(testthat)
+library(PBAT)
+
+test_check("PBAT")
