@@ -1,15 +1,20 @@
 Package: PBAT
 Title: Plant Breeding Analytical Tools (Shiny App)
 Version: 0.1.0
-Maintainer: Krishnan P Abhijith <abhijithkpgen@gmail.com>
-Description: An interactive Shiny application for plant breeding analyses, including mating-design analytics (diallel, line x tester, partial diallel), ANOVA summaries, GCA/SCA effects, BLUE/BLUP utilities, PCA/plots, and exportable reports. Designed for non-programmers with a point-and-click interface.
+Authors@R: 
+    c(
+      person("Krishnan P", "Abhijith", email = "abhijithkpgen@gmail.com",
+             role = c("aut", "cre"),
+             comment = c(ORCID = "0000-0001-8641-026X"))
+    )
+Description: An interactive Shiny application for plant breeding analyses, including mating-design analytics (diallel, line-by-tester, partial diallel), ANOVA summaries, GCA/SCA effects, BLUE/BLUP utilities, PCA and plotting, and exportable reports. Designed for non-programmers with a point-and-click interface.
 License: MIT + file LICENSE
 URL: https://github.com/abhijithkpgen/PBAT
 BugReports: https://github.com/abhijithkpgen/PBAT/issues
 Encoding: UTF-8
-Authors@R: 
-    person("Krishnan P", "Abhijith", , "abhijithkpgen@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0001-8641-026X"))
+Language: en-US
+Depends:
+    R (>= 4.1)
 Imports:
     agricolae,
     broom,
@@ -23,7 +28,6 @@ Imports:
     factoextra,
     FactoMineR,
     ggplot2,
-    gridExtra,
     lavaan,
     lme4,
     lmerTest,
@@ -42,11 +46,11 @@ Imports:
     tidyr,
     waiter,
     zip
-Suggests: 
-    knitr,
-    rmarkdown,
-    testthat
-LazyData: true
+Suggests:
+    testthat (>= 3.0.0),
+    covr,
+    spelling
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Config/testthat/edition: 3
+Config/testthat/parallel: true
