@@ -52,18 +52,21 @@ The application is hosted online at: **[https://pbat.online](https://pbat.online
      
 
 4. **Map Data Columns**
+
+
    ![Map columns](man/figures/Map%20coloumns.jpg)
    - Assign the appropriate columns (genotype, location, replication, block, etc.) when prompted, to enable correct analysis.
 
 6. **Run Analysis**
-   ![Descriptive analysis](man/figures/Descriptive%20analysis.jpg
-   
+
+    ![](man/figures/Descriptive%20analysis.jpg)
+
    - **Experimental Designs**: Generate summary statistics, ANOVA, heritability (H^2), BLUEs/BLUPs (combined and location-wise), diagnostics, and post-hoc tests. Visualize results with boxplots, QQ plots, and interaction plots. 
    - **Multivariate**: Perform PCA, GGE biplot , AMMI, correlation, and path analysis on selected traits. Run analyses in standalone mode or linked to your EDA results.
    - **Mating Design**: Analyze Diallel (Griffing Methods I-IV, PartialDiallel Designs) and Line x Tester. Obtain GCA/SCA effects, ANOVA tables, 
 
 8. **Review & Download Results**  
-   - All results-interactive tables, plots, and summaries-can be downloaded as publication-ready PDF/CSV ZIP files for reporting or further analysis.
+   - All results-interactive tables, plots, and summaries-can be downloaded as publication-ready PDF/CSV or Text file as ZIP file.
 
 ## 📂 Sample Data
 
