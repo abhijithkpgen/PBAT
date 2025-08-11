@@ -4,7 +4,10 @@
 #' @keywords internal
 #'
 # Shiny and UI Packages
-#' @import shiny shinyjs bslib waiter
+#' @importFrom shiny actionButton br column div downloadButton downloadHandler fluidPage h1 h2 h3 h4 HTML icon incProgress mainPanel modalDialog navbarPage NS numericInput p plotOutput reactive reactiveVal removeModal renderPlot renderPrint renderUI req selectInput sidebarLayout showModal tabPanel tagList textInput uiOutput validate verbatimTextOutput need withProgress
+#' @importFrom shinyjs useShinyjs runjs show hide toggle enable disable
+#' @importFrom bslib bs_theme page_navbar
+#' @importFrom waiter use_waiter waiter_hide waiter_show spin_fading_circles
 #' @importFrom DT DTOutput renderDT datatable
 #' @importFrom zip zipr
 #'
@@ -29,12 +32,12 @@
 #' @importFrom agricolae HSD.test LSD.test duncan.test friedman kruskal kurtosis reg.homog skewness waerden.test
 #' @importFrom broom tidy
 #' @importFrom broom.mixed tidy
-#' @importFrom car Anova leveneTest qqPlot recode some
+#' @importFrom car Anova leveneTest qqPlot
 #' @importFrom emmeans emmeans contrast
 #' @importFrom FactoMineR CA PCA
 #' @importFrom lme4 lmer VarCorr
 #' @importFrom lmerTest lmer
-#' @importFrom metan anova_ind arrange_comb corr_coef env_strat GGE ge_effects ge_plot get_dist gge gv_ind hmgv_ind path_coeff plot_scores recode_factor replace_na res_ind waas waasb waasb_ind
+#' @importFrom metan anova_ind arrange_comb corr_coef env_strat GGE ge_effects ge_plot get_dist gge gv_ind hmgv_ind path_coeff plot_scores recode_factor res_ind waas waasb waasb_ind
 #' @importFrom multcomp cld glht
 #'
 # Base R and Utils
