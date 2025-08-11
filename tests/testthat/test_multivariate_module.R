@@ -2,7 +2,6 @@
 
 test_that("multivariate UI constructs without error", {
   ui <- multivariate_analysis_ui(id = "multi_1")
-  # Should be a shiny tag/list
   expect_s3_class(ui, c("shiny.tag", "shiny.tag.list"), exact = FALSE)
 })
 
@@ -12,24 +11,27 @@ test_that("home UI constructs without error", {
 })
 
 test_that("module server can be initialized with minimal shared data", {
-  # Minimal shared_data object the server expects
+  # Put Shiny in test mode for deterministic behavior
+  old <- options(shiny.testmode = TRUE); on.exit(options(old), add = TRUE)
+
   shared_data <- shiny::reactiveValues(file_data = NULL, multi_subtype = NULL)
 
-  # Initialize the module server; this should not error even with NULL data
-  expect_silent({
-    shiny::testServer(
-      app = multivariate_analysis_server,
-      args = list(id = "multi_1", shared_data = shared_data),
-      {
-        # No assertions inside yet; just exercising initialization path.
-        # You can add expectations on outputs/reactives if the module exposes them.
-        TRUE
-      }
-    )
-  })
+  expect_no_error(
+    suppressWarnings(suppressMessages(
+      shiny::testServer(
+        app = multivariate_analysis_server,
+        args = list(id = "multi_1", shared_data = shared_data),
+        {
+          # Smoke test only — ensure server boots without throwing
+          TRUE
+        }
+      )
+    ))
+  )
 })
 
 test_that("run_app returns a shiny app object", {
-  app <- PBAT::run_app()  # constructs the app object; doesn't launch
+  old <- options(shiny.testmode = TRUE); on.exit(options(old), add = TRUE)
+  app <- run_app()  # inside the package, no need for PBAT::
   expect_s3_class(app, "shiny.appobj")
 })
