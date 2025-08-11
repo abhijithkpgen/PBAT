@@ -4,7 +4,7 @@
 #' @keywords internal
 #'
 # Shiny and UI Packages
-#' @importFrom shiny actionButton br column div downloadButton downloadHandler fluidPage h1 h2 h3 h4 HTML icon incProgress mainPanel modalDialog navbarPage NS numericInput p plotOutput reactive reactiveVal removeModal renderPlot renderPrint renderUI req selectInput sidebarLayout showModal tabPanel tagList textInput uiOutput validate verbatimTextOutput need withProgress
+#' @importFrom shiny actionButton actionLink br checkboxGroupInput checkboxInput column conditionalPanel div downloadButton downloadHandler fileInput fluidPage fluidRow h1 h2 h3 h4 h5 helpText hr HTML icon incProgress mainPanel modalDialog moduleServer navbarMenu navbarPage NS numericInput observe observeEvent p plotOutput radioButtons reactive reactiveVal reactiveValues reactiveValuesToList removeModal renderPlot renderPrint renderTable renderUI req selectInput showModal showNotification showTab sidebarLayout sidebarPanel span tableOutput tabPanel tabsetPanel tagList tags textInput uiOutput updateCheckboxGroupInput updateNavbarPage updateSelectInput updateTabsetPanel validate verbatimTextOutput wellPanel withProgress need
 #' @importFrom shinyjs useShinyjs runjs show hide toggle enable disable
 #' @importFrom bslib bs_theme page_navbar
 #' @importFrom waiter use_waiter waiter_hide waiter_show spin_fading_circles
@@ -35,7 +35,7 @@
 #' @importFrom car Anova leveneTest qqPlot
 #' @importFrom emmeans emmeans contrast
 #' @importFrom FactoMineR CA PCA
-#' @importFrom lme4 lmer VarCorr
+#' @importFrom lme4 VarCorr
 #' @importFrom lmerTest lmer
 #' @importFrom metan anova_ind arrange_comb corr_coef env_strat GGE ge_effects ge_plot get_dist gge gv_ind hmgv_ind path_coeff plot_scores recode_factor res_ind waas waasb waasb_ind
 #' @importFrom multcomp cld glht
