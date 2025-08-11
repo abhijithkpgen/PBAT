@@ -2,8 +2,8 @@
 #'
 #' Sets up static resources bundled in the package and starts the app.
 #'
-#' @param ... Passed to [shiny::shinyApp()] (currently unused).
-#' @return A Shiny app object (in interactive sessions it will launch).
+#' @param ... Passed to [shiny::shinyApp()]
+#' @return A Shiny app object.
 #' @export
 run_app <- function(...) {
 
@@ -15,5 +15,15 @@ run_app <- function(...) {
     shiny::addResourcePath("www", www_dir)
   }
 
-  shiny::shinyApp(ui = app_ui(), server = app_server, ...)
+  # Get the port from the environment variable provided by Cloud Run.
+  # Default to 8100 if the PORT variable is not set (for local development).
+  port <- as.numeric(Sys.getenv("PORT", "8100"))
+
+  shiny::shinyApp(
+    ui = app_ui(),
+    server = app_server,
+    # Set host to '0.0.0.0' to be accessible within the container
+    # and use the port determined above.
+    options = list(host = '0.0.0.0', port = port)
+  )
 }
