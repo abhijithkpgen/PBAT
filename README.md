@@ -1,4 +1,7 @@
+<!-- badges: start -->
 [![R-CMD-check](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml?query=branch%3Amain)
+<!-- badges: end -->
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/LogoNobg.png" alt="PbAT Logo" width="200"/>
 </p>
@@ -38,7 +41,7 @@ The workflow is designed to be intuitive and straightforward.
 #### 1. Upload Your Data
 Upload your data in CSV format. The file should include columns for genotype, location, replication, and traits. You can refer to the example datasets in the "Help & Guide" section for the required format.
 
-<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Loading%20data.jpg" alt="Loading data" width="700">
+<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Loading_data.jpg" alt="Loading data" width="700">
 
 #### 2. Select an Analysis
 Choose the type of analysis you want to perform based on your experimental design and objectives.
@@ -46,12 +49,12 @@ Choose the type of analysis you want to perform based on your experimental desig
 #### 3. Map Data Columns
 Assign the appropriate columns from your dataset (e.g., genotype, location, block) when prompted to ensure the analysis runs correctly.
 
-<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Map%20coloumns.jpg" alt="Map columns" width="700">
+<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Map_columns.jpg" alt="Map columns" width="700">
 
 #### 4. Run the Analysis
 Execute the analysis to generate tables, summaries, and visualizations.
 
-<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Descriptive%20analysis.jpg" alt="Descriptive analysis" width="700">
+<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Descriptive_analysis.jpg" alt="Descriptive analysis" width="700">
 
 #### 5. Review & Download Results
 All results—including interactive tables, plots, and summaries—can be downloaded as a single ZIP archive containing publication-ready files.
