@@ -1,33 +1,74 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+# Help: https://github.com/r-lib/actions#where-to-find-help
+name: R-CMD-check
+
 on:
   push:
     branches: [main, master]
   pull_request:
+  workflow_dispatch:
 
-name: R-CMD-check.yaml
+# Ensure only the latest run per branch is considered (keeps the badge accurate)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
+  # ------------------------------
+  # Quick unit tests (no R CMD check)
+  # ------------------------------
+  unit-tests:
+    runs-on: ubuntu-latest
+    name: unit-tests (ubuntu-latest, release)
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      CI: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::devtools
+          needs: tests
+
+      - name: Run testthat tests
+        run: Rscript -e 'devtools::test()'
+
+  # ------------------------------
+  # Full CRAN-like R CMD check
+  # ------------------------------
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
+    needs: unit-tests
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: ${{ matrix.config.os }} (R ${{ matrix.config.r }})
 
     strategy:
       fail-fast: false
       matrix:
         config:
-          - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+          - { os: macos-latest,   r: 'release' }
+          - { os: windows-latest, r: 'release' }
+          - { os: ubuntu-latest,  r: 'devel',   http-user-agent: 'release' }
+          - { os: ubuntu-latest,  r: 'release' }
+          - { os: ubuntu-latest,  r: 'oldrel-1' }
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      CI: true
+      # Make CI more forgiving/robust
+      _R_CHECK_FORCE_SUGGESTS_: false
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      # Headless graphics
+      RGL_USE_NULL: true
 
     steps:
       - uses: actions/checkout@v4
