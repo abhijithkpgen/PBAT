@@ -40,28 +40,30 @@ The application is hosted online at: **[https://pbat.online](https://pbat.online
 
 ##  Application Workflow
 
-1. **Upload Data**  
-   - CSV format required  
-   - Columns: genotype, location, replication, block (if applicable), and trait(s)
+1. **Upload Data**
+   ![Loading data](man/figures/Loading%20data.jpg)
+   - The required format is CSV   and
+     add Columns: genotype, location, replication, block (if applicable), and trait(s), you can refer the example data sets for the required format which is given at help and guide section
 
-2. **Select Analysis Type**  
+3. **Select Analysis Type depending on your workflow.**  
    - **Experimental Design Analysis**  
    - **Multivariate Analysis**  
    - **Mating Design Analysis**
+     
 
-3. **Map Data Columns**  
-   - Assign columns for genotype, location, replication, block, etc. as prompted
+4. **Map Data Columns**
+   ![Map columns](man/figures/Map%20coloumns.jpg)
+   - Assign the appropriate columns (genotype, location, replication, block, etc.) when prompted, to enable correct analysis.
 
-4. **Run Analysis**
-   - **Experimental Designs**: EDA pipeline  
-   - **Multivariate**: PCA, GGE, AMMI, correlation, path analysis  
-   - **Mating Design**: Diallel & Line × Tester
+6. **Run Analysis**
+   ![Descriptive analysis](man/figures/Descriptive%20analysis.jpg
+   
+   - **Experimental Designs**: Generate summary statistics, ANOVA, heritability (H^2), BLUEs/BLUPs (combined and location-wise), diagnostics, and post-hoc tests. Visualize results with boxplots, QQ plots, and interaction plots. 
+   - **Multivariate**: Perform PCA, GGE biplot , AMMI, correlation, and path analysis on selected traits. Run analyses in standalone mode or linked to your EDA results.
+   - **Mating Design**: Analyze Diallel (Griffing Methods I-IV, PartialDiallel Designs) and Line x Tester. Obtain GCA/SCA effects, ANOVA tables, 
 
-5. **Review & Download Results**  
-   - All outputs downloadable as ZIP (CSV + PDF)  
-   - Ready for reports and publications
-
----
+8. **Review & Download Results**  
+   - All results-interactive tables, plots, and summaries-can be downloaded as publication-ready PDF/CSV ZIP files for reporting or further analysis.
 
 ## 📂 Sample Data
 
@@ -78,3 +80,8 @@ install.packages("devtools")
 
 # Install PbAT from GitHub
 devtools::install_github("abhijithkpgen/PBAT")
+# Load the library
+library(PBAT)
+#Run the app and the app will be opened in a new window
+run_app()
+
