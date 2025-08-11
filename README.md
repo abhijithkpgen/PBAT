@@ -2,96 +2,84 @@
 [![R-CMD-check](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml?query=branch%3Amain)
 <!-- badges: end -->
 
-
-
 <p align="center">
-  <img src="man/figures/LogoNobg.png" alt="PbAT Logo" width="200"/>
+  <img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/LogoNobg.png" alt="PbAT Logo" width="200"/>
 </p>
-
 
 # PbAT: Plant Breeding Analytical Tools
 
-**PbAT** is a Shiny-based R package that provides an **end-to-end pipeline** for statistical, multivariate, and mating design analyses in plant breeding experiments.  
-The application is hosted online at: **[https://pbat.online](https://pbat.online)**
+**PbAT** is a Shiny-based R package that provides an **end-to-end pipeline** for statistical analysis in plant breeding experiments. The application is also hosted online and is freely accessible at: **[https://pbat.online](https://pbat.online)**
 
 ---
 
-##  Key Features
+## Key Features
 
-- **Experimental Design Analysis (EDA)**
-  - Summary statistics, ANOVA, heritability (H²)
-  - BLUEs / BLUPs (combined & location-wise)
-  - Diagnostics & post-hoc tests
-  - Publication-ready visualizations (boxplots, QQ plots, interaction plots)
+-   **Experimental Design Analysis (EDA)**
+    -   Summary statistics, ANOVA, and broad-sense heritability (H²).
+    -   Calculates BLUEs and BLUPs (for combined or individual locations).
+    -   Includes diagnostic checks and post-hoc tests.
+    -   Generates publication-ready visualizations (boxplots, QQ plots, interaction plots).
 
-- **Multivariate Analysis**
-  - PCA, GGE Biplot, and AMMI Analysis
-  - Trait correlation & path analysis
-  - Standalone or linked to EDA results
+-   **Multivariate Analysis**
+    -   Performs PCA, GGE Biplot, and AMMI analysis.
+    -   Conducts trait correlation and path analysis.
+    -   Can be run in standalone mode or linked directly to EDA results.
 
-- **Mating Design Analysis**
-  - Diallel (Griffing Methods I–IV, Partial Diallel)
-  - Line × Tester analysis
-  - GCA/SCA effects, ANOVA tables, variance components
+-   **Mating Design Analysis**
+    -   Analyzes common mating designs, including Diallel (Griffing Methods I–IV, Partial Diallel) and Line × Tester.
+    -   Calculates GCA/SCA effects, generates ANOVA tables, and estimates variance components.
 
-- **Downloads**
-  - Export results as ZIP archives containing CSV/PDF outputs
-  - High-quality, publication-ready plots
+-   **Downloads**
+    -   Export all results as ZIP archives containing CSV tables and high-quality PDF plots.
 
 ---
 
-##  Application Workflow
+## Application Workflow
 
-1. **Upload Data**
+The workflow is designed to be intuitive and straightforward.
 
-   <img src="man/figures/Loading%20data.jpg" alt="Loading data" width="500">
+#### 1. Upload Your Data
+Upload your data in CSV format. The file should include columns for genotype, location, replication, and traits. You can refer to the example datasets in the "Help & Guide" section for the required format.
 
-   - The required format is CSV   and
-     add Columns: genotype, location, replication, block (if applicable), and trait(s), you can refer the example data sets for the required format which is given at help and guide section
+<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Loading_data.jpg" alt="Loading data" width="700">
 
-3. **Select Analysis Type depending on your workflow.**  
-   - **Experimental Design Analysis**  
-   - **Multivariate Analysis**  
-   - **Mating Design Analysis**
-     
+#### 2. Select an Analysis
+Choose the type of analysis you want to perform based on your experimental design and objectives.
 
-4. **Map Data Columns**
+#### 3. Map Data Columns
+Assign the appropriate columns from your dataset (e.g., genotype, location, block) when prompted to ensure the analysis runs correctly.
 
+<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Map_columns.jpg" alt="Map columns" width="700">
 
-   <img src="man/figures/Map%20coloumns.jpg" alt="Map columns" height= "400">
+#### 4. Run the Analysis
+Execute the analysis to generate tables, summaries, and visualizations.
 
-   
-   - Assign the appropriate columns (genotype, location, replication, block, etc.) when prompted, to enable correct analysis.
+<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Descriptive_analysis.jpg" alt="Descriptive analysis" width="700">
 
-6. **Run Analysis**
+#### 5. Review & Download Results
+All results—including interactive tables, plots, and summaries—can be downloaded as a single ZIP archive containing publication-ready files.
 
-<img src="man/figures/Descriptive%20analysis.jpg" alt="Descriptive analysis" width="500">
-
-
-   - **Experimental Designs**: Generate summary statistics, ANOVA, heritability (H^2), BLUEs/BLUPs (combined and location-wise), diagnostics, and post-hoc tests. Visualize results with boxplots, QQ plots, and interaction plots. 
-   - **Multivariate**: Perform PCA, GGE biplot , AMMI, correlation, and path analysis on selected traits. Run analyses in standalone mode or linked to your EDA results.
-   - **Mating Design**: Analyze Diallel (Griffing Methods I-IV, PartialDiallel Designs) and Line x Tester. Obtain GCA/SCA effects, ANOVA tables, 
-
-8. **Review & Download Results**  
-   - All results-interactive tables, plots, and summaries-can be downloaded as publication-ready PDF/CSV or Text file as ZIP file.
+---
 
 ## 📂 Sample Data
 
-PbAT includes sample CSV templates for each analysis type in `inst/app/www/`.  
-They are also downloadable from the “Help & Guide” tab within the app.
+PbAT includes sample CSV templates for each analysis type. These are available in the `inst/app/www/` directory of the package and are also downloadable from the **“Help & Guide”** tab within the app itself.
 
 ---
 
-## 💻 Installation
+## 💻 Installation & Usage
+
+You can install the development version of PbAT directly from GitHub using `devtools`.
 
 ```r
-# Install devtools if not available
-install.packages("devtools")
+# Install devtools if it's not already installed
+if (!require("devtools")) install.packages("devtools")
 
 # Install PbAT from GitHub
 devtools::install_github("abhijithkpgen/PBAT")
+
 # Load the library
 library(PBAT)
-#Run the app and the app will be opened in a new window
-run_app()
 
+# Run the application
+run_app()
