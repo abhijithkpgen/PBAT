@@ -1,6 +1,8 @@
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml?query=branch%3Amain)
 <!-- badges: end -->
+
+
 
 <p align="center">
   <img src="man/figures/LogoNobg.png" alt="PbAT Logo" width="200"/>
