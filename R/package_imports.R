@@ -9,19 +9,19 @@
 #' @importFrom zip zipr
 #'
 # Tidyverse and Data Manipulation
-#' @importFrom dplyr %>% arrange as_tibble bind_rows distinct filter group_by left_join mutate pull recode select summarise summarise_all
+#' @importFrom dplyr %>% across all_of arrange as_tibble bind_rows contains distinct filter full_join group_by left_join mutate n pull recode select starts_with summarise summarise_all where
 #' @importFrom tidyr drop_na pivot_longer pivot_wider replace_na separate
 #' @importFrom tibble as_tibble column_to_rownames remove_rownames rownames_to_column tibble
 #' @importFrom purrr map map_chr map_dbl map_dfc map_dfr map_int map_lgl pmap some
 #' @importFrom readr read_csv write_csv
-#' @importFrom rlang .data :=
+#' @importFrom rlang .data := sym
 #' @importFrom scales percent
 #'
 # Plotting and Visualization
-#' @importFrom ggplot2 aes element_text facet_wrap geom_abline geom_bar geom_boxplot geom_col geom_hline geom_jitter geom_label geom_point geom_segment geom_text geom_tile geom_vline ggplot labs theme theme_bw theme_classic theme_minimal xlab ylab
+#' @importFrom ggplot2 aes element_text facet_wrap geom_abline geom_bar geom_boxplot geom_col geom_hline geom_jitter geom_label geom_line geom_point geom_segment geom_text geom_tile geom_vline ggplot labs scale_fill_brewer theme theme_bw theme_classic theme_minimal xlab ylab
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom corrplot corrplot
-#' @importFrom factoextra fviz_ca_biplot fviz_cos2 fviz_pca_biplot fviz_pca_ind fviz_pca_var hcut
+#' @importFrom factoextra fviz_ca_biplot fviz_cos2 fviz_pca_biplot fviz_pca_ind fviz_pca_var fviz_screeplot hcut
 #' @importFrom PerformanceAnalytics chart.Correlation
 #' @importFrom semPlot semPaths
 #'
@@ -34,7 +34,7 @@
 #' @importFrom FactoMineR CA PCA
 #' @importFrom lme4 lmer VarCorr
 #' @importFrom lmerTest lmer
-#' @importFrom metan anova_ind arrange_comb corr_coef env_strat GGE ge_effects ge_plot get_dist gge gv_ind hmgv_ind path_coeff recode_factor replace_na res_ind waas waasb waasb_ind
+#' @importFrom metan anova_ind arrange_comb corr_coef env_strat GGE ge_effects ge_plot get_dist gge gv_ind hmgv_ind path_coeff plot_scores recode_factor replace_na res_ind waas waasb waasb_ind
 #' @importFrom multcomp cld glht
 #'
 # Base R and Utils
