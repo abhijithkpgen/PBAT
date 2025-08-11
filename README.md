@@ -49,7 +49,6 @@ Choose the type of analysis you want to perform based on your experimental desig
 #### 3. Map Data Columns
 Assign the appropriate columns from your dataset (e.g., genotype, location, block) when prompted to ensure the analysis runs correctly.
 
-<img src="https://raw.githubusercontent.com/abhijithkpgen/PBAT/main/man/figures/Map_columns.jpg" alt="Map columns" width="700">
 
 #### 4. Run the Analysis
 Execute the analysis to generate tables, summaries, and visualizations.
