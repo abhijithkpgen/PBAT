@@ -4,7 +4,7 @@
 #' @keywords internal
 #'
 #' @import shiny shinyjs bslib waiter
-#' @import readr dplyr tibble purrr tidyr rlang
+#' @import readr dplyr tibble purrr tidyr rlang scales
 #' @import DT ggplot2 RColorBrewer corrplot semPlot PerformanceAnalytics factoextra
 #' @import lme4 lmerTest emmeans metan broom broom.mixed FactoMineR car multcomp agricolae
 #' @import zip
