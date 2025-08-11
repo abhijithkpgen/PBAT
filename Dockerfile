@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
+    libglpk-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the 'remotes' package, which is used to install packages from GitHub
