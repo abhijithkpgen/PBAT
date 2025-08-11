@@ -21,4 +21,4 @@ EXPOSE 8080
 
 # The command to run when the container starts.
 # This sets the correct host and port, then calls the run_app() function from your package.
-CMD ["R", "-e", "options(shiny.port = 8080, shiny.host = '0.0.0.0'); PBAT::run_app()"]
+CMD ["R", "-e", "PBAT::run_app()"]
