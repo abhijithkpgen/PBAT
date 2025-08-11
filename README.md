@@ -41,7 +41,9 @@ The application is hosted online at: **[https://pbat.online](https://pbat.online
 ##  Application Workflow
 
 1. **Upload Data**
-   ![Loading data](man/figures/Loading%20data.jpg)
+
+   <img src="man/figures/Loading%20data.jpg" alt="Loading data" width="500">
+
    - The required format is CSV   and
      add Columns: genotype, location, replication, block (if applicable), and trait(s), you can refer the example data sets for the required format which is given at help and guide section
 
@@ -54,12 +56,15 @@ The application is hosted online at: **[https://pbat.online](https://pbat.online
 4. **Map Data Columns**
 
 
-   ![Map columns](man/figures/Map%20coloumns.jpg)
+   <img src="man/figures/Map%20coloumns.jpg" alt="Map columns" height= "400">
+
+   
    - Assign the appropriate columns (genotype, location, replication, block, etc.) when prompted, to enable correct analysis.
 
 6. **Run Analysis**
 
-    ![](man/figures/Descriptive%20analysis.jpg)
+<img src="man/figures/Descriptive%20analysis.jpg" alt="Descriptive analysis" width="500">
+
 
    - **Experimental Designs**: Generate summary statistics, ANOVA, heritability (H^2), BLUEs/BLUPs (combined and location-wise), diagnostics, and post-hoc tests. Visualize results with boxplots, QQ plots, and interaction plots. 
    - **Multivariate**: Perform PCA, GGE biplot , AMMI, correlation, and path analysis on selected traits. Run analyses in standalone mode or linked to your EDA results.
