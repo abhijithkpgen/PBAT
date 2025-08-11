@@ -1,5 +1,5 @@
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/176d5ea2-30b0-47fb-998c-5ba088101c12" /><!-- badges: start -->
-[![R-CMD-check](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml)
+(https://github.com/abhijithkpgen/PBAT/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 <p align="center">
