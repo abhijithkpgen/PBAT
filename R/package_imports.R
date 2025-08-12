@@ -21,7 +21,7 @@
 #' @importFrom scales percent
 #'
 # Plotting and Visualization
-#' @importFrom ggplot2 aes element_text facet_wrap geom_abline geom_bar geom_boxplot geom_col geom_hline geom_jitter geom_label geom_line geom_point geom_segment geom_text geom_tile geom_vline ggplot labs scale_fill_brewer theme theme_bw theme_classic theme_minimal xlab ylab
+#' @importFrom ggplot2 aes element_text facet_wrap geom_abline geom_bar geom_boxplot geom_col geom_hline geom_jitter geom_label geom_line geom_point geom_segment geom_text geom_tile geom_vline ggplot labs scale_fill_brewer theme theme_bw theme_classic theme_minimal xlab ylab stat_qq stat_qq_line
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom corrplot corrplot
 #' @importFrom factoextra fviz_ca_biplot fviz_cos2 fviz_pca_biplot fviz_pca_ind fviz_pca_var fviz_screeplot hcut
