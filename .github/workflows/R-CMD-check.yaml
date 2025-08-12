@@ -47,12 +47,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       config:
-          - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'devel'}
-          - {os: ubuntu-latest,  r: 'release'}
-          - {os: ubuntu-latest,  r: 'oldrel-1'}
+        config:
+          - { os: macos-latest,   r: 'release',  build_manual: false }
+          - { os: windows-latest, r: 'release',  build_manual: false }
+          - { os: ubuntu-latest,  r: 'devel',    http-user-agent: 'release', build_manual: false }
+          - { os: ubuntu-latest,  r: 'oldrel-1', build_manual: false }
+          - { os: ubuntu-latest,  r: 'release',  build_manual: true }    # only job that builds PDF manual
+
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
@@ -88,17 +89,20 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      # Decide build args based on whether we build the manual
-      - name: Set build/check args
-        shell: bash
-        run: |
-          if [ "${{ matrix.config.build_manual }}" = "true" ]; then
-            echo "BUILD_ARGS=" >> $GITHUB_ENV
-          else
-            echo 'BUILD_ARGS=c("--no-manual","--compact-vignettes=gs+qpdf")' >> $GITHUB_ENV
-          fi
-
-      - uses: r-lib/actions/check-r-package@v2
+      # ---- Run checks ----
+      # Non-manual jobs (skip PDF manual, compact vignettes)
+      - name: Check package (no manual)
+        if: matrix.config.build_manual == false
+        uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          build_args: ${{ env.BUILD_ARGS }}
+          args: 'c("--as-cran","--no-manual")'
+          build_args: 'c("--compact-vignettes=gs+qpdf")'
+
+      # Manual job (Ubuntu release) – build the PDF manual
+      - name: Check package (with manual)
+        if: matrix.config.build_manual == true
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          args: 'c("--as-cran")'
