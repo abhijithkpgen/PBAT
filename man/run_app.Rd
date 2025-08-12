@@ -7,10 +7,10 @@
 run_app(...)
 }
 \arguments{
-\item{...}{Passed to \code{\link[shiny:shinyApp]{shiny::shinyApp()}} (currently unused).}
+\item{...}{Passed to \code{\link[shiny:shinyApp]{shiny::shinyApp()}}}
 }
 \value{
-A Shiny app object (in interactive sessions it will launch).
+A Shiny app object.
 }
 \description{
 Sets up static resources bundled in the package and starts the app.

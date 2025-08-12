@@ -5,25 +5,30 @@
 #' @param ... Passed to [shiny::shinyApp()]
 #' @return A Shiny app object.
 #' @export
+#' @importFrom shiny shinyApp addResourcePath
 run_app <- function(...) {
-
-  # Serve package assets so paths like "LogoNobg.png" and CSV links work.
-  # Assets are stored under inst/app/www in the package.
-  www_dir <- system.file("app/www", package = "PBAT")
-  if (nzchar(www_dir) && dir.exists(www_dir)) {
-    # Map "www" so URLs like "www/LogoNobg.png" resolve
-    shiny::addResourcePath("www", www_dir)
+  
+  # 1) Serve static assets from the built package
+  pkg_www <- system.file("app/www", package = "PBAT")
+  if (nzchar(pkg_www) && dir.exists(pkg_www)) {
+    shiny::addResourcePath("www", pkg_www)
+  } else {
+    # 2) Dev fallback: use repo's ./www if running from source
+    dev_www <- file.path(getwd(), "www")
+    if (dir.exists(dev_www)) {
+      shiny::addResourcePath("www", dev_www)
+    }
   }
-
-  # Get the port from the environment variable provided by Cloud Run.
-  # Default to 8100 if the PORT variable is not set (for local development).
+  
+  # 3) Host/port (works locally and in containers)
   port <- as.numeric(Sys.getenv("PORT", "8100"))
-
+  opts <- list(host = "0.0.0.0", port = port)
+  
+  # 4) Build and return the app
   shiny::shinyApp(
-    ui = app_ui(),
+    ui     = app_ui(),
     server = app_server,
-    # Set host to '0.0.0.0' to be accessible within the container
-    # and use the port determined above.
-    options = list(host = '0.0.0.0', port = port)
+    options = opts,
+    ...
   )
 }
