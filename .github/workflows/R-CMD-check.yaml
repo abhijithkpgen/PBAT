@@ -75,15 +75,14 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      # System packages for Linux (qpdf/gs for compact vignettes)
-      - if: runner.os == 'Linux'
-        uses: r-lib/actions/setup-apt@v2
-        with:
-          packages: |
-            qpdf
-            ghostscript
+      # System packages for Linux (qpdf/ghostscript for compact vignettes)
+      - name: Install system libraries (Linux only)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qpdf ghostscript
 
-      # Quarto (optional; fine even without vignettes)
+      # Quarto (optional)
       - uses: r-lib/actions/setup-quarto@v2
 
       # TinyTeX only when we build the PDF manual
