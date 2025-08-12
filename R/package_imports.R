@@ -1,5 +1,5 @@
 # Centralize package imports for PBAT.
-# This file uses @importFrom for all packages to avoid namespace conflicts.
+# This file centralizes imports to keep NAMESPACE tidy.
 
 #' @keywords internal
 #'
@@ -12,16 +12,16 @@
 #' @importFrom zip zipr
 #'
 # Tidyverse and Data Manipulation
-#' @importFrom dplyr %>% across all_of arrange as_tibble bind_rows contains distinct filter full_join group_by left_join mutate n pull recode select starts_with summarise summarise_all where
-#' @importFrom tidyr drop_na pivot_longer pivot_wider replace_na separate
-#' @importFrom tibble as_tibble column_to_rownames remove_rownames rownames_to_column tibble
+#' @importFrom dplyr %>% across all_of arrange bind_rows contains distinct filter full_join group_by left_join mutate n pull recode select starts_with summarise summarise_all where
+#' @importFrom tidyr drop_na pivot_longer pivot_wider separate
+#' @importFrom tibble as_tibble tibble
 #' @importFrom purrr map map_chr map_dbl map_dfc map_dfr map_int map_lgl pmap some
 #' @importFrom readr read_csv write_csv
 #' @importFrom rlang .data := sym
 #' @importFrom scales percent
 #'
 # Plotting and Visualization
-#' @importFrom ggplot2 aes element_text facet_wrap geom_abline geom_bar geom_boxplot geom_col geom_hline geom_jitter geom_label geom_line geom_point geom_segment geom_text geom_tile geom_vline ggplot labs scale_fill_brewer theme theme_bw theme_classic theme_minimal xlab ylab stat_qq stat_qq_line#' @importFrom ggplot2 aes element_text facet_wrap geom_abline geom_bar geom_boxplot geom_col geom_hline geom_jitter geom_label geom_line geom_point geom_segment geom_text geom_tile geom_vline ggplot labs scale_fill_brewer theme theme_bw theme_classic theme_minimal xlab ylab stat_qq stat_qq_line ggtitle
+#' @import ggplot2
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom corrplot corrplot
 #' @importFrom factoextra fviz_ca_biplot fviz_cos2 fviz_pca_biplot fviz_pca_ind fviz_pca_var fviz_screeplot hcut
@@ -37,7 +37,7 @@
 #' @importFrom FactoMineR CA PCA
 #' @importFrom lme4 VarCorr
 #' @importFrom lmerTest lmer
-#' @importFrom metan anova_ind arrange_comb corr_coef env_strat GGE ge_effects ge_plot get_dist gge gv_ind hmgv_ind path_coeff plot_scores recode_factor res_ind waas waasb waasb_ind
+#' @import metan
 #' @importFrom multcomp cld glht
 #'
 # Base R and Utils
