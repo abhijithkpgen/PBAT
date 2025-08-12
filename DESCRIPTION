@@ -1,6 +1,6 @@
 Package: PBAT
 Title: Plant Breeding Analytical Tools (Shiny App)
-Version: 0.1.0
+Version: 1.0.2
 Authors@R: 
     c(
       person("Krishnan P", "Abhijith", email = "abhijithkpgen@gmail.com",
