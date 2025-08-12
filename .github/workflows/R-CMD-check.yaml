@@ -51,7 +51,6 @@ jobs:
           - { os: macos-latest,   r: 'release',  build_manual: false }
           - { os: windows-latest, r: 'release',  build_manual: false }
           - { os: ubuntu-latest,  r: 'devel',    http-user-agent: 'release', build_manual: false }
-          - { os: ubuntu-latest,  r: 'oldrel-1', build_manual: false }
           - { os: ubuntu-latest,  r: 'release',  build_manual: true }    # only job that builds PDF manual
 
     env:
