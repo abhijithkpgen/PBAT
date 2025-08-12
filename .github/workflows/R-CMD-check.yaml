@@ -26,16 +26,13 @@ jobs:
       CI: true
     steps:
       - uses: actions/checkout@v4
-
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::devtools
           needs: tests
-
       - name: Run testthat tests
         run: Rscript -e 'devtools::test()'
 
@@ -66,9 +63,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: r-lib/actions/setup-pandoc@v2
-
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
@@ -81,9 +76,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qpdf ghostscript
-
-      # Quarto (optional)
-      - uses: r-lib/actions/setup-quarto@v2
 
       # TinyTeX only when we build the PDF manual
       - if: matrix.config.build_manual == true

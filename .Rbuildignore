@@ -1,5 +1,15 @@
-^LICENSE\.md$
 ^\.Rproj\.user$
+^\.Rhistory$
+^\.DS_Store$
 ^\.github$
-^paper$
 ^Dockerfile$
+^dev($|/)
+^paper($|/)
+^www$                 # only if you keep a top-level www/ (assets should live in inst/app/www/)
+^LICENSE\.md$         # keep only LICENSE (required for MIT + file LICENSE)
+^README\.Rmd$         # if you knit a README.Rmd locally
+^dev$
+^www$
+^README\.Rmd$
+^LICENSE\.md$
+
