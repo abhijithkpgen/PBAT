@@ -51,15 +51,17 @@ analysisUI <- function(id) {
               h4(" Variable Contributions"), plotOutput(ns("pca_plot_varcontrib")),
               h4(" PCA Summary Table"), tableOutput(ns("pca_table_summary"))
             ),
-            tabPanel(" Correlation Plot",
-              plotOutput(ns("corr_plot1")),
-              plotOutput(ns("corr_plot2"))
+            tabPanel("Correlation Plot",
+                     plotOutput(ns("corr_plot1")),
+                     hr(),
+                     uiOutput(ns("corr_interpretation_ui"))
+            )
             )
           )
         )
       )
     )
-  )
+  
 }
 
 # ===================================================================
@@ -88,6 +90,7 @@ analysisServer <- function(id, home_inputs) {
     pca_results <- reactiveVal(NULL)
     crd_results <- reactiveValues() 
     go_to_analysis2 <- reactiveVal(0)
+    corr_interpretation <- reactiveVal(NULL)
 
     observeEvent(home_inputs(), {
         req(home_inputs()$analysis_mode == "eda")
@@ -98,6 +101,50 @@ analysisServer <- function(id, home_inputs) {
     # ===================================================================
     # -------- Section 2.2: Helper Functions (Self-Contained) --------
     # ===================================================================
+    
+    # Helper function to generate text summary for correlations
+    generate_correlation_interpretation <- function(corr_matrix, p_value_matrix, alpha = 0.05) {
+      significant_correlations <- list()
+      # Define thresholds for strength
+      strength_levels <- list(
+        strong = 0.7,
+        moderate = 0.4
+      )
+      
+      # Iterate through the upper triangle of the matrix to avoid duplicates
+      for (i in 1:(nrow(p_value_matrix) - 1)) {
+        for (j in (i + 1):ncol(p_value_matrix)) {
+          p_val <- p_value_matrix[i, j]
+          if (!is.na(p_val) && p_val < alpha) {
+            corr_val <- corr_matrix[i, j]
+            var1 <- rownames(corr_matrix)[i]
+            var2 <- colnames(corr_matrix)[j]
+            
+            # Determine direction and strength
+            direction <- if (corr_val > 0) "positive" else "negative"
+            strength <- if (abs(corr_val) >= strength_levels$strong) "strong" else if (abs(corr_val) >= strength_levels$moderate) "moderate" else "weak"
+            
+            # Format p-value for display
+            p_text <- if (p_val < 0.001) "p < 0.001" else paste0("p = ", round(p_val, 3))
+            
+            # Create the interpretation sentence
+            sentence <- paste0("A significant ", tags$b(strength), " ", tags$b(direction), " correlation was observed between '",
+                               var1, "' and '", var2, "' (r = ", sprintf("%.2f", corr_val), ", ", p_text, ").")
+            
+            significant_correlations[[length(significant_correlations) + 1]] <- tags$li(HTML(sentence))
+          }
+        }
+      }
+      
+      if (length(significant_correlations) == 0) {
+        return(tags$p("No significant correlations were found at the p < 0.05 level."))
+      } else {
+        return(tagList(
+          tags$h4("Key Findings:"),
+          tags$ul(significant_correlations)
+        ))
+      }
+    }
     
     # --- ADD THIS to Section 2.2: Helper Functions ---
     generate_crd_anova_interpretation <- function(anova_df) {
@@ -465,10 +512,7 @@ analysisServer <- function(id, home_inputs) {
                     CV = round(100 * SD / Mean, 2),
                     Min = round(min(.data[[trait]], na.rm = TRUE), 2),
                     Max = round(max(.data[[trait]], na.rm = TRUE), 2),
-                    N = n(),
-                    Missing = sum(is.na(df[[trait]])),
-                    Missing_Percent = round(100 * Missing / nrow(df), 2),
-                    .groups = "drop"
+                    N = n()
                 )
             
             boxplot <- ggplot(df_trait, aes(x = Environment, y = .data[[trait]], fill = Environment)) +
@@ -957,18 +1001,59 @@ analysisServer <- function(id, home_inputs) {
 
     # --- Block E14: Analysis 2 - Correlation ---
     observeEvent(input$run_corr, {
-        req(pca_results())
-        df_corr <- tryCatch({ pca_results()$pca$call$X }, error = function(e) NULL)
-        if (is.null(df_corr)) { showModal(modalDialog(title = "Correlation Error", "PCA results missing. Please run PCA first.", easyClose = TRUE)); return() }
+      req(pca_results())
+      df_corr <- tryCatch({ pca_results()$pca$call$X }, error = function(e) NULL)
+      if (is.null(df_corr)) {
+        showModal(modalDialog(title = "Correlation Error", "PCA results missing. Please run PCA first.", easyClose = TRUE))
+        return()
+      }
+      
+      tryCatch({
+        # Calculate correlation matrix and p-values
+        corr_obj <- corrplot::cor.mtest(df_corr, conf.level = 0.95)
+        corr_matrix <- cor(df_corr, use = "complete.obs")
+        p_value_matrix <- corr_obj$p
         
-        tryCatch({
-            output$corr_plot1 <- renderPlot({ corrplot(cor(df_corr, use = "complete.obs"), method = "number", type = "upper", order = "hclust", col = RColorBrewer::brewer.pal(8, "RdYlBu")) })
-            output$corr_plot2 <- renderPlot({ PerformanceAnalytics::chart.Correlation(df_corr, histogram = TRUE, pch = 19) })
-            output$corr_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " Correlation Completed (OK)") })
-            updateTabsetPanel(session, "analysis2_tabs", selected = " Correlation Plot")
-        }, error = function(e) { showModal(modalDialog(title = "Correlation Error", paste("Error in correlation plotting:", e$message), easyClose = TRUE)) })
+        # Generate and store the interpretation
+        interpretation_text <- generate_correlation_interpretation(corr_matrix, p_value_matrix)
+        corr_interpretation(interpretation_text)
+        
+        # --- SIMPLIFIED AND CORRECTED PLOT RENDERING ---
+        
+        # Plot 1: A single, clear correlation matrix
+        output$corr_plot1 <- renderPlot({
+          corrplot(
+            corr_matrix,
+            method = "number",        # Use color to represent correlation strength
+            addCoef.col = "black",   # Overlay coefficients in solid black text
+            type = "upper",          
+            order = "hclust",        
+            p.mat = p_value_matrix,  # Use p-values to blank non-significant results
+            sig.level = 0.05,        
+            insig = "pch",         
+            tl.col = "black",        # Text label color
+            tl.srt = 45,             # Rotate text labels for readability
+            number.cex = 0.9         # Adjust number size
+          )
+        })
+        
+        # Plot 2 has been removed from the logic.
+        
+        output$corr_status <- renderUI({
+          span(style = "color: green; font-weight: bold;", icon("check"), " Correlation Completed (OK)")
+        })
+        updateTabsetPanel(session, "analysis2_tabs", selected = " Correlation Plot")
+        
+      }, error = function(e) {
+        showModal(modalDialog(title = "Correlation Error", paste("Error in correlation plotting:", e$message), easyClose = TRUE))
+      })
     })
-
+    output$corr_interpretation_ui <- renderUI({
+      req(corr_interpretation())
+      div(style = "background-color: #f8f9fa; border-left: 5px solid #007bff; padding: 15px; border-radius: 5px;",
+          corr_interpretation()
+      )
+    })
     #==================================================================
     # -------- Section 2.5: Download Handlers --------
     #==================================================================
