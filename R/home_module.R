@@ -67,7 +67,7 @@ homeUI <- function(id) {
       actionButton(ns("go_to_analysis"), "Proceed to Analysis", class = "btn btn-primary"),
       br(),br(),
       tags$div(style = "font-size: 11px; text-align: center;",
-        HTML("Developed by <b>Dr. Abhijith K P</b><br>
+        HTML("Developed by <b>Dr. Abhijith K P (Lead) and the development team</b><br>
               Scientist (Genetics and Plant Breeding), ICAR-IARI Assam<br>
               <a href='mailto:abhijithkpgen@gmail.com'>abhijithkpgen@gmail.com</a>"),
         br(), br(), br(), br(), br(), br(), br(), br(),
