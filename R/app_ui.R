@@ -107,7 +107,9 @@ app_ui <- function() {
                div(style = "padding: 30px;",
                    h2(" Help & Guide", style = "color: #23272b;"),
                    h4(" Sample Format Downloads", style = "color: #23272b;"),
-                   p("Note: These files must be placed inside a 'www' folder in your app's directory to be downloadable."),
+                   p(  "Disclaimer: The example datasets provided in this application are simulated 
+   for demonstration purposes only. They do not represent actual experimental 
+   results and should not be used for research conclusions."),
                    tags$ul(
                      tags$li(tags$a(href = "www/Alpha_lattice_sample.csv", "Alpha Lattice Sample CSV", download = NA, target = "_blank")),
                      tags$li(tags$a(href = "www/Augmented_RCBD_Sample.csv", "Augmented RCBD Sample CSV", download = NA, target = "_blank")),
@@ -118,7 +120,7 @@ app_ui <- function() {
                      tags$li(tags$a(href = "www/Factorial_CRD_sample.csv", "Factorial CRD Sample CSV", download = NA, target = "_blank")),
                      tags$li(tags$a(href = "www/Line_x_Tester_Sample.csv", "Line x Tester Sample CSV", download = NA, target = "_blank")),
                      tags$li(tags$a(href = "www/Partial_diallel_dummy.csv", "Partial Diallel Sample CSV", download = NA, target = "_blank")),
-                     tags$li(tags$a(href = "www/Biplot_Sample_Format.csv", "Biplot Sample Format CSV", download = NA, target = "_blank")),
+                     tags$li(tags$a(href = "www/AMMI_GGE_Sample_Data.csv", "AMMI and GGE Sample Format CSV", download = NA, target = "_blank")),
                      tags$li(tags$a(href = "www/Mult_Variate_sample_format.csv", "Multivariate Analysis Sample Format CSV", download = NA, target = "_blank")),
                      tags$li(tags$a(href = "www/RCBD_sample.csv", "RCBD Sample CSV", download = NA, target = "_blank"))
                    )
