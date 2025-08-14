@@ -1,7 +1,7 @@
 # ===================================================================
 # FINAL INTEGRATED SHINY APPLICATION
 # This app.R file loads all modules and connects them with a custom UI.
-# UPDATE: Replaced non-ASCII emoji characters with text to pass CRAN checks.
+# UPDATE: Added styling for the collapsible <details> element on the home page.
 # ===================================================================
 
 # ===================================================================
@@ -115,6 +115,21 @@ app_ui <- function() {
         border-radius: 5px;
         border: 1px solid #ced4da;
         white-space: pre-wrap; /* Ensures code wraps */
+      }
+      /* Styling for the collapsible details element */
+      .installation-box details {
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        margin-top: 10px;
+      }
+      .installation-box summary {
+        padding: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        outline: none;
+      }
+      .installation-box details[open] summary {
+        border-bottom: 1px solid #ced4da;
       }
     ")))
     ),

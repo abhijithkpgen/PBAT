@@ -102,7 +102,7 @@ homeUI <- function(id) {
                    tags$img(src = "www/LogoNobg.png", height = "120px", style = "margin-bottom: 10px; border: none;")
           ),
           h4(icon("laptop-code"), " Run Locally in R"),
-          p("You can install and run this application on your own computer directly within R or RStudio. This is a great option for offline use"),
+          p("You can install and run this application on your own computer directly within R or RStudio. This is a great option for offline use or for analyzing sensitive data."),
           tags$a(href = "https://github.com/abhijithkpgen/PBAT", 
                  target = "_blank", 
                  class = "btn btn-primary", 
@@ -112,19 +112,22 @@ homeUI <- function(id) {
                  class = "btn btn-secondary", 
                  style = "color: white !important;", 
                  icon("download"), " Download v1.0.4"),
-          hr(),
-          h4(icon("laptop-code"), "Installation Instructions"),
-          tags$pre(
-            tags$code(
-              HTML(
-                '# Install devtools if not already installed<br>',
-                'if (!require("devtools")) install.packages("devtools")<br><br>',
-                '# Install PbAT from GitHub<br>',
-                'devtools::install_github("abhijithkpgen/PBAT")<br><br>',
-                '# Load the library<br>',
-                'library(PBAT)<br><br>',
-                '# Run the application<br>',
-                'run_app()'
+          
+          # --- NEW COLLAPSIBLE SECTION ---
+          tags$details(
+            tags$summary(icon("terminal"), " Click to view Installation Instructions"),
+            tags$pre(
+              tags$code(
+                HTML(
+                  '# Install devtools if not already installed<br>',
+                  'if (!require("devtools")) install.packages("devtools")<br><br>',
+                  '# Install PbAT from GitHub<br>',
+                  'devtools::install_github("abhijithkpgen/PBAT")<br><br>',
+                  '# Load the library<br>',
+                  'library(PBAT)<br><br>',
+                  '# Run the application<br>',
+                  'run_app()'
+                )
               )
             )
           )
