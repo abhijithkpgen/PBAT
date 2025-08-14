@@ -31,7 +31,7 @@ homeUI <- function(id) {
               div(class = "half-width", textInput(ns("user_email"), "Email"))
           ),
           textInput(ns("user_institute"), "Institute / Organization"),
-          fileInput(ns("file"), "Upload CSV File", accept = ".csv"),
+          fileInput(ns("file"), "Upload CSV File", accept = c("text/csv", ".csv")),
           
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'multivariate'"),
