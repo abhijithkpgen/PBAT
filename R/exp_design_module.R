@@ -1132,15 +1132,14 @@ analysisServer <- function(id, home_inputs) {
     )
     
     
-    # -------- Block D2: Download Handler - Analysis 1 ZIP (FINAL CORRECTED) --------
+    
+    # -------- Block D2: Download Handler - Analysis 1 ZIP (Corrected) --------
     output$download_analysis1 <- downloadHandler(
       filename = function() {
-        # FIX 1: Use the reactive value `active_design()` for modular compatibility.
         design_name <- tools::toTitleCase(active_design() %||% "Analysis")
         paste0("PbAT_", design_name, "_Results_", Sys.Date(), ".zip")
       },
       content = function(file) {
-        # FIX 2: Create a unique temporary directory and handle file paths correctly.
         tmp_dir <- tempfile("analysis1_zip_")
         dir.create(tmp_dir)
         on.exit(unlink(tmp_dir, recursive = TRUE), add = TRUE)
@@ -1160,7 +1159,6 @@ analysisServer <- function(id, home_inputs) {
               fname_box <- file.path(tmp_dir, paste0(trait, "_boxplot.pdf"))
               pdf(fname_box, width = 11, height = 8.5); print(desc_res$boxplot); dev.off()
               
-              # FIX 3: Save QQ plots to a multi-page PDF without needing gridExtra.
               if (!is.null(desc_res$qq) && length(desc_res$qq) > 0) {
                 fname_qq <- file.path(tmp_dir, paste0(trait, "_qqplots.pdf"))
                 pdf(fname_qq, width = 11, height = 8.5)
@@ -1189,10 +1187,12 @@ analysisServer <- function(id, home_inputs) {
           }, error = function(e) { showNotification(paste("Error for trait", trait, ":", e$message), type = "warning") })
         }
         
-        zip::zip(zipfile = file, files = files_to_zip, mode = "cherry-pick")
+        # CORRECTED FUNCTION CALL
+        zip::zipr(zipfile = file, files = files_to_zip, recurse = FALSE)
       },
       contentType = "application/zip"
     )
+    
     
     # -------- Block D3: Download Handler - Analysis 2 ZIP (FINAL CORRECTED) --------
     output$download_analysis2 <- downloadHandler(
