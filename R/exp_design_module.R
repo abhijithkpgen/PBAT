@@ -299,7 +299,7 @@ analysisServer <- function(id, home_inputs) {
         results$anova_table <- extract_custom_anova(df, trait, entry_col, block_col, rep_col, env_col, design)
         results$anova_interpretation <- generate_anova_interpretation(results$anova_table)
         results$var_comps <- tryCatch({ process_var_comps(fit_vc) }, error = function(e) data.frame(Message="VarComps error"))
-        lrt_table_obj <- tryCatch({ if(results$is_singular) NULL else process_lrt_table(fit_vc) }, error = function(e) NULL)
+        lrt_table_obj <- tryCatch({ process_lrt_table(fit_vc) }, error = function(e) NULL)
         if(!is.null(lrt_table_obj)) {
           results$lrt_table <- lrt_table_obj
           results$lrt_interpretation <- generate_lrt_interpretation(lrt_table_obj, entry_col, env_col)
@@ -334,7 +334,7 @@ analysisServer <- function(id, home_inputs) {
         fit_rand <- lmerTest::lmer(as.formula(random_formula_str), data = df)
         results$is_singular <- lme4::isSingular(fit_rand)
         results$singularity_message <- if(results$is_singular) "Warning: Model fit is singular." else ""
-        lrt_table_obj <- tryCatch({ if (results$is_singular) NULL else process_lrt_table(fit_rand) }, error = function(e) NULL)
+        lrt_table_obj <- tryCatch({ process_lrt_table(fit_rand) }, error = function(e) NULL)
         if(!is.null(lrt_table_obj)) {
           results$lrt_table <- lrt_table_obj
           results$lrt_interpretation <- generate_lrt_interpretation(lrt_table_obj, entry_col, env_col)
