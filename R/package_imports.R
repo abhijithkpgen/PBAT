@@ -29,6 +29,8 @@
 #' @importFrom semPlot semPaths
 #'
 # Statistics and Modeling
+#' @import promises
+#' @import future
 #' @importFrom agricolae HSD.test LSD.test duncan.test friedman kruskal kurtosis reg.homog skewness waerden.test
 #' @importFrom broom tidy
 #' @importFrom broom.mixed tidy

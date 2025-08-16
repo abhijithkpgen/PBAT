@@ -5,7 +5,7 @@ Authors@R:
     person("Krishnan P", "Abhijith",
            email = "abhijithkpgen@gmail.com",
            role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0001-8641-026X"))
+           comment = c(ORCID = "0000-0001-8641-02X"))
 Description: Provides an interactive Shiny application for plant breeding 
     analyses, including mating design analytics (diallel, line-by-tester, 
     partial diallel), ANOVA summaries, estimation of GCA/SCA effects, 
@@ -31,6 +31,7 @@ Imports:
     emmeans,
     factoextra,
     FactoMineR,
+    future,
     ggplot2,
     lavaan,
     lme4,
@@ -38,6 +39,7 @@ Imports:
     metan,
     multcomp,
     PerformanceAnalytics,
+    promises,
     purrr,
     RColorBrewer,
     readr,
