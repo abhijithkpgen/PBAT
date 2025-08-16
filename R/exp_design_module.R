@@ -588,7 +588,7 @@ analysisServer <- function(id, home_inputs) {
       waiter::waiter_show(
         id = ns("main_panel_eda"), # Targets the main panel
         html = tagList(
-          tags$img(src = "www/spinner2.gif", height = "250px"),
+          tags$img(src = "www/spinner2.gif", height = "240px"),
           h4("Running Model Analysis, this may take a while...", style = "color:darkblue;")
         ),
         color = "white" 
@@ -634,15 +634,9 @@ analysisServer <- function(id, home_inputs) {
       results <- model_results(); if (length(results) == 0) return(h4("Run Analysis.", style="color:grey;"))
       
       create_explanation_ui <- function(id_prefix, content) {
-        # Construct simple, un-namespaced base IDs
-        link_id <- paste0("toggle_", id_prefix)
-        div_id <- paste0("div_", id_prefix)
-        
-        # Pass the namespaced IDs to the UI elements
-        tagList(
-          actionLink(ns(link_id), "Show/Hide Explanation", style = "font-size: 12px;"),
-          shinyjs::hidden(div(id = ns(div_id), class = "alert alert-info", style = "margin-top: 10px;", content))
-        )
+        ns_prefix <- ns(id_prefix)
+        link_id <- paste0("toggle_", ns_prefix); div_id <- paste0("div_", ns_prefix)
+        tagList(actionLink(link_id, "Show/Hide Explanation", style = "font-size: 12px;"), shinyjs::hidden(div(id = div_id, class = "alert alert-info", style = "margin-top: 10px;", content)))
       }
       
       model_explanation_content <- function(model_type, design, trial_type) {
@@ -707,13 +701,8 @@ analysisServer <- function(id, home_inputs) {
         if (!is.null(trait_content$Fixed)) {
           tid_prefix <- make.names(paste0(trait_name, "_fixed"))
           local({
-            model_link_id <- paste0("toggle_model_exp_", tid_prefix)
-            model_div_id  <- paste0("div_model_exp_", tid_prefix)
-            lrt_link_id   <- paste0("toggle_lrt_exp_", tid_prefix)
-            lrt_div_id    <- paste0("div_lrt_exp_", tid_prefix)
-            
-            observeEvent(input[[model_link_id]], { shinyjs::toggle(id = model_div_id, anim = TRUE) })
-            observeEvent(input[[lrt_link_id]],   { shinyjs::toggle(id = lrt_div_id, anim = TRUE) })
+            observeEvent(input[[paste0("toggle_model_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("model_exp_", tid_prefix))), anim = TRUE) })
+            observeEvent(input[[paste0("toggle_lrt_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("lrt_exp_", tid_prefix))), anim = TRUE) })
             
             output[[paste0("anova_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$anova_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$anova_interpretation) })
             output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$lrt_interpretation) })
@@ -728,13 +717,8 @@ analysisServer <- function(id, home_inputs) {
         if (!is.null(trait_content$Random)) {
           tid_prefix <- make.names(paste0(trait_name, "_random"))
           local({
-            model_link_id <- paste0("toggle_model_exp_", tid_prefix)
-            model_div_id  <- paste0("div_model_exp_", tid_prefix)
-            lrt_link_id   <- paste0("toggle_lrt_exp_", tid_prefix)
-            lrt_div_id    <- paste0("div_lrt_exp_", tid_prefix)
-            
-            observeEvent(input[[model_link_id]], { shinyjs::toggle(id = model_div_id, anim = TRUE) })
-            observeEvent(input[[lrt_link_id]],   { shinyjs::toggle(id = lrt_div_id, anim = TRUE) })
+            observeEvent(input[[paste0("toggle_model_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("model_exp_", tid_prefix))), anim = TRUE) })
+            observeEvent(input[[paste0("toggle_lrt_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("lrt_exp_", tid_prefix))), anim = TRUE) })
             
             output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Random$equation_latex); p(trait_content$Random$equation_latex) })
             output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Random$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Random$lrt_interpretation) })
