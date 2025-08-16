@@ -584,49 +584,67 @@ analysisServer <- function(id, home_inputs) {
     # --- Block E8 Part D: Model-Based Analysis (Non-CRD) ---
     observeEvent(input$run_model, {
       req(raw_data(), active_design(), !tolower(gsub("\\s+", "", active_design())) == "crd", input$traits, input$entry)
-      # ADD THIS WAITER_SHOW CALL
+      
       waiter::waiter_show(
         id = ns("main_panel_eda"), # Targets the main panel
         html = tagList(
           tags$img(src = "www/LogoNobg.png", height = "180px", style = "margin-bottom: 20px;"),
-          tags$img(src = "www/spinner1.gif", height = "250px"),
+          tags$img(src = "www/spinner1.gif", height = "70px"),
           h4("Running Model Analysis, this may take a while...", style = "color:darkblue;")
         ),
-        color = "white" 
+        color = "rgba(255, 255, 255, 0.95)" 
       )
-      withProgress(message = 'Running Model Analysis...', value = 0, {
-        df <- raw_data(); design <- tolower(gsub("\\s+", "", active_design())); trial_type <- input$trial_type
-        genotype_model <- input$genotype_model
-        traits <- input$traits; entry_col <- make.names(input$entry); block_col <- make.names(input$block); rep_col <- if (!is.null(input$rep)) make.names(input$rep) else NULL; env_col <- if (trial_type == "Multi Environment" && !is.null(input$env)) make.names(input$env) else NULL
-        names(df) <- make.names(names(df)); cols_to_factor <- c(entry_col, block_col, rep_col, env_col); for (col in cols_to_factor) { if (!is.null(col) && col %in% names(df)) df[[col]] <- as.factor(df[[col]]) }
-        
-        all_results <- list(); bt <- function(x) paste0("`", x, "`")
-        for (i in seq_along(traits)) {
-          original_trait_name <- traits[i]; trait <- make.names(original_trait_name)
-          incProgress(1 / length(traits), detail = paste("Processing trait:", original_trait_name))
-          if (!is.numeric(df[[trait]])) { showNotification(paste("Skipping non-numeric trait:", original_trait_name), type = "warning"); next }
+      
+      # Use future_promise to run the analysis asynchronously
+      future_promise({
+        withProgress(message = 'Running Model Analysis...', value = 0, {
+          df <- raw_data(); design <- tolower(gsub("\\s+", "", active_design())); trial_type <- input$trial_type
+          genotype_model <- input$genotype_model
+          traits <- input$traits; entry_col <- make.names(input$entry); block_col <- make.names(input$block); rep_col <- if (!is.null(input$rep)) make.names(input$rep) else NULL; env_col <- if (trial_type == "Multi Environment" && !is.null(input$env)) make.names(input$env) else NULL
+          names(df) <- make.names(names(df)); cols_to_factor <- c(entry_col, block_col, rep_col, env_col); for (col in cols_to_factor) { if (!is.null(col) && col %in% names(df)) df[[col]] <- as.factor(df[[col]]) }
           
-          trait_results <- list(); fixed_formula_vc_str <- NULL; formula_random_str <- NULL
-          if (design %in% c("rcbd", "augmentedrcbd")) { if (is.null(env_col)) { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(block_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(block_col), ")") } else { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")") } 
-          } else if (design == "alphalattice") { req(rep_col); if (is.null(env_col)) { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")") } else { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")") } }
-          
-          if (genotype_model == "Fixed") {
-            key <- get_equation_key(design, trial_type, "Fixed")
-            other_res <- run_model_and_extract(df, trait, fixed_formula_vc_str, NULL, "Fixed", entry_col, env_col, block_col, rep_col, design)
-            trait_results$Fixed <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), other_res)
+          all_results <- list(); bt <- function(x) paste0("`", x, "`")
+          for (i in seq_along(traits)) {
+            original_trait_name <- traits[i]; trait <- make.names(original_trait_name)
+            incProgress(1 / length(traits), detail = paste("Processing trait:", original_trait_name))
+            if (!is.numeric(df[[trait]])) { 
+              # Cannot show notifications from a future, so we'll handle this differently if needed
+              next 
+            }
+            
+            trait_results <- list(); fixed_formula_vc_str <- NULL; formula_random_str <- NULL
+            if (design %in% c("rcbd", "augmentedrcbd")) { if (is.null(env_col)) { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(block_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(block_col), ")") } else { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")") } 
+            } else if (design == "alphalattice") { req(rep_col); if (is.null(env_col)) { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")") } else { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")") } }
+            
+            if (genotype_model == "Fixed") {
+              key <- get_equation_key(design, trial_type, "Fixed")
+              other_res <- run_model_and_extract(df, trait, fixed_formula_vc_str, NULL, "Fixed", entry_col, env_col, block_col, rep_col, design)
+              trait_results$Fixed <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), other_res)
+            }
+            if (genotype_model == "Random") {
+              key <- get_equation_key(design, trial_type, "Random")
+              res_rand <- run_model_and_extract(df, trait, NULL, formula_random_str, "Random", entry_col, env_col, block_col, rep_col, design)
+              trait_results$Random <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), res_rand)
+            }
+            all_results[[original_trait_name]] <- trait_results
           }
-          if (genotype_model == "Random") {
-            key <- get_equation_key(design, trial_type, "Random")
-            res_rand <- run_model_and_extract(df, trait, NULL, formula_random_str, "Random", entry_col, env_col, block_col, rep_col, design)
-            trait_results$Random <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), res_rand)
-          }
-          all_results[[original_trait_name]] <- trait_results
-        }
+          return(all_results)
+        })
+      }) %...>% (function(all_results) {
+        # This code runs when the future is successful
         model_results(all_results)
-        waiter::waiter_hide() 
+        showNotification(paste(toupper(active_design()), "model analysis complete."), type = "message")
+        updateTabsetPanel(session, "result_tabs", selected = "Model Results")
+      }) %...>% (function(...) {
+        # This code runs after success or error
+        waiter::waiter_hide()
+      }) %...!% (function(error) {
+        # This code runs if the future fails
+        showModal(modalDialog(
+          title = "Asynchronous Error",
+          paste("An error occurred during the model analysis:", error$message)
+        ))
       })
-      showNotification(paste(toupper(active_design()), "model analysis complete."), type = "message")
-      updateTabsetPanel(session, "result_tabs", selected = "Model Results")
     })
     
     # --- Block E8 Part E: UI Renderer for Model Results ---
@@ -634,8 +652,9 @@ analysisServer <- function(id, home_inputs) {
       req(model_results())
       results <- model_results(); if (length(results) == 0) return(h4("Run Analysis.", style="color:grey;"))
       
+      # FIX 1: Corrected create_explanation_ui function
       create_explanation_ui <- function(id_prefix, content) {
-        # Construct simple, un-namespaced base IDs
+        # Create simple, un-namespaced base IDs
         link_id <- paste0("toggle_", id_prefix)
         div_id <- paste0("div_", id_prefix)
         
@@ -703,19 +722,23 @@ analysisServer <- function(id, home_inputs) {
         tabPanel(title = trait_name, do.call(tabsetPanel, unname(model_type_tabs)))
       })
       
+      # FIX 2: Corrected logic for observeEvent listeners
       purrr::iwalk(results, ~{
         trait_name <- .y; trait_content <- .x
         if (!is.null(trait_content$Fixed)) {
           tid_prefix <- make.names(paste0(trait_name, "_fixed"))
           local({
+            # Define un-namespaced IDs
             model_link_id <- paste0("toggle_model_exp_", tid_prefix)
             model_div_id  <- paste0("div_model_exp_", tid_prefix)
             lrt_link_id   <- paste0("toggle_lrt_exp_", tid_prefix)
             lrt_div_id    <- paste0("div_lrt_exp_", tid_prefix)
             
+            # Create observers that listen for the un-namespaced IDs
             observeEvent(input[[model_link_id]], { shinyjs::toggle(id = model_div_id, anim = TRUE) })
             observeEvent(input[[lrt_link_id]],   { shinyjs::toggle(id = lrt_div_id, anim = TRUE) })
             
+            # --- The rest of the render outputs are correct and remain unchanged ---
             output[[paste0("anova_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$anova_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$anova_interpretation) })
             output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$lrt_interpretation) })
             output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$equation_latex); p(trait_content$Fixed$equation_latex) })
@@ -729,14 +752,17 @@ analysisServer <- function(id, home_inputs) {
         if (!is.null(trait_content$Random)) {
           tid_prefix <- make.names(paste0(trait_name, "_random"))
           local({
+            # Define un-namespaced IDs
             model_link_id <- paste0("toggle_model_exp_", tid_prefix)
             model_div_id  <- paste0("div_model_exp_", tid_prefix)
             lrt_link_id   <- paste0("toggle_lrt_exp_", tid_prefix)
             lrt_div_id    <- paste0("div_lrt_exp_", tid_prefix)
             
+            # Create observers that listen for the un-namespaced IDs
             observeEvent(input[[model_link_id]], { shinyjs::toggle(id = model_div_id, anim = TRUE) })
             observeEvent(input[[lrt_link_id]],   { shinyjs::toggle(id = lrt_div_id, anim = TRUE) })
             
+            # --- The rest of the render outputs are correct and remain unchanged ---
             output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Random$equation_latex); p(trait_content$Random$equation_latex) })
             output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Random$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Random$lrt_interpretation) })
             output[[paste0("singularity_warning_", tid_prefix)]] <- renderUI({ if(!is.null(trait_content$Random$is_singular) && trait_content$Random$is_singular) { tags$div(class = "alert alert-warning", trait_content$Random$singularity_message) } })
