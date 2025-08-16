@@ -12,56 +12,65 @@
 #'
 analysisUI <- function(id) {
   ns <- NS(id) # Create the namespace
-
+  
   list(
     # --- UI for Analysis 1 Tab ---
     tabPanel("Analysis 1",
-      sidebarLayout(
-        sidebarPanel(width = 4, uiOutput(ns("dynamic_sidebar"))),
-        mainPanel(uiOutput(ns("dynamic_mainpanel")))
-      )
+             sidebarLayout(
+               sidebarPanel(width = 4, uiOutput(ns("dynamic_sidebar"))),
+               mainPanel(
+                 shinycssloaders::withSpinner(
+                   uiOutput(ns("dynamic_mainpanel")),
+                   type = 6,
+                   color = "#00b894",
+                   size = 1.5
+                 )
+               )
+             )
     ),
     # --- UI for Analysis 2 Tab ---
     tabPanel("Analysis 2",
-      sidebarLayout(
-        sidebarPanel(width = 4,
-          selectInput(ns("gge_trait"), "Trait for GGE Biplot", choices = NULL),
-          actionButton(ns("run_gge"), "Run GGE Biplot", class = "btn btn-success"),
-          uiOutput(ns("gge_status")),
-          hr(),
-          checkboxGroupInput(ns("multi_traits"), "Select Traits for PCA / Correlation", choices = NULL),
-          actionButton(ns("run_pca"), "Run PCA", class = "btn btn-primary"),
-          uiOutput(ns("pca_status")),
-          br(),
-          actionButton(ns("run_corr"), "Run Correlation Plot", class = "btn btn-secondary"),
-          uiOutput(ns("corr_status")),
-          downloadButton(ns("download_analysis2"), "Download Analysis 2 ZIP", class = "btn btn-success")
-        ),
-        mainPanel(
-          tabsetPanel(
-            id = ns("analysis2_tabs"),
-            tabPanel(" GGE Biplot",
-              h4(" Which Won Where"), plotOutput(ns("gge_plot_type1")),
-              h4(" Mean vs Stability"), plotOutput(ns("gge_plot_type2")),
-              h4(" Representativeness vs Discriminativeness"), plotOutput(ns("gge_plot_type3"))
-            ),
-            tabPanel(" PCA Plot",
-              h4(" PCA Individual Biplot"), plotOutput(ns("pca_plot_biplot")),
-              h4(" Scree Plot"), plotOutput(ns("pca_plot_scree")),
-              h4(" Variable Contributions"), plotOutput(ns("pca_plot_varcontrib")),
-              h4(" PCA Summary Table"), tableOutput(ns("pca_table_summary"))
-            ),
-            tabPanel("Correlation Plot",
-                     plotOutput(ns("corr_plot1")),
-                     hr(),
-                     uiOutput(ns("corr_interpretation_ui"))
-            )
-            )
-          )
-        )
-      )
+             sidebarLayout(
+               sidebarPanel(width = 4,
+                            selectInput(ns("gge_trait"), "Trait for GGE Biplot", choices = NULL),
+                            actionButton(ns("run_gge"), "Run GGE Biplot", class = "btn btn-success"),
+                            uiOutput(ns("gge_status")),
+                            hr(),
+                            checkboxGroupInput(ns("multi_traits"), "Select Traits for PCA / Correlation", choices = NULL),
+                            actionButton(ns("run_pca"), "Run PCA", class = "btn btn-primary"),
+                            uiOutput(ns("pca_status")),
+                            br(),
+                            actionButton(ns("run_corr"), "Run Correlation Plot", class = "btn btn-secondary"),
+                            uiOutput(ns("corr_status")),
+                            downloadButton(ns("download_analysis2"), "Download Analysis 2 ZIP", class = "btn btn-success")
+               ),
+               mainPanel(
+                 shinycssloaders::withSpinner(
+                   tabsetPanel(
+                     id = ns("analysis2_tabs"),
+                     tabPanel(" GGE Biplot",
+                              h4(" Which Won Where"), plotOutput(ns("gge_plot_type1")),
+                              h4(" Mean vs Stability"), plotOutput(ns("gge_plot_type2")),
+                              h4(" Representativeness vs Discriminativeness"), plotOutput(ns("gge_plot_type3"))
+                     ),
+                     tabPanel(" PCA Plot",
+                              h4(" PCA Individual Biplot"), plotOutput(ns("pca_plot_biplot")),
+                              h4(" Scree Plot"), plotOutput(ns("pca_plot_scree")),
+                              h4(" Variable Contributions"), plotOutput(ns("pca_plot_varcontrib")),
+                              h4(" PCA Summary Table"), tableOutput(ns("pca_table_summary"))
+                     ),
+                     tabPanel("Correlation Plot",
+                              plotOutput(ns("corr_plot1")),
+                              hr(),
+                              uiOutput(ns("corr_interpretation_ui"))
+                     )
+                   ),
+                   type = 6, color = "#00b894", size = 1.5
+                 )
+               )
+             )
     )
-  
+  )
 }
 
 # ===================================================================
@@ -78,7 +87,7 @@ analysisServer <- function(id, home_inputs) {
   moduleServer(id, function(input, output, session) {
     
     ns <- session$ns
-
+    
     # ===================================================================
     # -------- Section 2.1: Reactive Values & Data Input --------
     # ===================================================================
@@ -91,13 +100,13 @@ analysisServer <- function(id, home_inputs) {
     crd_results <- reactiveValues() 
     go_to_analysis2 <- reactiveVal(0)
     corr_interpretation <- reactiveVal(NULL)
-
+    
     observeEvent(home_inputs(), {
-        req(home_inputs()$analysis_mode == "eda")
-        raw_data(home_inputs()$file_data)
-        active_design(home_inputs()$design)
+      req(home_inputs()$analysis_mode == "eda")
+      raw_data(home_inputs()$file_data)
+      active_design(home_inputs()$design)
     })
-	
+    
     # ===================================================================
     # -------- Section 2.2: Helper Functions (Self-Contained) --------
     # ===================================================================
@@ -190,7 +199,7 @@ analysisServer <- function(id, home_inputs) {
     )
     get_equation_key <- function(design, trial_type, model_type) { trial_str <- if (trial_type == "Multi Environment") "multi" else "single"; model_str <- tolower(model_type); key <- paste(design, trial_str, model_str, sep = "_"); return(key) }
     add_significance_stars <- function(p_values) { sapply(p_values, function(p) { if (is.na(p)) return(""); if (p < 0.001) return("***"); if (p < 0.01) return("**"); if (p < 0.05) return("*"); return("ns") }) }
-
+    
     # --- Block E8 Part B: ANOVA FUNCTION ---
     extract_custom_anova <- function(df, trait, entry_col, block_col, rep_col, env_col, design) {
       tryCatch({
@@ -210,7 +219,7 @@ analysisServer <- function(id, home_inputs) {
     
     # --- Block E8 Part C: MAIN ANALYSIS ENGINE FUNCTION ---
     run_model_and_extract <- function(df, trait, vc_formula_str, random_formula_str, 
-                                      model_type, entry_col, env_col, block_col, rep_col, design) {
+                                      model_type, entry_col, env_col, block_col, rep_col, design, env_wise_flag) {
       results <- list()
       
       round_df <- function(d) {
@@ -310,7 +319,7 @@ analysisServer <- function(id, home_inputs) {
           emm_comb <- emmeans::emmeans(fit_vc, specs = as.formula(paste0("~", entry_col))); 
           summary_comb <- as.data.frame(summary(emm_comb)) %>% dplyr::select(all_of(entry_col), BLUE_Combined = "emmean", SE_Combined = "SE"); 
           final_blue_table <- summary_comb
-          if (!is.null(env_col) && input$env_wise) {
+          if (!is.null(env_col) && env_wise_flag) {
             env_levels <- unique(as.character(df[[env_col]])); 
             env_blues_list <- lapply(env_levels, function(env) {
               df_sub <- df[df[[env_col]] == env, ]; 
@@ -348,7 +357,7 @@ analysisServer <- function(id, home_inputs) {
           blups_comb$BLUP_Combined <- intercept + blups_comb[,1]
           blups_comb <- tibble::rownames_to_column(blups_comb, var=entry_col) %>% dplyr::select(all_of(entry_col), "BLUP_Combined"); 
           final_blup_table <- blups_comb
-          if (!is.null(env_col) && input$env_wise) {
+          if (!is.null(env_col) && env_wise_flag) {
             gxe_term <- paste0(entry_col, ":", env_col); 
             blups_ind <- lme4::ranef(fit_rand)[[gxe_term]]; 
             blups_ind$BLUP <- intercept + blups_ind[,1]
@@ -361,70 +370,70 @@ analysisServer <- function(id, home_inputs) {
       }
       return(results)
     }
-
+    
     #==================================================================
     # -------- Section 2.3: Dynamic UI Rendering --------
     #==================================================================
     
     # --- Block E2: EDA Dynamic Sidebar UI ---
     output$dynamic_sidebar <- renderUI({
-        df <- raw_data()
-        design <- active_design()
-        if (is.null(df) || is.null(design)) return(h4("Please select EDA on the Home page and proceed."))
-
-        nms <- names(df)
-        numeric_cols <- nms[sapply(df, is.numeric)]
-        design_lwr <- tolower(gsub("\\s+", "", design))
-        step_header <- function(step, txt) h4(div(style="margin-bottom:6px;margin-top:10px;color:#3a5a40;", paste0("Step ", step, ": ", txt)))
-
-        if (design_lwr == "crd") {
-            wellPanel(
-                step_header(1, "Specify Number of Factors"),
-                numericInput(ns("crd_n_factors"), NULL, value = 2, min = 1, max = 3, step = 1),
-                uiOutput(ns("crd_factor_ui")),
-                step_header(2, "Select Traits"),
-                checkboxGroupInput(ns("crd_traits"), NULL, choices = numeric_cols),
-                step_header(3, "Run Analysis"),
-                actionButton(ns("crd_descriptive"), "Run Descriptive Summary", class = "btn btn-primary mb-2"),
-                actionButton(ns("run_crd_anova"), "Run ANOVA + Post Hoc", class = "btn btn-primary mb-2"),
-                actionButton(ns("run_crd_interact"), "Plot Interactions", class = "btn btn-info mb-2"),
-                step_header(4, "Download Results"),
-                downloadButton(ns("download_crd_zip"), "Download CRD Results (ZIP)", class = "btn btn-success")
+      df <- raw_data()
+      design <- active_design()
+      if (is.null(df) || is.null(design)) return(h4("Please select EDA on the Home page and proceed."))
+      
+      nms <- names(df)
+      numeric_cols <- nms[sapply(df, is.numeric)]
+      design_lwr <- tolower(gsub("\\s+", "", design))
+      step_header <- function(step, txt) h4(div(style="margin-bottom:6px;margin-top:10px;color:#3a5a40;", paste0("Step ", step, ": ", txt)))
+      
+      if (design_lwr == "crd") {
+        wellPanel(
+          step_header(1, "Specify Number of Factors"),
+          numericInput(ns("crd_n_factors"), NULL, value = 2, min = 1, max = 3, step = 1),
+          uiOutput(ns("crd_factor_ui")),
+          step_header(2, "Select Traits"),
+          checkboxGroupInput(ns("crd_traits"), NULL, choices = numeric_cols),
+          step_header(3, "Run Analysis"),
+          actionButton(ns("crd_descriptive"), "Run Descriptive Summary", class = "btn btn-primary mb-2"),
+          actionButton(ns("run_crd_anova"), "Run ANOVA + Post Hoc", class = "btn btn-primary mb-2"),
+          actionButton(ns("run_crd_interact"), "Plot Interactions", class = "btn btn-info mb-2"),
+          step_header(4, "Download Results"),
+          downloadButton(ns("download_crd_zip"), "Download CRD Results (ZIP)", class = "btn btn-success")
+        )
+      } else if (design_lwr %in% c("augmentedrcbd", "rcbd", "alphalattice")) {
+        wellPanel(
+          step_header(1, "Select Trial Type"),
+          selectInput(ns("trial_type"), NULL, choices = c("Single Environment", "Multi Environment"), selected = "Single Environment"),
+          step_header(2, "Map Data Columns"),
+          selectInput(ns("entry"),  "Genotype Column", choices = nms),
+          if (design_lwr == "alphalattice") selectInput(ns("rep"), "Replication Column", choices = nms),
+          selectInput(ns("block"),  "Block Column", choices = nms),
+          conditionalPanel(
+            condition = paste0("input['", ns("trial_type"), "'] == 'Multi Environment'"),
+            selectInput(ns("env"), "Environment Column", choices = nms)
+          ),
+          if (design_lwr == "augmentedrcbd") {
+            list(
+              selectInput(ns("check_col"), "Check/Entry Type Column", choices = nms),
+              helpText("Select the column indicating checks vs. test entries.")
             )
-        } else if (design_lwr %in% c("augmentedrcbd", "rcbd", "alphalattice")) {
-            wellPanel(
-                step_header(1, "Select Trial Type"),
-                selectInput(ns("trial_type"), NULL, choices = c("Single Environment", "Multi Environment"), selected = "Single Environment"),
-                step_header(2, "Map Data Columns"),
-                selectInput(ns("entry"),  "Genotype Column", choices = nms),
-                if (design_lwr == "alphalattice") selectInput(ns("rep"), "Replication Column", choices = nms),
-                selectInput(ns("block"),  "Block Column", choices = nms),
-                conditionalPanel(
-                    condition = paste0("input['", ns("trial_type"), "'] == 'Multi Environment'"),
-                    selectInput(ns("env"), "Environment Column", choices = nms)
-                ),
-                if (design_lwr == "augmentedrcbd") {
-                    list(
-                        selectInput(ns("check_col"), "Check/Entry Type Column", choices = nms),
-                        helpText("Select the column indicating checks vs. test entries.")
-                    )
-                },
-                step_header(3, "Select Traits and Options"),
-                checkboxGroupInput(ns("traits"), NULL, choices = numeric_cols, selected = numeric_cols[1]),
-                selectInput(ns("palette"), "Boxplot Color Palette", choices = rownames(RColorBrewer::brewer.pal.info)),
-                selectInput(ns("genotype_model"), "Genotype Model", choices = c("Fixed", "Random"), selected = "Fixed"),
-                checkboxInput(ns("env_wise"), "Compute Environment-wise BLUE/BLUP?", value = TRUE),
-                step_header(4, "Run Analysis"),
-                actionButton(ns("run_descriptive"), "Run Descriptive Summary", class = "btn btn-primary mb-2"),
-                uiOutput(ns("descriptive_status")),
-                actionButton(ns("run_model"), "Run Model-Based Analysis", class = "btn btn-primary mb-2"),
-                uiOutput(ns("model_status")),
-                step_header(5, "Download Results"),
-                downloadButton(ns("download_analysis1"), "Download Results ZIP", class = "btn btn-success")
-            )
-        }
+          },
+          step_header(3, "Select Traits and Options"),
+          checkboxGroupInput(ns("traits"), NULL, choices = numeric_cols, selected = numeric_cols[1]),
+          selectInput(ns("palette"), "Boxplot Color Palette", choices = rownames(RColorBrewer::brewer.pal.info)),
+          selectInput(ns("genotype_model"), "Genotype Model", choices = c("Fixed", "Random"), selected = "Fixed"),
+          checkboxInput(ns("env_wise"), "Compute Environment-wise BLUE/BLUP?", value = TRUE),
+          step_header(4, "Run Analysis"),
+          actionButton(ns("run_descriptive"), "Run Descriptive Summary", class = "btn btn-primary mb-2"),
+          uiOutput(ns("descriptive_status")),
+          actionButton(ns("run_model"), "Run Model-Based Analysis", class = "btn btn-primary mb-2"),
+          uiOutput(ns("model_status")),
+          step_header(5, "Download Results"),
+          downloadButton(ns("download_analysis1"), "Download Results ZIP", class = "btn btn-success")
+        )
+      }
     })
-
+    
     # --- Block C1: CRD Factors UI ---
     output$crd_factor_ui <- renderUI({
       req(raw_data(), input$crd_n_factors)
@@ -487,135 +496,195 @@ analysisServer <- function(id, home_inputs) {
     
     # --- Block E6: EDA Descriptive Analysis (Non-CRD) ---
     observeEvent(input$run_descriptive, {
-        req(raw_data(), input$traits)
+      req(raw_data(), input$traits)
+      
+      make_safe <- function(x) gsub("[^A-Za-z0-9]", "_", x)
+      df <- raw_data()
+      trial_type <- if (!is.null(input$trial_type)) input$trial_type else "Single Environment"
+      
+      env_col <- NULL
+      if (trial_type == "Multi Environment" && !is.null(input$env) && input$env %in% names(df)) {
+        env_col <- input$env
+      }
+      
+      results_list <- purrr::map(input$traits, function(trait) {
+        df_trait <- df[!is.na(df[[trait]]), ]
+        df_trait$Environment <- if (is.null(env_col)) factor("All") else as.factor(df_trait[[env_col]])
         
-        make_safe <- function(x) gsub("[^A-Za-z0-9]", "_", x)
-        df <- raw_data()
-        trial_type <- if (!is.null(input$trial_type)) input$trial_type else "Single Environment"
+        summary_tbl <- df_trait %>%
+          dplyr::group_by(Environment) %>%
+          dplyr::summarise(
+            Trait = trait,
+            Mean = round(mean(.data[[trait]], na.rm = TRUE), 2),
+            SD = round(sd(.data[[trait]], na.rm = TRUE), 2),
+            SE = round(SD / sqrt(n()), 2),
+            CV = round(100 * SD / Mean, 2),
+            Min = round(min(.data[[trait]], na.rm = TRUE), 2),
+            Max = round(max(.data[[trait]], na.rm = TRUE), 2),
+            N = n()
+          )
         
-        env_col <- NULL
-        if (trial_type == "Multi Environment" && !is.null(input$env) && input$env %in% names(df)) {
-            env_col <- input$env
+        boxplot <- ggplot(df_trait, aes(x = Environment, y = .data[[trait]], fill = Environment)) +
+          geom_boxplot(color = "black", width = 0.5) +
+          theme_minimal(base_size = 16) +
+          labs(
+            title = if (length(unique(df_trait$Environment)) == 1)
+              paste("Boxplot of", trait)
+            else
+              paste("Boxplot of", trait, "by Environment"),
+            y = trait
+          ) +
+          scale_fill_brewer(palette = input$palette)
+        
+        qqplots <- df_trait %>%
+          dplyr::group_split(Environment) %>%
+          purrr::map(~ ggplot(.x, aes(sample = .data[[trait]])) +
+                       stat_qq() + stat_qq_line() +
+                       ggtitle(paste("QQ -", unique(.x$Environment))) +
+                       theme_minimal(base_size = 14)
+          )
+        
+        list(summary = summary_tbl, boxplot = boxplot, qq = qqplots)
+      })
+      names(results_list) <- input$traits
+      descriptive_results(results_list)
+      
+      output$descriptive_status <- renderUI({
+        span(style = "color: green; font-weight: bold;", icon("check"), " Descriptive Analysis Completed (OK)")
+      })
+      shinyjs::enable("run_model")
+      shinyjs::enable("download_analysis1")
+      
+      output$descriptive_ui <- renderUI({
+        tabs <- purrr::map(names(results_list), function(trait) {
+          safe_trait <- make_safe(trait)
+          tabPanel(
+            title = trait,
+            h4("Summary Statistics"), tableOutput(ns(paste0("sum_", safe_trait))),
+            h4("Boxplot"), plotOutput(ns(paste0("box_", safe_trait))),
+            h4("QQ Plot(s)"),
+            fluidRow(
+              purrr::map(seq_along(results_list[[trait]]$qq), function(i) {
+                column(4, plotOutput(ns(paste0("qq_", safe_trait, "_", i))))
+              })
+            )
+          )
+        })
+        do.call(tabsetPanel, tabs)
+      })
+      
+      purrr::walk2(names(results_list), results_list, function(trait, r) {
+        safe_trait <- make_safe(trait)
+        local({
+          trait_local <- safe_trait
+          r_local <- r
+          output[[paste0("sum_", trait_local)]] <- renderTable(r_local$summary)
+          output[[paste0("box_", trait_local)]] <- renderPlot(r_local$boxplot)
+          purrr::walk2(seq_along(r_local$qq), r_local$qq, function(i, p) {
+            i_local <- i; p_local <- p
+            output[[paste0("qq_", trait_local, "_", i_local)]] <- renderPlot(p_local)
+          })
+        })
+      })
+      
+      updateTabsetPanel(session, "result_tabs", selected = "Descriptive Results")
+    })
+    
+    # --- ASYNCHRONOUS MODEL-BASED ANALYSIS (Non-CRD) ---
+    observeEvent(input$run_model, {
+      req(raw_data(), active_design(), !tolower(gsub("\\s+", "", active_design())) == "crd", input$traits, input$entry)
+      
+      # Show waiter and disable button
+      waiter_show(html = tagList(spin_fading_circles(), h4("Running Model Analysis... This may take several minutes.")))
+      shinyjs::disable("run_model")
+      
+      # Capture all needed inputs for the future
+      df <- raw_data()
+      design <- tolower(gsub("\\s+", "", active_design()))
+      trial_type <- input$trial_type
+      genotype_model <- input$genotype_model
+      traits <- input$traits
+      entry_col <- make.names(input$entry)
+      block_col <- make.names(input$block)
+      rep_col <- if (!is.null(input$rep)) make.names(input$rep) else NULL
+      env_col <- if (trial_type == "Multi Environment" && !is.null(input$env)) make.names(input$env) else NULL
+      env_wise_flag <- input$env_wise
+      
+      # Start asynchronous process
+      future({
+        # This code runs in a separate background R process
+        
+        # Prepare data (this is safe to do in the future)
+        names(df) <- make.names(names(df))
+        cols_to_factor <- c(entry_col, block_col, rep_col, env_col)
+        for (col in cols_to_factor) {
+          if (!is.null(col) && col %in% names(df)) {
+            df[[col]] <- as.factor(df[[col]])
+          }
         }
         
-        results_list <- purrr::map(input$traits, function(trait) {
-            df_trait <- df[!is.na(df[[trait]]), ]
-            df_trait$Environment <- if (is.null(env_col)) factor("All") else as.factor(df_trait[[env_col]])
-            
-            summary_tbl <- df_trait %>%
-                dplyr::group_by(Environment) %>%
-                dplyr::summarise(
-                    Trait = trait,
-                    Mean = round(mean(.data[[trait]], na.rm = TRUE), 2),
-                    SD = round(sd(.data[[trait]], na.rm = TRUE), 2),
-                    SE = round(SD / sqrt(n()), 2),
-                    CV = round(100 * SD / Mean, 2),
-                    Min = round(min(.data[[trait]], na.rm = TRUE), 2),
-                    Max = round(max(.data[[trait]], na.rm = TRUE), 2),
-                    N = n()
-                )
-            
-            boxplot <- ggplot(df_trait, aes(x = Environment, y = .data[[trait]], fill = Environment)) +
-                geom_boxplot(color = "black", width = 0.5) +
-                theme_minimal(base_size = 16) +
-                labs(
-                    title = if (length(unique(df_trait$Environment)) == 1)
-                        paste("Boxplot of", trait)
-                    else
-                        paste("Boxplot of", trait, "by Environment"),
-                    y = trait
-                ) +
-                scale_fill_brewer(palette = input$palette)
-            
-            qqplots <- df_trait %>%
-                dplyr::group_split(Environment) %>%
-                purrr::map(~ ggplot(.x, aes(sample = .data[[trait]])) +
-                           stat_qq() + stat_qq_line() +
-                           ggtitle(paste("QQ -", unique(.x$Environment))) +
-                           theme_minimal(base_size = 14)
-                )
-            
-            list(summary = summary_tbl, boxplot = boxplot, qq = qqplots)
-        })
-        names(results_list) <- input$traits
-        descriptive_results(results_list)
+        all_results <- list()
+        bt <- function(x) paste0("`", x, "`")
         
-        output$descriptive_status <- renderUI({
-            span(style = "color: green; font-weight: bold;", icon("check"), " Descriptive Analysis Completed (OK)")
-        })
-        shinyjs::enable("run_model")
-        shinyjs::enable("download_analysis1")
-        
-        output$descriptive_ui <- renderUI({
-            tabs <- purrr::map(names(results_list), function(trait) {
-                safe_trait <- make_safe(trait)
-                tabPanel(
-                    title = trait,
-                    h4("Summary Statistics"), tableOutput(ns(paste0("sum_", safe_trait))),
-                    h4("Boxplot"), plotOutput(ns(paste0("box_", safe_trait))),
-                    h4("QQ Plot(s)"),
-                    fluidRow(
-                        purrr::map(seq_along(results_list[[trait]]$qq), function(i) {
-                            column(4, plotOutput(ns(paste0("qq_", safe_trait, "_", i))))
-                        })
-                    )
-                )
-            })
-            do.call(tabsetPanel, tabs)
-        })
-        
-        purrr::walk2(names(results_list), results_list, function(trait, r) {
-            safe_trait <- make_safe(trait)
-            local({
-                trait_local <- safe_trait
-                r_local <- r
-                output[[paste0("sum_", trait_local)]] <- renderTable(r_local$summary)
-                output[[paste0("box_", trait_local)]] <- renderPlot(r_local$boxplot)
-                purrr::walk2(seq_along(r_local$qq), r_local$qq, function(i, p) {
-                    i_local <- i; p_local <- p
-                    output[[paste0("qq_", trait_local, "_", i_local)]] <- renderPlot(p_local)
-                })
-            })
-        })
-        
-        updateTabsetPanel(session, "result_tabs", selected = "Descriptive Results")
-    })
-
-    # --- Block E8 Part D: Model-Based Analysis (Non-CRD) ---
-    observeEvent(input$run_model, {
-        req(raw_data(), active_design(), !tolower(gsub("\\s+", "", active_design())) == "crd", input$traits, input$entry)
-        withProgress(message = 'Running Model Analysis...', value = 0, {
-            df <- raw_data(); design <- tolower(gsub("\\s+", "", active_design())); trial_type <- input$trial_type
-            genotype_model <- input$genotype_model
-            traits <- input$traits; entry_col <- make.names(input$entry); block_col <- make.names(input$block); rep_col <- if (!is.null(input$rep)) make.names(input$rep) else NULL; env_col <- if (trial_type == "Multi Environment" && !is.null(input$env)) make.names(input$env) else NULL
-            names(df) <- make.names(names(df)); cols_to_factor <- c(entry_col, block_col, rep_col, env_col); for (col in cols_to_factor) { if (!is.null(col) && col %in% names(df)) df[[col]] <- as.factor(df[[col]]) }
-            
-            all_results <- list(); bt <- function(x) paste0("`", x, "`")
-            for (i in seq_along(traits)) {
-                original_trait_name <- traits[i]; trait <- make.names(original_trait_name)
-                incProgress(1 / length(traits), detail = paste("Processing trait:", original_trait_name))
-                if (!is.numeric(df[[trait]])) { showNotification(paste("Skipping non-numeric trait:", original_trait_name), type = "warning"); next }
-                
-                trait_results <- list(); fixed_formula_vc_str <- NULL; formula_random_str <- NULL
-                if (design %in% c("rcbd", "augmentedrcbd")) { if (is.null(env_col)) { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(block_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(block_col), ")") } else { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")") } 
-                } else if (design == "alphalattice") { req(rep_col); if (is.null(env_col)) { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")") } else { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")") } }
-                
-                if (genotype_model == "Fixed") {
-                    key <- get_equation_key(design, trial_type, "Fixed")
-                    other_res <- run_model_and_extract(df, trait, fixed_formula_vc_str, NULL, "Fixed", entry_col, env_col, block_col, rep_col, design)
-                    trait_results$Fixed <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), other_res)
-                }
-                if (genotype_model == "Random") {
-                    key <- get_equation_key(design, trial_type, "Random")
-                    res_rand <- run_model_and_extract(df, trait, NULL, formula_random_str, "Random", entry_col, env_col, block_col, rep_col, design)
-                    trait_results$Random <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), res_rand)
-                }
-                all_results[[original_trait_name]] <- trait_results
+        # Loop through traits to perform analysis
+        for (i in seq_along(traits)) {
+          original_trait_name <- traits[i]
+          trait <- make.names(original_trait_name)
+          
+          if (!is.numeric(df[[trait]])) next
+          
+          trait_results <- list()
+          fixed_formula_vc_str <- NULL
+          formula_random_str <- NULL
+          
+          # --- Build model formulas (same logic as before) ---
+          if (design %in% c("rcbd", "augmentedrcbd")) { 
+            if (is.null(env_col)) { 
+              fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(block_col), ")")
+              formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(block_col), ")")
+            } else { 
+              fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")")
+              formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")")
+            } 
+          } else if (design == "alphalattice") { 
+            req(rep_col)
+            if (is.null(env_col)) { 
+              fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")")
+              formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")")
+            } else { 
+              fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")")
+              formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")")
             }
-            model_results(all_results)
-        })
+          }
+          
+          # --- Run models (passing env_wise_flag explicitly) ---
+          if (genotype_model == "Fixed") {
+            key <- get_equation_key(design, trial_type, "Fixed")
+            other_res <- run_model_and_extract(df, trait, fixed_formula_vc_str, NULL, "Fixed", entry_col, env_col, block_col, rep_col, design, env_wise_flag)
+            trait_results$Fixed <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), other_res)
+          }
+          if (genotype_model == "Random") {
+            key <- get_equation_key(design, trial_type, "Random")
+            res_rand <- run_model_and_extract(df, trait, NULL, formula_random_str, "Random", entry_col, env_col, block_col, rep_col, design, env_wise_flag)
+            trait_results$Random <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), res_rand)
+          }
+          all_results[[original_trait_name]] <- trait_results
+        }
+        all_results # Return results from the future
+      }) %...>% { results ->
+          # This code runs back in the main session when the future is successful
+          model_results(results)
         showNotification(paste(toupper(active_design()), "model analysis complete."), type = "message")
         updateTabsetPanel(session, "result_tabs", selected = "Model Results")
+      } %...!% {
+        # This code runs if there's an error in the future
+        error_msg <- .
+        showNotification(paste("An error occurred during model analysis:", error_msg), type = "error", duration = 10)
+      } %...>% {
+        # This code runs regardless of success or failure
+        shinyjs::enable("run_model")
+        waiter_hide()
+      }
     })
     
     # --- Block E8 Part E: UI Renderer for Model Results ---
@@ -624,105 +693,154 @@ analysisServer <- function(id, home_inputs) {
       results <- model_results(); if (length(results) == 0) return(h4("Run Analysis.", style="color:grey;"))
       
       create_explanation_ui <- function(id_prefix, content) {
-          ns_prefix <- ns(id_prefix)
-          link_id <- paste0("toggle_", ns_prefix); div_id <- paste0("div_", ns_prefix)
-          tagList(actionLink(link_id, "Show/Hide Explanation", style = "font-size: 12px;"), shinyjs::hidden(div(id = div_id, class = "alert alert-info", style = "margin-top: 10px;", content)))
+        ns_prefix <- ns(id_prefix)
+        link_id <- paste0("toggle_", ns_prefix); div_id <- paste0("div_", ns_prefix)
+        tagList(actionLink(link_id, "Show/Hide Explanation", style = "font-size: 12px;"), shinyjs::hidden(div(id = div_id, class = "alert alert-info", style = "margin-top: 10px;", content)))
       }
       
       model_explanation_content <- function(model_type, design, trial_type) {
-          design <- tolower(gsub("\\s+", "", design))
-          fixed_effects <- character(0); random_effects <- c("Residual (error)")
-          if(model_type == "Fixed") { fixed_effects <- c(fixed_effects, "Genotype") } else { random_effects <- c(random_effects, "Genotype") }
+        design <- tolower(gsub("\\s+", "", design))
+        fixed_effects <- character(0); random_effects <- c("Residual (error)")
+        if(model_type == "Fixed") { fixed_effects <- c(fixed_effects, "Genotype") } else { random_effects <- c(random_effects, "Genotype") }
+        if(design == "alphalattice") {
+          random_effects <- c(random_effects, "Replication")
+          if(trial_type != "Multi Environment") random_effects <- c(random_effects, "Block within Replication")
+        } else { random_effects <- c(random_effects, "Block") }
+        if(trial_type == "Multi Environment") {
+          random_effects <- c(random_effects, "Environment", "Genotype x Environment Interaction")
           if(design == "alphalattice") {
-              random_effects <- c(random_effects, "Replication")
-              if(trial_type != "Multi Environment") random_effects <- c(random_effects, "Block within Replication")
-          } else { random_effects <- c(random_effects, "Block") }
-          if(trial_type == "Multi Environment") {
-              random_effects <- c(random_effects, "Environment", "Genotype x Environment Interaction")
-              if(design == "alphalattice") {
-                  random_effects <- c(random_effects, "Replication within Environment", "Block within Replication & Environment")
-              } else { random_effects <- c(random_effects, "Block within Environment") }
-          }
-          tagList(
-              if (length(fixed_effects) > 0) { list(tags$b("Fixed Effects:"), tags$ul(lapply(sort(unique(fixed_effects)), tags$li))) },
-              tags$b("Random Effects:"), tags$ul(lapply(sort(unique(random_effects)), tags$li))
-          )
+            random_effects <- c(random_effects, "Replication within Environment", "Block within Replication & Environment")
+          } else { random_effects <- c(random_effects, "Block within Environment") }
+        }
+        tagList(
+          if (length(fixed_effects) > 0) { list(tags$b("Fixed Effects:"), tags$ul(lapply(sort(unique(fixed_effects)), tags$li))) },
+          tags$b("Random Effects:"), tags$ul(lapply(sort(unique(random_effects)), tags$li))
+        )
       }
       
       lrt_explanation_content <- tagList(
-          tags$b("What is the Likelihood Ratio Test (LRT)?"), tags$p("The LRT tests if a random effect is statistically significant. A small p-value (Pr(>Chisq)) suggests the effect is important."), tags$b("What is the Baseline Model?"), tags$p("The 'Baseline Model (for comparison)' is the simpler model used as a starting point for the test.")
+        tags$b("What is the Likelihood Ratio Test (LRT)?"), tags$p("The LRT tests if a random effect is statistically significant. A small p-value (Pr(>Chisq)) suggests the effect is important."), tags$b("What is the Baseline Model?"), tags$p("The 'Baseline Model (for comparison)' is the simpler model used as a starting point for the test.")
       )
       
       trait_tabs <- purrr::imap(results, ~{
-          trait_name <- .y; trait_content <- .x; model_type_tabs <- list()
-          if (!is.null(trait_content$Fixed)) {
-              tid_prefix <- make.names(paste0(trait_name, "_fixed"))
-              model_type_tabs$Fixed <- tabPanel("Fixed Model (Genotype)",
-                  h5("Model Equation", style="font-weight:bold;"), uiOutput(ns(paste0("equation_", tid_prefix))),
-                  create_explanation_ui(paste0("model_exp_", tid_prefix), model_explanation_content("Fixed", active_design(), input$trial_type)), 
-                  hr(),
-                  uiOutput(ns(paste0("singularity_warning_", tid_prefix))),
-                  h4("1. ANOVA Table (Genotype Only)"), DT::dataTableOutput(ns(paste0("anova_", tid_prefix))),
-                  uiOutput(ns(paste0("anova_interp_", tid_prefix))),
-                  h4("2. Likelihood Ratio Test (LRT)"), create_explanation_ui(paste0("lrt_exp_", tid_prefix), lrt_explanation_content), DT::dataTableOutput(ns(paste0("lrt_", tid_prefix))),
-                  uiOutput(ns(paste0("lrt_interp_", tid_prefix))), 
-                  h4("3. Variance Components"), DT::dataTableOutput(ns(paste0("varcomp_", tid_prefix))),
-                  h4("4. Best Linear Unbiased Estimates (BLUEs)"), DT::dataTableOutput(ns(paste0("blues_", tid_prefix)))
-              )
-          }
-          if (!is.null(trait_content$Random)) {
-              tid_prefix <- make.names(paste0(trait_name, "_random"))
-              model_type_tabs$Random <- tabPanel("Random Model (Genotype)",
-                  h5("Model Equation", style="font-weight:bold;"), uiOutput(ns(paste0("equation_", tid_prefix))),
-                  create_explanation_ui(paste0("model_exp_", tid_prefix), model_explanation_content("Random", active_design(), input$trial_type)), 
-                  hr(),
-                  uiOutput(ns(paste0("singularity_warning_", tid_prefix))),
-                  h4("1. Likelihood Ratio Test (LRT)"), create_explanation_ui(paste0("lrt_exp_", tid_prefix), lrt_explanation_content), DT::dataTableOutput(ns(paste0("lrt_", tid_prefix))),
-                  uiOutput(ns(paste0("lrt_interp_", tid_prefix))),
-                  h4("2. Variance Components"), DT::dataTableOutput(ns(paste0("varcomp_", tid_prefix))),
-                  h4("3. Best Linear Unbiased Predictors (BLUPs)"), DT::dataTableOutput(ns(paste0("blups_", tid_prefix)))
-              )
-          }
-          tabPanel(title = trait_name, do.call(tabsetPanel, unname(model_type_tabs)))
+        trait_name <- .y; trait_content <- .x; model_type_tabs <- list()
+        if (!is.null(trait_content$Fixed)) {
+          tid_prefix <- make.names(paste0(trait_name, "_fixed"))
+          model_type_tabs$Fixed <- tabPanel("Fixed Model (Genotype)",
+                                            h5("Model Equation", style="font-weight:bold;"), uiOutput(ns(paste0("equation_", tid_prefix))),
+                                            create_explanation_ui(paste0("model_exp_", tid_prefix), model_explanation_content("Fixed", active_design(), input$trial_type)), 
+                                            hr(),
+                                            uiOutput(ns(paste0("singularity_warning_", tid_prefix))),
+                                            h4("1. ANOVA Table (Genotype Only)"), DT::dataTableOutput(ns(paste0("anova_", tid_prefix))),
+                                            uiOutput(ns(paste0("anova_interp_", tid_prefix))),
+                                            h4("2. Likelihood Ratio Test (LRT)"), create_explanation_ui(paste0("lrt_exp_", tid_prefix), lrt_explanation_content), DT::dataTableOutput(ns(paste0("lrt_", tid_prefix))),
+                                            uiOutput(ns(paste0("lrt_interp_", tid_prefix))), 
+                                            h4("3. Variance Components"), DT::dataTableOutput(ns(paste0("varcomp_", tid_prefix))),
+                                            h4("4. Best Linear Unbiased Estimates (BLUEs)"), DT::dataTableOutput(ns(paste0("blues_", tid_prefix)))
+          )
+        }
+        if (!is.null(trait_content$Random)) {
+          tid_prefix <- make.names(paste0(trait_name, "_random"))
+          model_type_tabs$Random <- tabPanel("Random Model (Genotype)",
+                                             h5("Model Equation", style="font-weight:bold;"), uiOutput(ns(paste0("equation_", tid_prefix))),
+                                             create_explanation_ui(paste0("model_exp_", tid_prefix), model_explanation_content("Random", active_design(), input$trial_type)), 
+                                             hr(),
+                                             uiOutput(ns(paste0("singularity_warning_", tid_prefix))),
+                                             h4("1. Likelihood Ratio Test (LRT)"), create_explanation_ui(paste0("lrt_exp_", tid_prefix), lrt_explanation_content), DT::dataTableOutput(ns(paste0("lrt_", tid_prefix))),
+                                             uiOutput(ns(paste0("lrt_interp_", tid_prefix))),
+                                             h4("2. Variance Components"), DT::dataTableOutput(ns(paste0("varcomp_", tid_prefix))),
+                                             h4("3. Best Linear Unbiased Predictors (BLUPs)"), DT::dataTableOutput(ns(paste0("blups_", tid_prefix)))
+          )
+        }
+        tabPanel(title = trait_name, do.call(tabsetPanel, unname(model_type_tabs)))
       })
       
       purrr::iwalk(results, ~{
-          trait_name <- .y; trait_content <- .x
-          if (!is.null(trait_content$Fixed)) {
-              tid_prefix <- make.names(paste0(trait_name, "_fixed"))
-              local({
-                  observeEvent(input[[paste0("toggle_model_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("model_exp_", tid_prefix))), anim = TRUE) })
-                  observeEvent(input[[paste0("toggle_lrt_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("lrt_exp_", tid_prefix))), anim = TRUE) })
-                  
-                  output[[paste0("anova_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$anova_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$anova_interpretation) })
-                  output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$lrt_interpretation) })
-                  output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$equation_latex); p(trait_content$Fixed$equation_latex) })
-                  output[[paste0("singularity_warning_", tid_prefix)]] <- renderUI({ if(!is.null(trait_content$Fixed$is_singular) && trait_content$Fixed$is_singular) { tags$div(class = "alert alert-warning", trait_content$Fixed$singularity_message) } })
-                  output[[paste0("anova_", tid_prefix)]] <- DT::renderDataTable(trait_content$Fixed$anova_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-                  output[[paste0("lrt_", tid_prefix)]] <- DT::renderDataTable(trait_content$Fixed$lrt_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-                  output[[paste0("varcomp_", tid_prefix)]] <- DT::renderDataTable(trait_content$Fixed$var_comps, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-                  output[[paste0("blues_", tid_prefix)]] <- DT::renderDataTable(trait_content$Fixed$blue_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 10))
-              })
-          }
-          if (!is.null(trait_content$Random)) {
-              tid_prefix <- make.names(paste0(trait_name, "_random"))
-              local({
-                  observeEvent(input[[paste0("toggle_model_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("model_exp_", tid_prefix))), anim = TRUE) })
-                  observeEvent(input[[paste0("toggle_lrt_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("lrt_exp_", tid_prefix))), anim = TRUE) })
-                  
-                  output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Random$equation_latex); p(trait_content$Random$equation_latex) })
-                  output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Random$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Random$lrt_interpretation) })
-                  output[[paste0("singularity_warning_", tid_prefix)]] <- renderUI({ if(!is.null(trait_content$Random$is_singular) && trait_content$Random$is_singular) { tags$div(class = "alert alert-warning", trait_content$Random$singularity_message) } })
-                  output[[paste0("lrt_", tid_prefix)]] <- DT::renderDataTable(trait_content$Random$lrt_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-                  output[[paste0("varcomp_", tid_prefix)]] <- DT::renderDataTable(trait_content$Random$var_comps, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-                  output[[paste0("blups_", tid_prefix)]] <- DT::renderDataTable(trait_content$Random$blup_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 10))
-              })
-          }
+        trait_name <- .y; trait_content <- .x
+        if (!is.null(trait_content$Fixed)) {
+          tid_prefix <- make.names(paste0(trait_name, "_fixed"))
+          local({
+            observeEvent(input[[paste0("toggle_model_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("model_exp_", tid_prefix))), anim = TRUE) })
+            observeEvent(input[[paste0("toggle_lrt_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("lrt_exp_", tid_prefix))), anim = TRUE) })
+            
+            output[[paste0("anova_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$anova_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$anova_interpretation) })
+            output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$lrt_interpretation) })
+            output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$equation_latex); p(trait_content$Fixed$equation_latex) })
+            output[[paste0("singularity_warning_", tid_prefix)]] <- renderUI({ if(!is.null(trait_content$Fixed$is_singular) && trait_content$Fixed$is_singular) { tags$div(class = "alert alert-warning", trait_content$Fixed$singularity_message) } })
+            output[[paste0("anova_", tid_prefix)]] <- DT::renderDataTable({
+              res_data <- trait_content$Fixed$anova_table
+              if (!is.null(res_data) && is.data.frame(res_data)) {
+                res_data
+              } else {
+                data.frame(Status = "Could not generate ANOVA table.")
+              }
+            }, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+            output[[paste0("lrt_", tid_prefix)]] <- DT::renderDataTable({
+              res_data <- trait_content$Fixed$lrt_table
+              if (!is.null(res_data) && is.data.frame(res_data)) {
+                res_data
+              } else {
+                data.frame(Status = "Could not generate LRT table.")
+              }
+            }, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+            output[[paste0("varcomp_", tid_prefix)]] <- DT::renderDataTable({
+              res_data <- trait_content$Fixed$var_comps
+              if (!is.null(res_data) && is.data.frame(res_data)) {
+                res_data
+              } else {
+                data.frame(Status = "Could not generate Variance Components.")
+              }
+            }, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+            output[[paste0("blues_", tid_prefix)]] <- DT::renderDataTable({
+              res_data <- trait_content$Fixed$blue_table
+              if (!is.null(res_data) && is.data.frame(res_data)) {
+                res_data
+              } else {
+                data.frame(Status = "Could not generate BLUEs.")
+              }
+            }, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 10))
+          })
+        }
+        if (!is.null(trait_content$Random)) {
+          tid_prefix <- make.names(paste0(trait_name, "_random"))
+          local({
+            observeEvent(input[[paste0("toggle_model_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("model_exp_", tid_prefix))), anim = TRUE) })
+            observeEvent(input[[paste0("toggle_lrt_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("lrt_exp_", tid_prefix))), anim = TRUE) })
+            
+            output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Random$equation_latex); p(trait_content$Random$equation_latex) })
+            output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Random$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Random$lrt_interpretation) })
+            output[[paste0("singularity_warning_", tid_prefix)]] <- renderUI({ if(!is.null(trait_content$Random$is_singular) && trait_content$Random$is_singular) { tags$div(class = "alert alert-warning", trait_content$Random$singularity_message) } })
+            output[[paste0("lrt_", tid_prefix)]] <- DT::renderDataTable({
+              res_data <- trait_content$Random$lrt_table
+              if (!is.null(res_data) && is.data.frame(res_data)) {
+                res_data
+              } else {
+                data.frame(Status = "Could not generate LRT table.")
+              }
+            }, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+            output[[paste0("varcomp_", tid_prefix)]] <- DT::renderDataTable({
+              res_data <- trait_content$Random$var_comps
+              if (!is.null(res_data) && is.data.frame(res_data)) {
+                res_data
+              } else {
+                data.frame(Status = "Could not generate Variance Components.")
+              }
+            }, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+            output[[paste0("blups_", tid_prefix)]] <- DT::renderDataTable({
+              res_data <- trait_content$Random$blup_table
+              if (!is.null(res_data) && is.data.frame(res_data)) {
+                res_data
+              } else {
+                data.frame(Status = "Could not generate BLUPs.")
+              }
+            }, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 10))
+          })
+        }
       })
       
       do.call(tabsetPanel, unname(trait_tabs))
     })
-
+    
     # ===================================================================
     # -------- Section 2.4: CRD Analysis Logic (CORRECTED BLOCKS) --------
     # ===================================================================
@@ -768,89 +886,91 @@ analysisServer <- function(id, home_inputs) {
     })
     
     
-# --- Block C5: ANOVA + Post-Hoc (Corrected for reactiveValues) ---
+    # --- Block C5: ANOVA + Post-Hoc (Corrected for reactiveValues) ---
     observeEvent(input$run_crd_anova, {
       req(raw_data(), input$crd_traits, input$crd_n_factors > 0)
+      
+      waiter_show(html = tagList(spin_fading_circles(), h4("Running ANOVA and Post-Hoc...")))
+      
       df <- raw_data(); nfac <- as.numeric(input$crd_n_factors)
       factor_names <- paste0("crd_factor", 1:nfac)
       factor_cols <- na.omit(unname(sapply(factor_names, function(x) input[[x]])))
       
       # --- Original validation logic ---
       if (any(duplicated(factor_cols))) {
-        showNotification("Please select unique factors for each Factor slot!", type = "error"); return(NULL)
+        showNotification("Please select unique factors for each Factor slot!", type = "error"); waiter_hide(); return(NULL)
       }
       if (length(factor_cols) == 0) {
-        showNotification("Please select at least one valid factor.", type = "error"); return(NULL)
+        showNotification("Please select at least one valid factor.", type = "error"); waiter_hide(); return(NULL)
       }
       if (any(!factor_cols %in% names(df))) {
-        showNotification("Selected factors do not match data columns.", type = "error"); return(NULL)
+        showNotification("Selected factors do not match data columns.", type = "error"); waiter_hide(); return(NULL)
       }
       for (fac in factor_cols) df[[fac]] <- as.factor(df[[fac]])
       single_level_factors <- factor_cols[sapply(factor_cols, function(fac) length(unique(df[[fac]])) < 2)]
       if (length(single_level_factors) > 0) {
         msg <- paste("Some selected factors have only one level and will be ignored in ANOVA:", paste(single_level_factors, collapse = ", "))
-        showNotification(msg, type = "error"); return(NULL)
+        showNotification(msg, type = "error"); waiter_hide(); return(NULL)
       }
       
-      withProgress(message = 'Running ANOVA + Post Hoc (DMRT)...', value = 0, {
-        for (trait in input$crd_traits) {
-          local({
-            trait_local <- trait; trait_id <- make.names(trait_local)
-            incProgress(1/length(input$crd_traits), detail = paste("Trait:", trait_local))
+      for (trait in input$crd_traits) {
+        local({
+          trait_local <- trait; trait_id <- make.names(trait_local)
+          
+          # --- Original analysis variables and logic ---
+          anova_str <- ""; dmrt_str <- ""; anova_df <- data.frame(); missing <- data.frame()
+          
+          if (!is.numeric(df[[trait_local]])) {
+            anova_str <- paste("Trait", trait_local, "is not numeric. Cannot run ANOVA.")
+            anova_df <- data.frame(Message = anova_str)
+          } else {
+            factors_bt <- sapply(factor_cols, function(x) if (grepl("[^A-Za-z0-9_.]", x)) paste0("`", x, "`") else x)
+            formula_str <- if (length(factors_bt) == 1) { paste(trait_local, "~", factors_bt[1]) } else { paste(trait_local, "~", paste(factors_bt, collapse = " * ")) }
+            fit <- tryCatch(aov(as.formula(formula_str), data = df), error = function(e) NULL)
             
-            # --- Original analysis variables and logic ---
-            anova_str <- ""; dmrt_str <- ""; anova_df <- data.frame(); missing <- data.frame()
-            
-            if (!is.numeric(df[[trait_local]])) {
-              anova_str <- paste("Trait", trait_local, "is not numeric. Cannot run ANOVA.")
-              anova_df <- data.frame(Message = anova_str)
-            } else {
-              factors_bt <- sapply(factor_cols, function(x) if (grepl("[^A-Za-z0-9_.]", x)) paste0("`", x, "`") else x)
-              formula_str <- if (length(factors_bt) == 1) { paste(trait_local, "~", factors_bt[1]) } else { paste(trait_local, "~", paste(factors_bt, collapse = " * ")) }
-              fit <- tryCatch(aov(as.formula(formula_str), data = df), error = function(e) NULL)
-              
-              if (!is.null(fit)) {
-                anova_df <- broom::tidy(fit)
-                anova_str <- "Shapiro-Wilk Test for Normality of Residuals:\n"
-                res <- tryCatch(residuals(fit), error = function(e) NULL)
-                if (!is.null(res) && length(res) > 3) {
-                  shapiro <- tryCatch(shapiro.test(res), error = function(e) NULL)
-                  if (!is.null(shapiro)) anova_str <- paste0(anova_str, paste(capture.output(shapiro), collapse = "\n"), "\n")
+            if (!is.null(fit)) {
+              anova_df <- broom::tidy(fit)
+              anova_str <- "Shapiro-Wilk Test for Normality of Residuals:\n"
+              res <- tryCatch(residuals(fit), error = function(e) NULL)
+              if (!is.null(res) && length(res) > 3) {
+                shapiro <- tryCatch(shapiro.test(res), error = function(e) NULL)
+                if (!is.null(shapiro)) anova_str <- paste0(anova_str, paste(capture.output(shapiro), collapse = "\n"), "\n")
+              }
+              if (requireNamespace("agricolae", quietly = TRUE)) {
+                for (ff in factors_bt) {
+                  dmrt <- tryCatch(agricolae::duncan.test(fit, ff, group=TRUE), error = function(e) NULL)
+                  if (!is.null(dmrt)) dmrt_str <- paste0(dmrt_str, "\nDMRT for ", ff, ":\n", paste(capture.output(dmrt$groups), collapse = "\n"), "\n")
                 }
-                if (requireNamespace("agricolae", quietly = TRUE)) {
-                  for (ff in factors_bt) {
-                    dmrt <- tryCatch(agricolae::duncan.test(fit, ff, group=TRUE), error = function(e) NULL)
-                    if (!is.null(dmrt)) dmrt_str <- paste0(dmrt_str, "\nDMRT for ", ff, ":\n", paste(capture.output(dmrt$groups), collapse = "\n"), "\n")
+                if (length(factors_bt) > 1) {
+                  all_interactions <- unlist(lapply(2:length(factors_bt), function(m) combn(factors_bt, m, simplify = FALSE)), recursive = FALSE)
+                  for (inter in all_interactions) {
+                    term <- paste(inter, collapse=":")
+                    dmrt <- tryCatch(agricolae::duncan.test(fit, term, group=TRUE), error = function(e) NULL)
+                    if (!is.null(dmrt)) dmrt_str <- paste0(dmrt_str, "\nDMRT for interaction ", term, ":\n", paste(capture.output(dmrt$groups), collapse = "\n"), "\n")
                   }
-                  if (length(factors_bt) > 1) {
-                    all_interactions <- unlist(lapply(2:length(factors_bt), function(m) combn(factors_bt, m, simplify = FALSE)), recursive = FALSE)
-                    for (inter in all_interactions) {
-                      term <- paste(inter, collapse=":")
-                      dmrt <- tryCatch(agricolae::duncan.test(fit, term, group=TRUE), error = function(e) NULL)
-                      if (!is.null(dmrt)) dmrt_str <- paste0(dmrt_str, "\nDMRT for interaction ", term, ":\n", paste(capture.output(dmrt$groups), collapse = "\n"), "\n")
-                    }
-                  }
-                } else { dmrt_str <- "\nagricolae package not available. DMRT not run.\n" }
-              } else { anova_str <- "ANOVA failed."; anova_df <- data.frame(Message = anova_str) }
-            }
-            full_grid <- expand.grid(lapply(df[factor_cols], function(x) levels(x))); actual <- df[, factor_cols, drop = FALSE] %>% distinct()
-            missing <- dplyr::anti_join(full_grid, actual, by = factor_cols)
-            
-            # Assign each result directly to its own slot
-            crd_results[[paste0("anova_table_", trait_id)]] <- anova_df
-            crd_results[[paste0("dmrt_text_", trait_id)]] <- dmrt_str
-            crd_results[[paste0("report_", trait_id)]] <- paste(anova_str, "\n", dmrt_str)
-            crd_results[[paste0("missing_combinations_", trait_id)]] <- missing
-            
-            # --- UI rendering logic ---
-            output[[paste0("crd_anova_", trait_id)]] <- DT::renderDataTable({ req(crd_results[[paste0("anova_table_", trait_id)]]) })
-            output[[paste0("crd_dmrt_", trait_id)]] <- renderPrint({ cat(crd_results[[paste0("dmrt_text_", trait_id)]]) })
-            output[[paste0("crd_missing_", trait_id)]] <- DT::renderDataTable({ req(crd_results[[paste0("missing_combinations_", trait_id)]]) })
-          })
-        }
-      })
+                }
+              } else { dmrt_str <- "\nagricolae package not available. DMRT not run.\n" }
+            } else { anova_str <- "ANOVA failed."; anova_df <- data.frame(Message = anova_str) }
+          }
+          full_grid <- expand.grid(lapply(df[factor_cols], function(x) levels(x))); actual <- df[, factor_cols, drop = FALSE] %>% distinct()
+          missing <- dplyr::anti_join(full_grid, actual, by = factor_cols)
+          
+          # Assign each result directly to its own slot
+          crd_results[[paste0("anova_table_", trait_id)]] <- anova_df
+          crd_results[[paste0("dmrt_text_", trait_id)]] <- dmrt_str
+          crd_results[[paste0("report_", trait_id)]] <- paste(anova_str, "\n", dmrt_str)
+          crd_results[[paste0("missing_combinations_", trait_id)]] <- missing
+          
+          # --- UI rendering logic ---
+          output[[paste0("crd_anova_", trait_id)]] <- DT::renderDataTable({ req(crd_results[[paste0("anova_table_", trait_id)]]) })
+          output[[paste0("crd_dmrt_", trait_id)]] <- renderPrint({ cat(crd_results[[paste0("dmrt_text_", trait_id)]]) })
+          output[[paste0("crd_missing_", trait_id)]] <- DT::renderDataTable({ req(crd_results[[paste0("missing_combinations_", trait_id)]]) })
+        })
+      }
+      waiter_hide()
       showNotification("ANOVA and Post-Hoc analysis complete.", type = "message")
     })
+    
     
     
     # -------- Block C6: CRD Interaction Plots (DEFINITIVE FIX for reactiveValues) --------
@@ -930,75 +1050,75 @@ analysisServer <- function(id, home_inputs) {
     
     # --- Block E9: Update Analysis 2 Trait Selectors ---
     observe({
-        mod_res <- model_results()
-        if (is.null(mod_res) || length(mod_res) == 0) return(NULL)
-        
-        valid_fixed_results <- purrr::keep(mod_res, ~!is.null(.x$Fixed$blue_table) && is.data.frame(.x$Fixed$blue_table))
-        if(length(valid_fixed_results) == 0) return(NULL)
-
-        traits_with_blues <- names(purrr::keep(valid_fixed_results, ~"BLUE_Combined" %in% names(.x$Fixed$blue_table)))
-        traits_with_locwise_blues <- names(purrr::keep(valid_fixed_results, ~ncol(.x$Fixed$blue_table) > 3))
-
-        updateSelectInput(session, "gge_trait", choices = traits_with_locwise_blues, selected = if (length(traits_with_locwise_blues) > 0) traits_with_locwise_blues[[1]] else NULL)
-        updateCheckboxGroupInput(session, "multi_traits", choices = traits_with_blues, selected = traits_with_blues)
+      mod_res <- model_results()
+      if (is.null(mod_res) || length(mod_res) == 0) return(NULL)
+      
+      valid_fixed_results <- purrr::keep(mod_res, ~!is.null(.x$Fixed$blue_table) && is.data.frame(.x$Fixed$blue_table))
+      if(length(valid_fixed_results) == 0) return(NULL)
+      
+      traits_with_blues <- names(purrr::keep(valid_fixed_results, ~"BLUE_Combined" %in% names(.x$Fixed$blue_table)))
+      traits_with_locwise_blues <- names(purrr::keep(valid_fixed_results, ~ncol(.x$Fixed$blue_table) > 3))
+      
+      updateSelectInput(session, "gge_trait", choices = traits_with_locwise_blues, selected = if (length(traits_with_locwise_blues) > 0) traits_with_locwise_blues[[1]] else NULL)
+      updateCheckboxGroupInput(session, "multi_traits", choices = traits_with_blues, selected = traits_with_blues)
     })
-
+    
     # --- Block E12: Analysis 2 - GGE Biplot ---
     observeEvent(input$run_gge, {
-        req(input$gge_trait, model_results())
-        trait_data <- model_results()[[input$gge_trait]]$Fixed
-        req(trait_data, trait_data$blue_table, is.data.frame(trait_data$blue_table))
-        
-        df_blue <- trait_data$blue_table
-        # This input$entry will come from the ns("entry") in the dynamic sidebar
-        entry_col_name <- make.names(input$entry) 
-        
-        df_gge <- df_blue %>%
-            dplyr::select(gen = all_of(entry_col_name), starts_with("BLUE_")) %>%
-            dplyr::select(-contains("BLUE_Combined"), -contains("SE_Combined")) %>%
-            tidyr::pivot_longer(cols = -gen, names_to = "env", values_to = "resp", names_prefix = "BLUE_")
-
-        tryCatch({
-            gge_model <- metan::gge(df_gge, env = env, gen = gen, resp = resp, scaling = 1)
-            gge_results(gge_model)
-            output$gge_plot_type1 <- renderPlot({ plot(gge_model, type = 3) })
-            output$gge_plot_type2 <- renderPlot({ plot(gge_model, type = 2) })
-            output$gge_plot_type3 <- renderPlot({ plot(gge_model, type = 4) })
-            output$gge_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " GGE Biplot Completed (OK)") })
-            updateTabsetPanel(session, "analysis2_tabs", selected = " GGE Biplot")
-        }, error = function(e) { showModal(modalDialog(title = "GGE Error", paste("Error in GGE analysis:", e$message), easyClose = TRUE)) })
+      req(input$gge_trait, model_results())
+      trait_data <- model_results()[[input$gge_trait]]$Fixed
+      req(trait_data, trait_data$blue_table, is.data.frame(trait_data$blue_table))
+      
+      df_blue <- trait_data$blue_table
+      # This input$entry will come from the ns("entry") in the dynamic sidebar
+      entry_col_name <- make.names(input$entry) 
+      
+      df_gge <- df_blue %>%
+        dplyr::select(gen = all_of(entry_col_name), starts_with("BLUE_")) %>%
+        dplyr::select(-contains("BLUE_Combined"), -contains("SE_Combined")) %>%
+        tidyr::pivot_longer(cols = -gen, names_to = "env", values_to = "resp", names_prefix = "BLUE_")
+      
+      tryCatch({
+        gge_model <- metan::gge(df_gge, env = env, gen = gen, resp = resp, scaling = 1)
+        gge_results(gge_model)
+        output$gge_plot_type1 <- renderPlot({ plot(gge_model, type = 3) })
+        output$gge_plot_type2 <- renderPlot({ plot(gge_model, type = 2) })
+        output$gge_plot_type3 <- renderPlot({ plot(gge_model, type = 4) })
+        output$gge_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " GGE Biplot Completed (OK)") })
+        updateTabsetPanel(session, "analysis2_tabs", selected = " GGE Biplot")
+      }, error = function(e) { showModal(modalDialog(title = "GGE Error", paste("Error in GGE analysis:", e$message), easyClose = TRUE)) })
     })
-
+    
     # --- Block E13: Analysis 2 - PCA ---
     observeEvent(input$run_pca, {
-        req(model_results(), input$multi_traits)
-        entry_col_name <- make.names(input$entry)
-        
-        trait_df_list <- purrr::map(input$multi_traits, function(trait) {
-            res <- model_results()[[trait]]$Fixed
-            if (!is.null(res) && !is.null(res$blue_table) && "BLUE_Combined" %in% names(res$blue_table)) {
-                res$blue_table %>% dplyr::select(all_of(entry_col_name), !!sym(trait) := BLUE_Combined)
-            } else { NULL }
-        }) %>% purrr::discard(is.null)
-        
-        if (length(trait_df_list) < 2) { showModal(modalDialog(title = "Insufficient Data", "PCA requires at least two traits with valid Combined BLUEs.", easyClose = TRUE)); return() }
-        
-        df_pca <- trait_df_list %>% purrr::reduce(full_join, by = entry_col_name)
-        df_pca_numeric <- df_pca[, -1, drop = FALSE]
-        rownames(df_pca_numeric) <- df_pca[[1]]
-        
-        tryCatch({
-            res.pca <- FactoMineR::PCA(df_pca_numeric, graph = FALSE, ncp = 5)
-            pca_results(list(pca = res.pca))
-            output$pca_plot_biplot <- renderPlot({ fviz_pca_ind(res.pca, col.ind = "cos2", gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE) })
-            output$pca_plot_scree <- renderPlot({ fviz_screeplot(res.pca, addlabels = TRUE) })
-            output$pca_plot_varcontrib <- renderPlot({ fviz_pca_var(res.pca, col.var = "contrib", gradient.cols = c("white", "blue", "red")) })
-            output$pca_table_summary <- renderTable({ round(factoextra::get_eigenvalue(res.pca), 2) }, rownames = TRUE)
-            output$pca_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " PCA Completed (OK)") })
-            updateTabsetPanel(session, "analysis2_tabs", selected = " PCA Plot")
-        }, error = function(e) { showModal(modalDialog(title = "PCA Error", paste("Error in PCA analysis:", e$message), easyClose = TRUE)) })
+      req(model_results(), input$multi_traits)
+      entry_col_name <- make.names(input$entry)
+      
+      trait_df_list <- purrr::map(input$multi_traits, function(trait) {
+        res <- model_results()[[trait]]$Fixed
+        if (!is.null(res) && !is.null(res$blue_table) && "BLUE_Combined" %in% names(res$blue_table)) {
+          res$blue_table %>% dplyr::select(all_of(entry_col_name), !!sym(trait) := BLUE_Combined)
+        } else { NULL }
+      }) %>% purrr::discard(is.null)
+      
+      if (length(trait_df_list) < 2) { showModal(modalDialog(title = "Insufficient Data", "PCA requires at least two traits with valid Combined BLUEs.", easyClose = TRUE)); return() }
+      
+      df_pca <- trait_df_list %>% purrr::reduce(full_join, by = entry_col_name)
+      df_pca_numeric <- df_pca[, -1, drop = FALSE]
+      rownames(df_pca_numeric) <- df_pca[[1]]
+      
+      tryCatch({
+        res.pca <- FactoMineR::PCA(df_pca_numeric, graph = FALSE, ncp = 5)
+        pca_results(list(pca = res.pca))
+        output$pca_plot_biplot <- renderPlot({ fviz_pca_ind(res.pca, col.ind = "cos2", gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), repel = TRUE) })
+        output$pca_plot_scree <- renderPlot({ fviz_screeplot(res.pca, addlabels = TRUE) })
+        output$pca_plot_varcontrib <- renderPlot({ fviz_pca_var(res.pca, col.var = "contrib", gradient.cols = c("white", "blue", "red")) })
+        output$pca_table_summary <- renderTable({ round(factoextra::get_eigenvalue(res.pca), 2) }, rownames = TRUE)
+        output$pca_status <- renderUI({ span(style = "color: green; font-weight: bold;", icon("check"), " PCA Completed (OK)") })
+        updateTabsetPanel(session, "analysis2_tabs", selected = " PCA Plot")
+      }, error = function(e) { showModal(modalDialog(title = "PCA Error", paste("Error in PCA analysis:", e$message), easyClose = TRUE)) })
     })
-
+    
     # --- Block E14: Analysis 2 - Correlation ---
     observeEvent(input$run_corr, {
       req(pca_results())
@@ -1194,6 +1314,7 @@ analysisServer <- function(id, home_inputs) {
     )
     
     
+    
     # -------- Block D3: Download Handler - Analysis 2 ZIP (FINAL CORRECTED) --------
     output$download_analysis2 <- downloadHandler(
       filename = function() paste0("PbAT_Analysis2_Results_", Sys.Date(), ".zip"),
@@ -1253,6 +1374,5 @@ analysisServer <- function(id, home_inputs) {
       },
       contentType = "application/zip"
     )
-
-  })
-}
+    
+  }
