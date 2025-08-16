@@ -4,6 +4,12 @@
 # ===================================================================
 app_server <- function(input, output, session) {
   
+  # --- Hide the pre-loader once the main UI is ready ---
+  shiny::observe({
+    shiny::req(input$main_navbar) # Waits until the main navbar is rendered
+    waiter::waiter_hide()
+  })
+  
   # --- Call the Home Module Server ---
   home_inputs <- homeServer(id = "home")
   
