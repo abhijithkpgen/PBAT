@@ -41,7 +41,9 @@ run_app <- function(...) {
     options(shiny.autoreload = TRUE)
   }
   
-  # ---- 4) Host/port (useful for Docker too) ----
+  # ---- 4) Host/port (CORRECTED FOR DEPLOYMENT) ----
+  # Use the PORT environment variable provided by Cloud Run.
+  # Default to 8100 for local development if the variable isn't set.
   port <- as.numeric(Sys.getenv("PORT", "8100"))
   opts <- list(host = "0.0.0.0", port = port)
   
