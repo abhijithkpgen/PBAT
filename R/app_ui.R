@@ -1,7 +1,7 @@
 # ===================================================================
 # FINAL INTEGRATED SHINY APPLICATION
 # This app.R file loads all modules and connects them with a custom UI.
-# UPDATE: Correctly implemented the custom loading screen with the PBAT logo.
+# UPDATE: Added a custom loading screen with the PBAT logo.
 # ===================================================================
 
 # ===================================================================
@@ -24,7 +24,7 @@ app_ui <- function() {
     header = tagList(
       useShinyjs(),
       waiter::use_waiter(),
-      # --- CORRECTED: Custom loading screen using a direct HTML tag ---
+      # --- Custom loading screen with logo and orange background ---
       waiter::waiter_show_on_load(
         html = tagList(
           tags$div(
@@ -33,7 +33,7 @@ app_ui <- function() {
             spin_fading_circles()
           )
         ),
-        color = "#e17055" # Background color matching the navbar
+        color = "#F5D7B3" # Light orange background
       ),
       tags$head(tags$style(HTML("
       body {
