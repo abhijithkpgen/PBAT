@@ -29,7 +29,7 @@
 #' @importFrom factoextra fviz_ca_biplot fviz_cos2 fviz_pca_biplot fviz_pca_ind fviz_pca_var fviz_screeplot hcut get_eigenvalue
 #' @importFrom PerformanceAnalytics chart.Correlation
 #' @importFrom semPlot semPaths
-#' @importFrom ggplot2 aes element_text facet_wrap geom_boxplot geom_line geom_point ggplot labs scale_fill_brewer theme theme_bw theme_minimal
+#' @importFrom ggplot2 aes element_text facet_wrap geom_boxplot geom_line geom_point ggplot labs scale_fill_brewer stat_qq stat_qq_line theme theme_bw theme_minimal
 #'
 # Statistics and Modeling
 #' @import promises
