@@ -1,7 +1,7 @@
 # Use a modern, general-purpose R base image
 FROM rocker/r-ver:4.4.1
 
-# 1. Install system dependencies that common R packages need on Linux
+# 1. Install system dependencies required by R packages
 RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
@@ -15,21 +15,21 @@ RUN apt-get update && apt-get install -y \
 # 2. Install the renv package itself
 RUN R -e "install.packages('renv')"
 
-# 3. Prepare the app directory
+# 3. Prepare the app directory and copy renv files
 WORKDIR /app
-
-# 4. Copy the lockfile. This tells renv what to install.
 COPY renv.lock .
+COPY renv/.Rprofile .
+COPY renv/activate.R .
 
-# 5. Restore all packages from the lockfile. This is the crucial step.
-#    It ensures the exact versions you use locally are installed here.
+# 4. Restore all packages from the lockfile. This is the crucial step.
 RUN R -e "renv::restore()"
 
-# 6. Copy the rest of your application code
+# 5. Copy the rest of your application source code
 COPY . .
 
-# 7. Install your PBAT package itself into the renv library
-RUN R -e "renv::install('.')"
+# 6. Install your PBAT package itself using a standard R command
+#    This is the corrected step.
+RUN R -e "install.packages('.', repos = NULL, type = 'source')"
 
 # Expose the port that Cloud Run will listen on
 EXPOSE 8080
