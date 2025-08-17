@@ -14,20 +14,8 @@ homeUI <- function(id) {
   # UI is now a flex container with three direct children panels
   div(class = "home-container",
       
-      # --- Custom CSS for Panel Backgrounds ---
-      tags$head(tags$style(HTML("
-      .eda-bg { background-color: #511D43 !important; }
-      .stability-bg { background-color: #00879E !important; }
-      .multivariate-bg { background-color: #8E1616 !important; }
-      .mating-bg { background-color: #3D74B6 !important; }
-    "))),
-      
       # --- Panel 1: User Inputs (Left) ---
-      # Add an id to this div to target it for color changes
-      div(id = ns("input-panel"), class = "overlay-panel",
-          # Add this line to enable shinyjs
-          shinyjs::useShinyjs(),
-          
+      div(class = "overlay-panel",
           radioButtons(
             ns("analysis_mode"),
             "Select Analysis Workflow",
@@ -45,7 +33,7 @@ homeUI <- function(id) {
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'stability'"),
             selectInput(
-              ns("stab_subtype"), "Select The Stability Analysis",
+              ns("stab_subtype"), "Select The Stability Analysis?",
               choices = c("AMMI Analysis" = "ammi", "GGE Biplot" = "gge")
             )
           ),
@@ -169,24 +157,6 @@ homeUI <- function(id) {
 #'
 homeServer <- function(id) {
   moduleServer(id, function(input, output, session) {
-    
-    # --- Dynamic Color Change Logic using CSS Classes ---
-    observeEvent(input$analysis_mode, {
-      
-      # First, remove all possible color classes to ensure a clean slate
-      shinyjs::removeClass(id = "input-panel", class = "eda-bg")
-      shinyjs::removeClass(id = "input-panel", class = "stability-bg")
-      shinyjs::removeClass(id = "input-panel", class = "multivariate-bg")
-      shinyjs::removeClass(id = "input-panel", class = "mating-bg")
-      
-      # Now, add the correct class based on the selection
-      selected_class <- paste0(input$analysis_mode, "-bg")
-      shinyjs::addClass(id = "input-panel", class = selected_class)
-      
-    }, ignoreInit = FALSE) # ignoreInit = FALSE makes it run on app start
-    
-    
-    # --- Existing Logic to Proceed to Analysis ---
     results_to_return <- reactiveVal()
     observeEvent(input$go_to_analysis, {
       req(input$file)
@@ -202,7 +172,6 @@ homeServer <- function(id) {
       )
       results_to_return(settings)
     })
-    
     return(results_to_return)
   })
 }
