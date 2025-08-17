@@ -25,6 +25,10 @@ analysisUI <- function(id) {
     tabPanel("Analysis 2",
              sidebarLayout(
                sidebarPanel(width = 4,
+                            # --- NEW: Selector for BLUEs vs BLUPs ---
+                            selectInput(ns("analysis2_input_type"), "Select Input for Analysis 2",
+                                        choices = c("BLUEs (Fixed Model)" = "blue", "BLUPs (Random Model)" = "blup")),
+                            hr(),
                             selectInput(ns("gge_trait"), "Trait for GGE Biplot", choices = NULL),
                             actionButton(ns("run_gge"), "Run GGE Biplot", class = "btn btn-success"),
                             uiOutput(ns("gge_status")),
@@ -690,12 +694,12 @@ analysisServer <- function(id, home_inputs) {
                                             create_explanation_ui(paste0("model_exp_", tid_prefix), model_explanation_content("Fixed", active_design(), input$trial_type)), 
                                             hr(),
                                             uiOutput(ns(paste0("singularity_warning_", tid_prefix))),
-                                            h4("1. ANOVA Table (Genotype Only)"), DT::dataTableOutput(ns(paste0("anova_", tid_prefix))),
+                                            h4("1. ANOVA Table (Genotype Only)"), div(style = "overflow-x: auto;", tableOutput(ns(paste0("anova_", tid_prefix)))),
                                             uiOutput(ns(paste0("anova_interp_", tid_prefix))),
-                                            h4("2. Likelihood Ratio Test (LRT)"), create_explanation_ui(paste0("lrt_exp_", tid_prefix), lrt_explanation_content), DT::dataTableOutput(ns(paste0("lrt_", tid_prefix))),
+                                            h4("2. Likelihood Ratio Test (LRT)"), create_explanation_ui(paste0("lrt_exp_", tid_prefix), lrt_explanation_content), div(style = "overflow-x: auto;", tableOutput(ns(paste0("lrt_", tid_prefix)))),
                                             uiOutput(ns(paste0("lrt_interp_", tid_prefix))), 
-                                            h4("3. Variance Components"), DT::dataTableOutput(ns(paste0("varcomp_", tid_prefix))),
-                                            h4("4. Best Linear Unbiased Estimates (BLUEs)"), DT::dataTableOutput(ns(paste0("blues_", tid_prefix)))
+                                            h4("3. Variance Components"), div(style = "overflow-x: auto;", tableOutput(ns(paste0("varcomp_", tid_prefix)))),
+                                            h4("4. Best Linear Unbiased Estimates (BLUEs)"), div(style = "overflow-x: auto;", tableOutput(ns(paste0("blues_", tid_prefix))))
           )
         }
         if (!is.null(trait_content$Random)) {
@@ -705,10 +709,10 @@ analysisServer <- function(id, home_inputs) {
                                              create_explanation_ui(paste0("model_exp_", tid_prefix), model_explanation_content("Random", active_design(), input$trial_type)), 
                                              hr(),
                                              uiOutput(ns(paste0("singularity_warning_", tid_prefix))),
-                                             h4("1. Likelihood Ratio Test (LRT)"), create_explanation_ui(paste0("lrt_exp_", tid_prefix), lrt_explanation_content), DT::dataTableOutput(ns(paste0("lrt_", tid_prefix))),
+                                             h4("1. Likelihood Ratio Test (LRT)"), create_explanation_ui(paste0("lrt_exp_", tid_prefix), lrt_explanation_content), div(style = "overflow-x: auto;", tableOutput(ns(paste0("lrt_", tid_prefix)))),
                                              uiOutput(ns(paste0("lrt_interp_", tid_prefix))),
-                                             h4("2. Variance Components"), DT::dataTableOutput(ns(paste0("varcomp_", tid_prefix))),
-                                             h4("3. Best Linear Unbiased Predictors (BLUPs)"), DT::dataTableOutput(ns(paste0("blups_", tid_prefix)))
+                                             h4("2. Variance Components"), div(style = "overflow-x: auto;", tableOutput(ns(paste0("varcomp_", tid_prefix)))),
+                                             h4("3. Best Linear Unbiased Predictors (BLUPs)"), div(style = "overflow-x: auto;", tableOutput(ns(paste0("blups_", tid_prefix))))
           )
         }
         tabPanel(title = trait_name, do.call(tabsetPanel, unname(model_type_tabs)))
@@ -734,10 +738,10 @@ analysisServer <- function(id, home_inputs) {
             output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$lrt_interpretation) })
             output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$equation_latex); p(trait_content$Fixed$equation_latex) })
             output[[paste0("singularity_warning_", tid_prefix)]] <- renderUI({ if(!is.null(trait_content$Fixed$is_singular) && trait_content$Fixed$is_singular) { tags$div(class = "alert alert-warning", trait_content$Fixed$singularity_message) } })
-            output[[paste0("anova_", tid_prefix)]] <- DT::renderDataTable(trait_content$Fixed$anova_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-            output[[paste0("lrt_", tid_prefix)]] <- DT::renderDataTable(trait_content$Fixed$lrt_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-            output[[paste0("varcomp_", tid_prefix)]] <- DT::renderDataTable(trait_content$Fixed$var_comps, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-            output[[paste0("blues_", tid_prefix)]] <- DT::renderDataTable(trait_content$Fixed$blue_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 10))
+            output[[paste0("anova_", tid_prefix)]] <- renderTable(trait_content$Fixed$anova_table, rownames = FALSE)
+            output[[paste0("lrt_", tid_prefix)]] <- renderTable(trait_content$Fixed$lrt_table, rownames = FALSE)
+            output[[paste0("varcomp_", tid_prefix)]] <- renderTable(trait_content$Fixed$var_comps, rownames = FALSE)
+            output[[paste0("blues_", tid_prefix)]] <- renderTable(trait_content$Fixed$blue_table, rownames = FALSE)
           })
         }
         if (!is.null(trait_content$Random)) {
@@ -757,9 +761,9 @@ analysisServer <- function(id, home_inputs) {
             output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Random$equation_latex); p(trait_content$Random$equation_latex) })
             output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Random$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Random$lrt_interpretation) })
             output[[paste0("singularity_warning_", tid_prefix)]] <- renderUI({ if(!is.null(trait_content$Random$is_singular) && trait_content$Random$is_singular) { tags$div(class = "alert alert-warning", trait_content$Random$singularity_message) } })
-            output[[paste0("lrt_", tid_prefix)]] <- DT::renderDataTable(trait_content$Random$lrt_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-            output[[paste0("varcomp_", tid_prefix)]] <- DT::renderDataTable(trait_content$Random$var_comps, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 5))
-            output[[paste0("blups_", tid_prefix)]] <- DT::renderDataTable(trait_content$Random$blup_table, rownames = FALSE, options = list(scrollX = TRUE, pageLength = 10))
+            output[[paste0("lrt_", tid_prefix)]] <- renderTable(trait_content$Random$lrt_table, rownames = FALSE)
+            output[[paste0("varcomp_", tid_prefix)]] <- renderTable(trait_content$Random$var_comps, rownames = FALSE)
+            output[[paste0("blups_", tid_prefix)]] <- renderTable(trait_content$Random$blup_table, rownames = FALSE)
           })
         }
       })
@@ -1006,35 +1010,52 @@ analysisServer <- function(id, home_inputs) {
     # --- Block E9: Update Analysis 2 Trait Selectors ---
     observe({
       mod_res <- model_results()
-      if (is.null(mod_res) || length(mod_res) == 0) return(NULL)
+      req(mod_res, input$analysis2_input_type) # Depend on the new selector
       
-      valid_fixed_results <- purrr::keep(mod_res, ~!is.null(.x$Fixed$blue_table) && is.data.frame(.x$Fixed$blue_table))
-      if(length(valid_fixed_results) == 0) return(NULL)
+      if (input$analysis2_input_type == "blue") {
+        # Logic for BLUEs
+        valid_results <- purrr::keep(mod_res, ~!is.null(.x$Fixed$blue_table) && is.data.frame(.x$Fixed$blue_table))
+        if(length(valid_results) == 0) return(NULL)
+        
+        traits_combined <- names(purrr::keep(valid_results, ~"BLUE_Combined" %in% names(.x$Fixed$blue_table)))
+        traits_locwise <- names(purrr::keep(valid_results, ~any(startsWith(names(.x$Fixed$blue_table), "BLUE_")) && ncol(.x$Fixed$blue_table) > 3))
+        
+      } else { # "blup"
+        # Logic for BLUPs
+        valid_results <- purrr::keep(mod_res, ~!is.null(.x$Random$blup_table) && is.data.frame(.x$Random$blup_table))
+        if(length(valid_results) == 0) return(NULL)
+        
+        traits_combined <- names(purrr::keep(valid_results, ~"BLUP_Combined" %in% names(.x$Random$blup_table)))
+        traits_locwise <- names(purrr::keep(valid_results, ~any(startsWith(names(.x$Random$blup_table), "BLUP_")) && ncol(.x$Random$blup_table) > 2))
+      }
       
-      traits_with_blues <- names(purrr::keep(valid_fixed_results, ~"BLUE_Combined" %in% names(.x$Fixed$blue_table)))
-      traits_with_locwise_blues <- names(purrr::keep(valid_fixed_results, ~ncol(.x$Fixed$blue_table) > 3))
-      
-      updateSelectInput(session, "gge_trait", choices = traits_with_locwise_blues, selected = if (length(traits_with_locwise_blues) > 0) traits_with_locwise_blues[[1]] else NULL)
-      updateCheckboxGroupInput(session, "multi_traits", choices = traits_with_blues, selected = traits_with_blues)
+      updateSelectInput(session, "gge_trait", choices = traits_locwise, selected = if (length(traits_locwise) > 0) traits_locwise[[1]] else NULL)
+      updateCheckboxGroupInput(session, "multi_traits", choices = traits_combined, selected = traits_combined)
     })
     
     # --- Block E12: Analysis 2 - GGE Biplot ---
     observeEvent(input$run_gge, {
-      req(input$gge_trait, model_results())
-      trait_data <- model_results()[[input$gge_trait]]$Fixed
-      req(trait_data, trait_data$blue_table, is.data.frame(trait_data$blue_table))
+      req(input$gge_trait, model_results(), input$analysis2_input_type)
       
-      df_blue <- trait_data$blue_table
-      # This input$entry will come from the ns("entry") in the dynamic sidebar
-      entry_col_name <- make.names(input$entry) 
-      
-      df_gge <- df_blue %>%
-        dplyr::select(gen = all_of(entry_col_name), starts_with("BLUE_")) %>%
-        dplyr::select(-contains("BLUE_Combined"), -contains("SE_Combined")) %>%
-        tidyr::pivot_longer(cols = -gen, names_to = "env", values_to = "resp", names_prefix = "BLUE_")
+      # --- ADAPTED: Select data based on input type ---
+      if (input$analysis2_input_type == "blue") {
+        trait_data <- model_results()[[input$gge_trait]]$Fixed
+        req(trait_data, trait_data$blue_table, is.data.frame(trait_data$blue_table))
+        df_long <- trait_data$blue_table %>%
+          dplyr::select(gen = all_of(make.names(input$entry)), starts_with("BLUE_")) %>%
+          dplyr::select(-contains("BLUE_Combined"), -contains("SE_Combined")) %>%
+          tidyr::pivot_longer(cols = -gen, names_to = "env", values_to = "resp", names_prefix = "BLUE_")
+      } else { # blup
+        trait_data <- model_results()[[input$gge_trait]]$Random
+        req(trait_data, trait_data$blup_table, is.data.frame(trait_data$blup_table))
+        df_long <- trait_data$blup_table %>%
+          dplyr::select(gen = all_of(make.names(input$entry)), starts_with("BLUP_")) %>%
+          dplyr::select(-contains("BLUP_Combined")) %>%
+          tidyr::pivot_longer(cols = -gen, names_to = "env", values_to = "resp", names_prefix = "BLUP_")
+      }
       
       tryCatch({
-        gge_model <- metan::gge(df_gge, env = env, gen = gen, resp = resp, scaling = 1)
+        gge_model <- metan::gge(df_long, env = env, gen = gen, resp = resp, scaling = 1)
         gge_results(gge_model)
         output$gge_plot_type1 <- renderPlot({ plot(gge_model, type = 3) })
         output$gge_plot_type2 <- renderPlot({ plot(gge_model, type = 2) })
@@ -1046,17 +1067,25 @@ analysisServer <- function(id, home_inputs) {
     
     # --- Block E13: Analysis 2 - PCA ---
     observeEvent(input$run_pca, {
-      req(model_results(), input$multi_traits)
+      req(model_results(), input$multi_traits, input$analysis2_input_type)
       entry_col_name <- make.names(input$entry)
       
+      # --- ADAPTED: Select data based on input type ---
       trait_df_list <- purrr::map(input$multi_traits, function(trait) {
-        res <- model_results()[[trait]]$Fixed
-        if (!is.null(res) && !is.null(res$blue_table) && "BLUE_Combined" %in% names(res$blue_table)) {
-          res$blue_table %>% dplyr::select(all_of(entry_col_name), !!sym(trait) := BLUE_Combined)
-        } else { NULL }
+        if (input$analysis2_input_type == "blue") {
+          res <- model_results()[[trait]]$Fixed
+          if (!is.null(res) && !is.null(res$blue_table) && "BLUE_Combined" %in% names(res$blue_table)) {
+            res$blue_table %>% dplyr::select(all_of(entry_col_name), !!sym(trait) := BLUE_Combined)
+          } else { NULL }
+        } else { # blup
+          res <- model_results()[[trait]]$Random
+          if (!is.null(res) && !is.null(res$blup_table) && "BLUP_Combined" %in% names(res$blup_table)) {
+            res$blup_table %>% dplyr::select(all_of(entry_col_name), !!sym(trait) := BLUP_Combined)
+          } else { NULL }
+        }
       }) %>% purrr::discard(is.null)
       
-      if (length(trait_df_list) < 2) { showModal(modalDialog(title = "Insufficient Data", "PCA requires at least two traits with valid Combined BLUEs.", easyClose = TRUE)); return() }
+      if (length(trait_df_list) < 2) { showModal(modalDialog(title = "Insufficient Data", "PCA requires at least two traits with valid Combined values.", easyClose = TRUE)); return() }
       
       df_pca <- trait_df_list %>% purrr::reduce(full_join, by = entry_col_name)
       df_pca_numeric <- df_pca[, -1, drop = FALSE]
