@@ -1,13 +1,11 @@
 # multivariate_analysis_module.R
 #
-# This file contains the complete UI and Server logic for the Multivariate Analysis module.
-# FINAL CORRECTION: Implemented the dual-model approach for AMMI analysis and corrected
-# the object references for plot_scores() and ammi_indexes() to resolve all errors.
+# This file contains the UI and Server logic for the updated Multivariate Analysis module.
+# AMMI and GGE analyses have been moved to the new Stability Analysis module.
 
 # Required Libraries
 library(shiny)
 library(dplyr)
-library(metan)
 library(FactoMineR)
 library(factoextra)
 library(corrplot)
@@ -44,8 +42,6 @@ multivariate_analysis_server <- function(id, shared_data) {
     ns <- session$ns
     
     # --- Reactive Values to store results ---
-    ammi_results <- reactiveVal(NULL)
-    gge_results  <- reactiveVal(NULL)
     pca_results  <- reactiveVal(NULL)
     path_results <- reactiveVal(NULL)
     corr_data    <- reactiveVal(NULL)
@@ -60,45 +56,13 @@ multivariate_analysis_server <- function(id, shared_data) {
       
       df <- multi_file_data()
       choices_numeric <- names(df)[sapply(df, is.numeric)]
-      choices_all <- names(df)
       
       step_block <- function(label, ...) {
         tags$div(tags$b(label), br(), ..., style = "margin-bottom: 20px;")
       }
       
       div(style = "color: #142850; font-size: 15px;",
-          if (multi_subtype_selected() == "ammi") {
-            tagList(
-              step_block("Step 1: Select Columns for AMMI",
-                         selectInput(ns("multi_ammi_genotype"), "Genotype Column", choices = choices_all),
-                         selectInput(ns("multi_ammi_location"), "Location Column", choices = choices_all),
-                         selectInput(ns("multi_ammi_rep"), "Replication Column", choices = choices_all)
-              ),
-              step_block("Step 2: Select Trait",
-                         selectInput(ns("multi_ammi_trait"), "Trait", choices = choices_numeric)
-              ),
-              step_block("Step 3: Run and Download",
-                         actionButton(ns("multi_run_ammi"), "Run AMMI Analysis", class = "btn btn-success"),
-                         uiOutput(ns("multi_ammi_status")), br(),
-                         downloadButton(ns("multi_download"), "Download Results (ZIP)", class = "btn btn-primary")
-              )
-            )
-          } else if (multi_subtype_selected() == "gge") {
-            tagList(
-              step_block("Step 1: Select Genotype & Location Columns",
-                         selectInput(ns("multi_gge_genotype"), "Genotype Column", choices = choices_all),
-                         selectInput(ns("multi_gge_location"), "Location Column", choices = choices_all)
-              ),
-              step_block("Step 2: Select Trait for GGE",
-                         selectInput(ns("multi_gge_trait"), "Trait", choices = choices_numeric)
-              ),
-              step_block("Step 3: Run and Download",
-                         actionButton(ns("multi_run_gge"), "Run GGE Biplot", class = "btn btn-success"),
-                         uiOutput(ns("multi_gge_status")), br(),
-                         downloadButton(ns("multi_download"), "Download Results (ZIP)", class = "btn btn-primary")
-              )
-            )
-          } else if (multi_subtype_selected() == "pca") {
+          if (multi_subtype_selected() == "pca") {
             tagList(
               step_block("Step 1: Select Traits for PCA",
                          checkboxGroupInput(ns("multi_pca_traits"), "Traits for PCA", choices = choices_numeric)
@@ -141,20 +105,7 @@ multivariate_analysis_server <- function(id, shared_data) {
     # --- Dynamic Main Panel UI ---
     output$multi_mainpanel <- renderUI({
       req(multi_subtype_selected())
-      if (multi_subtype_selected() == "ammi") {
-        tabsetPanel(
-          tabPanel("AMMI ANOVA", verbatimTextOutput(ns("multi_ammi_anova"))),
-          tabPanel("AMMI Biplot", plotOutput(ns("multi_ammi_biplot"))),
-          tabPanel("Yield Stability Plot (WAASB)", plotOutput(ns("multi_ammi_waasb"))),
-          tabPanel("AMMI Stability Ranks", DT::dataTableOutput(ns("multi_ammi_ranks")))
-        )
-      } else if (multi_subtype_selected() == "gge") {
-        tabsetPanel(
-          tabPanel("Which Won Where", plotOutput(ns("multi_gge_plot_type1"))),
-          tabPanel("Mean vs Stability", plotOutput(ns("multi_gge_plot_type2"))),
-          tabPanel("Representativeness vs Discriminativeness", plotOutput(ns("multi_gge_plot_type3")))
-        )
-      } else if (multi_subtype_selected() == "pca") {
+      if (multi_subtype_selected() == "pca") {
         tabsetPanel(
           tabPanel("Individual Biplot", plotOutput(ns("multi_pca_biplot"))),
           tabPanel("Scree Plot", plotOutput(ns("multi_pca_scree"))),
@@ -185,91 +136,6 @@ multivariate_analysis_server <- function(id, shared_data) {
     })
     
     # --- Analysis Logic ---
-    
-    # AMMI Analysis
-    observeEvent(input$multi_run_ammi, {
-      req(multi_file_data(), input$multi_ammi_genotype, input$multi_ammi_location,
-          input$multi_ammi_rep, input$multi_ammi_trait)
-      
-      df <- multi_file_data()
-      df_ammi <- df %>%
-        dplyr::select(
-          gen  = all_of(input$multi_ammi_genotype),
-          env  = all_of(input$multi_ammi_location),
-          rep  = all_of(input$multi_ammi_rep),
-          resp = all_of(input$multi_ammi_trait)
-        ) %>% na.omit()
-      
-      tryCatch({
-        # 1) AMMI model (for ANOVA + AMMI biplots)
-        ammi_fit  <- metan::performs_ammi(df_ammi, env = env, gen = gen, rep = rep, resp = resp, verbose = FALSE)
-        
-        # 2) WAASB/BLUP model (for WAASB plot)
-        waasb_fit <- metan::waasb(df_ammi, gen, env, rep, resp, verbose = FALSE)
-        
-        ammi_results(list(ammi = ammi_fit, waasb = waasb_fit))
-        
-        # AMMI ANOVA table
-        output$multi_ammi_anova <- renderPrint({
-          ammi_fit[[1]]$ANOVA
-        })
-        
-        # AMMI biplot (PC1 vs PC2)
-        output$multi_ammi_biplot <- renderPlot({
-          metan::plot_scores(ammi_fit, type = 2)
-        })
-        
-        # WAASB plot (mean vs WAASB)
-        output$multi_ammi_waasb <- renderPlot({
-          plot(waasb_fit)
-        })
-        
-        # AMMI stability ranks (simplified)
-        output$multi_ammi_ranks <- DT::renderDataTable({
-          stab_list <- metan::ammi_indexes(ammi_fit)
-          stab_tbl  <- stab_list[[1]]
-          
-          preferred <- c("GEN","Y","Y_R", "ASV","ASV_R","ssiASV", "SIPC","SIPC_R","ssiSIPC",
-                         "EV","EV_R","ssiEV", "Za","Za_R","ssiZa", "ASTAB","ASTAB_R","ssiASTAB",
-                         "ASI","WAASY","WAASB")
-          
-          if (any(grepl("^ssi", names(stab_tbl)))) {
-            stab_tbl <- dplyr::select(stab_tbl, dplyr::any_of(preferred), dplyr::matches("^ssi"))
-          } else {
-            stab_tbl <- dplyr::select(stab_tbl, dplyr::any_of(preferred))
-          }
-          DT::datatable(stab_tbl, options = list(scrollX = TRUE))
-        })
-        
-        output$multi_ammi_status <- renderUI({
-          span(style = "color: green;", icon("check"), " AMMI Completed")
-        })
-      }, error = function(e) {
-        showModal(modalDialog(title = "AMMI Error", e$message))
-      })
-    })
-    
-    # GGE Biplot
-    observeEvent(input$multi_run_gge, {
-      req(multi_file_data(), input$multi_gge_genotype, input$multi_gge_location, input$multi_gge_trait)
-      df <- multi_file_data()
-      df_gge <- df %>%
-        dplyr::select(gen = all_of(input$multi_gge_genotype),
-                      env = all_of(input$multi_gge_location),
-                      resp = all_of(input$multi_gge_trait)) %>%
-        dplyr::filter(!is.na(resp))
-      
-      tryCatch({
-        gge_model <- metan::gge(df_gge, env = env, gen = gen, resp = resp, scaling = "sd")
-        gge_results(gge_model)
-        output$multi_gge_plot_type1 <- renderPlot({ plot(gge_model, type = 3) })
-        output$multi_gge_plot_type2 <- renderPlot({ plot(gge_model, type = 2) })
-        output$multi_gge_plot_type3 <- renderPlot({ plot(gge_model, type = 4) })
-        output$multi_gge_status <- renderUI({ span(style = "color: green;", icon("check"), " GGE Completed") })
-      }, error = function(e) {
-        showModal(modalDialog(title = "GGE Error", e$message))
-      })
-    })
     
     # PCA
     observeEvent(input$multi_run_pca, {
@@ -358,31 +224,6 @@ multivariate_analysis_server <- function(id, shared_data) {
       content = function(file) {
         tmp_dir <- tempdir()
         files <- c()
-        
-        # Save AMMI results
-        if (multi_subtype_selected() == "ammi" && !is.null(ammi_results())) {
-          res <- ammi_results()
-          capture.output(res$ammi[[1]]$ANOVA, file = file.path(tmp_dir, "AMMI_ANOVA.txt"))
-          
-          stab_list <- metan::ammi_indexes(res$ammi)
-          stab_tbl  <- stab_list[[1]]
-          write.csv(stab_tbl, file.path(tmp_dir, "AMMI_Stability_Ranks_Full.csv"), row.names = FALSE)
-          
-          pdf(file.path(tmp_dir, "AMMI_Biplot.pdf")); print(plot_scores(res$ammi, type = 2)); dev.off()
-          pdf(file.path(tmp_dir, "AMMI_WAASB_Plot.pdf")); print(plot(res$waasb)); dev.off()
-          
-          files <- c(files, file.path(tmp_dir, "AMMI_ANOVA.txt"), file.path(tmp_dir, "AMMI_Stability_Ranks_Full.csv"), 
-                     file.path(tmp_dir, "AMMI_Biplot.pdf"), file.path(tmp_dir, "AMMI_WAASB_Plot.pdf"))
-        }
-        
-        # Save GGE results
-        if (multi_subtype_selected() == "gge" && !is.null(gge_results())) {
-          for (i in c(2, 3, 4)) {
-            p_file <- file.path(tmp_dir, paste0("GGE_Plot_Type", i, ".pdf"))
-            pdf(p_file, width = 7, height = 6); print(plot(gge_results(), type = i)); dev.off()
-            files <- c(files, p_file)
-          }
-        }
         
         # Save PCA results
         if (multi_subtype_selected() == "pca" && !is.null(pca_results()$pca)) {

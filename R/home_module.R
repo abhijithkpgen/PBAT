@@ -18,35 +18,45 @@ homeUI <- function(id) {
       div(class = "overlay-panel",
           radioButtons(
             ns("analysis_mode"),
-            "Select Analysis Type",
+            "Select Analysis Workflow",
             choices = c(
-              "Experimental Design " = "eda",
-              "Multivariate Analysis (PCA / GGE / Correlation / Path)" = "multivariate",
-              "Mating Design " = "mating"
+              "Experimental Design" = "eda",
+              "Stability Analysis" = "stability",
+              "Multivariate Analysis" = "multivariate",
+              "Mating Design" = "mating"
             ),
             selected = "eda"
           ),
-          div(class = "compact-row",
-              div(class = "half-width", textInput(ns("user_name"), "Name")),
-              div(class = "half-width", textInput(ns("user_email"), "Email"))
-          ),
-          textInput(ns("user_institute"), "Institute / Organization"),
           fileInput(ns("file"), "Upload CSV File", accept = c("text/csv", ".csv")),
           
+          # --- Conditional UI for Stability Analysis ---
+          conditionalPanel(
+            condition = paste0("input['", ns("analysis_mode"), "'] == 'stability'"),
+            selectInput(
+              ns("stab_subtype"), "Which Stability Analysis?",
+              choices = c("AMMI Analysis" = "ammi", "GGE Biplot" = "gge")
+            )
+          ),
+          
+          # --- Conditional UI for Multivariate Analysis (Updated) ---
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'multivariate'"),
             selectInput(
               ns("multi_subtype"), "Which Multivariate Analysis?",
-              choices = c("AMMI Analysis" = "ammi", "GGE Biplot" = "gge", 
-                          "Principal Component Analysis (PCA)" = "pca", "Correlation Analysis" = "correlation", 
+              choices = c("Principal Component Analysis (PCA)" = "pca", 
+                          "Correlation Analysis" = "correlation", 
                           "Path Analysis" = "path")
             )
           ),
+          
+          # --- Conditional UI for Experimental Design ---
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'eda'"),
             selectInput(ns("design"), "Experimental Design",
                         choices = c("Alpha Lattice", "RCBD", "CRD", "Augmented RCBD"))
           ),
+          
+          # --- Conditional UI for Mating Design ---
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'mating'"),
             selectInput(
@@ -65,8 +75,8 @@ homeUI <- function(id) {
           br(),br(),
           tags$div(style = "font-size: 11px; text-align: center;",
                    HTML("Developed by <b>Dr. Abhijith K P</b><br>
-              Scientist (Genetics and Plant Breeding), ICAR-IARI Assam<br>
-              <a href='mailto:abhijithkpgen@gmail.com'>abhijithkpgen@gmail.com</a>"),
+             Scientist (Genetics and Plant Breeding), ICAR-IARI Assam<br>
+             <a href='mailto:abhijithkpgen@gmail.com'>abhijithkpgen@gmail.com</a>"),
                    br(), br(),
                    tags$div(
                      class = "custom-footer",
@@ -85,7 +95,8 @@ homeUI <- function(id) {
             tags$li(tags$b("Map Data Columns:"), " Assign the appropriate columns to enable correct analysis."),
             tags$li(tags$b("Run Analysis:"), tags$ul(
               tags$li(tags$b("Experimental Designs:"), " Generate summary statistics, ANOVA, BLUEs/BLUPs, diagnostics, and post-hoc tests."),
-              tags$li(tags$b("Multivariate Analysis:"), " Perform PCA, GGE biplot, correlation, and path analysis."),
+              tags$li(tags$b("Stability Analysis:"), " Perform AMMI and GGE biplot analysis for GxE interaction."),
+              tags$li(tags$b("Multivariate Analysis:"), " Perform PCA, correlation, and path analysis."),
               tags$li(tags$b("Mating Design Analysis:"), " Analyze Diallel and Line x Tester designs.")
             )),
             tags$li(tags$b("Review & Download Results:"), " Download all results as publication-ready files for reporting or further analysis.")
@@ -113,7 +124,6 @@ homeUI <- function(id) {
                  style = "color: white !important;", 
                  icon("download"), " Download v1.0.4"),
           
-          # --- NEW COLLAPSIBLE SECTION ---
           tags$details(
             tags$summary(icon("terminal"), " Click to view Installation Instructions"),
             tags$pre(
@@ -155,6 +165,7 @@ homeServer <- function(id) {
         file_data = df,
         analysis_mode = input$analysis_mode,
         design = input$design,
+        stab_subtype = input$stab_subtype,
         multi_subtype = input$multi_subtype,
         mating_design = input$md_mating_design,
         trigger = runif(1)

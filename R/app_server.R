@@ -5,20 +5,18 @@
 app_server <- function(input, output, session) {
   
   # --- Hide the pre-loader once the main UI is fully ready ---
-  # This observer waits until the main navbar is rendered, then adds a small
-  # delay before hiding the loading screen. This prevents an "incomplete UI"
-  # flash by giving all initial components time to render.
   observeEvent(input$main_navbar, {
-    shinyjs::delay(500, { # 500 milliseconds = 0.5 second delay
+    shinyjs::delay(500, {
       waiter::waiter_hide()
     })
-  }, once = TRUE) # 'once = TRUE' ensures this only ever runs one time
+  }, once = TRUE)
   
   # --- Call the Home Module Server ---
   home_inputs <- homeServer(id = "home")
   
   # --- Create Reactive Values for each downstream module ---
-  eda_shared_data    <- reactiveVal()
+  eda_shared_data <- reactiveVal()
+  stability_shared_data <- reactiveValues(file_data = NULL, stab_subtype = NULL)
   mating_shared_data <- reactiveValues(file_data = NULL, mating_design = NULL)
   multi_shared_data  <- reactiveValues(file_data = NULL, multi_subtype = NULL)
   
@@ -27,17 +25,19 @@ app_server <- function(input, output, session) {
   # Hide all analysis tabs/menus at startup
   observe({
     hideTab("main_navbar", "Experimental Design")
+    hideTab("main_navbar", "Stability Analysis")
     hideTab("main_navbar", "Mating Design Analysis")
     hideTab("main_navbar", "Multivariate Analysis")
   })
   
-  # Observer to Route Data and Switch Tabs ---
+  # --- Observer to Route Data and Switch Tabs ---
   observeEvent(home_inputs(), {
     req(home_inputs())
     mode <- home_inputs()$analysis_mode
     
     # Hide all analysis tabs first to ensure a clean state
     hideTab("main_navbar", "Experimental Design")
+    hideTab("main_navbar", "Stability Analysis")
     hideTab("main_navbar", "Mating Design Analysis")
     hideTab("main_navbar", "Multivariate Analysis")
     
@@ -46,6 +46,11 @@ app_server <- function(input, output, session) {
       eda_shared_data(home_inputs())
       showTab("main_navbar", "Experimental Design")
       updateNavbarPage(session, "main_navbar", selected = "Analysis 1")
+    } else if (mode == "stability") {
+      stability_shared_data$file_data <- home_inputs()$file_data
+      stability_shared_data$stab_subtype <- home_inputs()$stab_subtype
+      showTab("main_navbar", "Stability Analysis")
+      updateNavbarPage(session, "main_navbar", selected = "Stability Analysis")
     } else if (mode == "mating") {
       mating_shared_data$file_data <- home_inputs()$file_data
       mating_shared_data$mating_design <- home_inputs()$mating_design
@@ -61,6 +66,7 @@ app_server <- function(input, output, session) {
   
   # --- Call the Server Logic for each Analysis Module ---
   analysisServer(id = "eda", home_inputs = eda_shared_data)
+  stability_analysis_server(id = "stability", shared_data = stability_shared_data)
   mating_design_server(id = "mating", shared_data = mating_shared_data)
   multivariate_analysis_server(id = "multi", shared_data = multi_shared_data)
   

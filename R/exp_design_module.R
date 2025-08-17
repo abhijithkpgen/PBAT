@@ -601,9 +601,7 @@ analysisServer <- function(id, home_inputs) {
           tags$div(
             style = "margin-top: 25px; color: #555; font-size: 13px; text-align: center;",
             tags$small(
-              HTML("<b>Tip:</b> If results don't render, reloading and rerunning the analysis can help."),
-              tags$br(), tags$br(),
-              HTML("<b>Note:</b> 'AJAX error' messages can often be ignored. See 'Help & Guide' for details."),
+              HTML("<b>Tip:</b> If results don't render or issue in downloading results, reloading and rerunning the analysis can help."),
               tags$br(), tags$br(),
               HTML("<b>For large datasets:</b> Consider installing the PBAT R package from the Home tab for a smoother experience.")
             )

@@ -1,17 +1,15 @@
 Package: PBAT
 Title: Plant Breeding Analytical Tools (Shiny Application)
-Version: 1.0.2
+Version: 1.0.3
 Authors@R: 
     person("Krishnan P", "Abhijith",
            email = "abhijithkpgen@gmail.com",
            role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8641-02X"))
 Description: Provides an interactive Shiny application for plant breeding 
-    analyses, including mating design analytics (diallel, line-by-tester, 
-    partial diallel), ANOVA summaries, estimation of GCA/SCA effects, 
-    BLUE/BLUP utilities, principal component analysis (PCA) with plots, 
-    and exportable reports. Designed for non-programmers with a 
-    point-and-click interface.
+    analyses, including Experimental design analysis, mating design analytics, 
+    stability analysis, and multivariate analysis. Designed for 
+    non-programmers with a point-and-click interface.
 License: MIT + file LICENSE
 URL: https://github.com/abhijithkpgen/PBAT
 BugReports: https://github.com/abhijithkpgen/PBAT/issues
@@ -25,6 +23,7 @@ Imports:
     broom.mixed,
     bslib,
     car,
+    colourpicker,
     corrplot,
     DT,
     dplyr,
@@ -61,3 +60,4 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Config/testthat/edition: 3
 Config/testthat/parallel: true
+

@@ -24,7 +24,6 @@ app_ui <- function() {
       useShinyjs(),
       waiter::use_waiter(),
       
-      # --- ADD THIS CODE BLOCK BACK ---
       waiter::waiter_show_on_load(
         html = tagList(
           tags$div(
@@ -35,7 +34,6 @@ app_ui <- function() {
         ),
         color = "#e17055" # orange background
       ),
-      # ---------------------------------
       
       tags$head(tags$style(HTML("
       body {
@@ -154,6 +152,8 @@ app_ui <- function() {
                analysisUI(id = "eda")[[2]]
     ),
     
+    stability_analysis_ui(id = "stability"),
+    
     mating_design_ui(id = "mating"),
     
     multivariate_analysis_ui(id = "multi"),
@@ -167,15 +167,16 @@ app_ui <- function() {
                      tabPanel("Troubleshooting",
                               div(style = "padding-top: 20px;",
                                   h3("Troubleshooting Common Issues"),
-                                  p("Encountering an issue? Most problems, especially with complex model analyses, are related to network connection timeouts during long calculations. Here are a few simple steps you can take to resolve common errors."),
-                                  h4("Problem: Results Not Appearing or an Error Message (like 'AJAX error') After Running an Analysis"),
-                                  p(HTML("<b>Cause:</b> This typically happens when the analysis takes a while to complete (10 seconds or more) and your browser's connection to the server times out, especially on a slower or less stable internet connection. The analysis likely finished successfully on the server, but the results didn't make it back to your browser.")),
+                                  p("Encountering an issue? Most problems with complex model analyses are related to network connection timeouts or temporary rendering glitches. Here are a few simple steps you can take to resolve common errors."),
+                                  h4("Problem: Results Not Appearing After Running an Analysis"),
+                                  p(HTML("<b>Cause:</b> This can happen when an analysis takes a while to complete, especially on a slower internet connection, or if there's a temporary glitch while displaying the results. The analysis likely finished successfully on the server, but the results weren't displayed correctly in your browser.")),
                                   h4("Solutions (Try these in order):"),
                                   tags$ul(
-                                    tags$li(HTML("<b>1. The Quick Refresh Trick:</b><br>This is the easiest and most common fix. If the results area is blank but the rest of the app is working, simply interact with the table controls. Click the <b>'Show X entries'</b> dropdown menu above the empty table area and select a different number. This sends a new, quick request to the server, which then correctly displays the results that were already calculated.")),
-                                    tags$li(HTML("<b>2. Ensure a Stable Internet Connection:</b><br>Since these analyses involve sending data and waiting for results, a stable connection is key. If you are on a weak Wi-Fi signal, try moving closer to your router or connect to a more reliable network and try running the analysis again.")),
+                                    tags$li(HTML("<b>1. Reload and Rerun:</b><br>This is the easiest and most common fix. If the results area is blank, simply reload the entire web page and run the analysis again. This resolves most temporary rendering issues.")),
+                                    tags$li(HTML("<b>2. Ensure a Stable Internet Connection:</b><br>Since these analyses involve sending data and waiting for results, a stable connection is key. If you are on a weak Wi-Fi signal, try moving closer to your router or connect to a more reliable network before rerunning the analysis.")),
                                     tags$li(HTML("<b>3. Reduce the Analysis Workload:</b><br>The more traits you select, the longer the server needs to compute. If the analysis is still failing, try reducing the complexity by selecting fewer traits at a time.")),
-                                    tags$li(HTML("<b>4. Be Patient:</b><br>A complex mixed-model analysis on a large dataset can take some time. After clicking 'Run,' please allow up to a minute for the server to process before assuming there is an error."))
+                                    tags$li(HTML("<b>4. Be Patient:</b><br>A complex mixed-model analysis on a large dataset can take some time. After clicking 'Run,' please allow up to a minute for the server to process before assuming there is an error.")),
+                                    tags$li(HTML("<b>5. Use the R Package Locally:</b><br>For very large datasets or complex multi-trait analyses, consider installing the PBAT R package (instructions on the Home tab) and running it on your own computer for the smoothest and fastest experience."))
                                   )
                               )
                      ),
