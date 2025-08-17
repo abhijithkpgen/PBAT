@@ -420,7 +420,7 @@ analysisServer <- function(id, home_inputs) {
           step_header(3, "Select Traits and Options"),
           checkboxGroupInput(ns("traits"), NULL, choices = numeric_cols, selected = numeric_cols[1]),
           selectInput(ns("palette"), "Boxplot Color Palette", choices = rownames(RColorBrewer::brewer.pal.info)),
-          selectInput(ns("genotype_model"), "Genotype Model", choices = c("Fixed", "Random"), selected = "Fixed"),
+          selectInput(ns("genotype_model"), "Genotype Model", choices = c("Fixed", "Random"), selected = "Random"),
           checkboxInput(ns("env_wise"), "Compute Environment-wise BLUE/BLUP?", value = TRUE),
           step_header(4, "Run Analysis"),
           actionButton(ns("run_descriptive"), "Run Descriptive Summary", class = "btn btn-primary mb-2"),
