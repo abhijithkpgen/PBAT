@@ -92,6 +92,10 @@ analysisServer <- function(id, home_inputs) {
     go_to_analysis2 <- reactiveVal(0)
     corr_interpretation <- reactiveVal(NULL)
     
+    # --- Triggers for automatic tab switching ---
+    crd_anova_finished <- reactiveVal(0)
+    model_analysis_finished <- reactiveVal(0)
+    
     observeEvent(home_inputs(), {
       req(home_inputs()$analysis_mode == "eda")
       raw_data(home_inputs()$file_data)
@@ -584,7 +588,7 @@ analysisServer <- function(id, home_inputs) {
     # --- Block E8 Part D: Model-Based Analysis (Non-CRD) ---
     observeEvent(input$run_model, {
       req(raw_data(), active_design(), !tolower(gsub("\\s+", "", active_design())) == "crd", input$traits, input$entry)
-      # ADD THIS WAITER_SHOW CALL
+      
       waiter::waiter_show(
         id = ns("main_panel_eda"), # Targets the main panel
         html = tagList(
@@ -624,8 +628,8 @@ analysisServer <- function(id, home_inputs) {
         model_results(all_results)
         waiter::waiter_hide() 
       })
+      model_analysis_finished(model_analysis_finished() + 1)
       showNotification(paste(toupper(active_design()), "model analysis complete."), type = "message")
-      updateTabsetPanel(session, "result_tabs", selected = "Model Results")
     })
     
     # --- Block E8 Part E: UI Renderer for Model Results ---
@@ -859,6 +863,7 @@ analysisServer <- function(id, home_inputs) {
           })
         }
       })
+      crd_anova_finished(crd_anova_finished() + 1)
       showNotification("ANOVA and Post-Hoc analysis complete.", type = "message")
     })
     
@@ -936,6 +941,36 @@ analysisServer <- function(id, home_inputs) {
       showNotification("Interaction plots generated for all selected traits.", type = "message")
     })
     
+    # --- NEW: OBSERVERS FOR AUTOMATIC TAB SWITCHING ---
+    
+    # Observer for non-CRD model analysis redirection
+    observeEvent(model_analysis_finished(), {
+      req(model_analysis_finished() > 0)
+      
+      # Construct the JS selector to find the correct tab link and click it
+      tabset_id <- session$ns("result_tabs")
+      js_command <- sprintf("$('#%s a:contains(\"Model Results\")').tab('show');", tabset_id)
+      
+      shinyjs::delay(200, {
+        shinyjs::runjs(js_command)
+      })
+    }, ignoreInit = TRUE)
+    
+    # Observer for CRD anova analysis redirection
+    observeEvent(crd_anova_finished(), {
+      req(crd_anova_finished() > 0, input$crd_traits)
+      
+      if (!is.null(input$crd_traits) && length(input$crd_traits) > 0) {
+        # Construct the JS selector for the CRD tabs
+        tabset_id <- session$ns("crd_trait_tabs")
+        tab_text <- input$crd_traits[[1]] # Target the first selected trait's tab
+        js_command <- sprintf("$('#%s a:contains(\"%s\")').tab('show');", tabset_id, tab_text)
+        
+        shinyjs::delay(200, {
+          shinyjs::runjs(js_command)
+        })
+      }
+    }, ignoreInit = TRUE)
     
     
     # --- Block E9: Update Analysis 2 Trait Selectors ---
