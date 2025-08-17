@@ -33,7 +33,7 @@ homeUI <- function(id) {
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'stability'"),
             selectInput(
-              ns("stab_subtype"), "Which Stability Analysis?",
+              ns("stab_subtype"), "Select The Stability Analysis",
               choices = c("AMMI Analysis" = "ammi", "GGE Biplot" = "gge")
             )
           ),
@@ -42,7 +42,7 @@ homeUI <- function(id) {
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'multivariate'"),
             selectInput(
-              ns("multi_subtype"), "Which Multivariate Analysis?",
+              ns("multi_subtype"), "Select The Multivariate Analysis",
               choices = c("Principal Component Analysis (PCA)" = "pca", 
                           "Correlation Analysis" = "correlation", 
                           "Path Analysis" = "path")
@@ -52,7 +52,7 @@ homeUI <- function(id) {
           # --- Conditional UI for Experimental Design ---
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'eda'"),
-            selectInput(ns("design"), "Experimental Design",
+            selectInput(ns("design"), "Select Experimental Design",
                         choices = c("Alpha Lattice", "RCBD", "CRD", "Augmented RCBD"))
           ),
           
