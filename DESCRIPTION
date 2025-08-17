@@ -1,11 +1,11 @@
 Package: PBAT
 Title: Plant Breeding Analytical Tools (Shiny Application)
-Version: 1.0.3
+Version: 1.0.5
 Authors@R: 
     person("Krishnan P", "Abhijith",
            email = "abhijithkpgen@gmail.com",
            role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0001-8641-02X"))
+           comment = c(ORCID = "0000-0001-8641-026X"))
 Description: Provides an interactive Shiny application for plant breeding 
     analyses, including Experimental design analysis, mating design analytics, 
     stability analysis, and multivariate analysis. Designed for 

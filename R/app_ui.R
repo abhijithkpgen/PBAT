@@ -11,7 +11,7 @@ app_ui <- function() {
     title = div(
       style = "display: flex; align-items: center; gap: 16px;",
       tags$img(src = "www/LogoNobg.png", height = "60px", style = "margin-right: 8px;"),
-      span("PbAT: Plant Breeding Analytical Tools  v1.0.2")
+      span("PbAT: Plant Breeding Analytical Tools  v1.0.5")
     ),
     id = "main_navbar", 
     theme = bs_theme(
