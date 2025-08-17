@@ -99,7 +99,7 @@ homeUI <- function(id) {
       # --- Panel 3: Run Locally (Right) ---
       div(class = "overlay-panel installation-box",
           tags$div(style = "text-align: center;",
-                   tags$img(src = "www/spinner3.gif", height = "150px", style = "margin-bottom: 5px; border: none;")
+                   tags$img(src = "www/spinner2.gif", height = "150px", style = "margin-bottom: 5px; border: none;")
           ),
           h4(icon("laptop-code"), " Run Locally in R"),
           p("You can install and run this application on your own computer directly within R or RStudio. This is a great option for offline use or for analyzing sensitive data."),

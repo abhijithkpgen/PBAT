@@ -210,7 +210,7 @@ analysisServer <- function(id, home_inputs) {
     
     # --- Block E8 Part C: MAIN ANALYSIS ENGINE FUNCTION ---
     run_model_and_extract <- function(df, trait, vc_formula_str, random_formula_str, 
-                                      model_type, entry_col, env_col, block_col, rep_col, design) {
+                                      model_type, entry_col, env_col, block_col, rep_col, design, compute_env_wise) {
       results <- list()
       
       round_df <- function(d) {
@@ -310,7 +310,7 @@ analysisServer <- function(id, home_inputs) {
           emm_comb <- emmeans::emmeans(fit_vc, specs = as.formula(paste0("~", entry_col))); 
           summary_comb <- as.data.frame(summary(emm_comb)) %>% dplyr::select(all_of(entry_col), BLUE_Combined = "emmean", SE_Combined = "SE"); 
           final_blue_table <- summary_comb
-          if (!is.null(env_col) && input$env_wise) {
+          if (!is.null(env_col) && compute_env_wise) {
             env_levels <- unique(as.character(df[[env_col]])); 
             env_blues_list <- lapply(env_levels, function(env) {
               df_sub <- df[df[[env_col]] == env, ]; 
@@ -348,7 +348,7 @@ analysisServer <- function(id, home_inputs) {
           blups_comb$BLUP_Combined <- intercept + blups_comb[,1]
           blups_comb <- tibble::rownames_to_column(blups_comb, var=entry_col) %>% dplyr::select(all_of(entry_col), "BLUP_Combined"); 
           final_blup_table <- blups_comb
-          if (!is.null(env_col) && input$env_wise) {
+          if (!is.null(env_col) && compute_env_wise) {
             gxe_term <- paste0(entry_col, ":", env_col); 
             blups_ind <- lme4::ranef(fit_rand)[[gxe_term]]; 
             blups_ind$BLUP <- intercept + blups_ind[,1]
@@ -581,51 +581,94 @@ analysisServer <- function(id, home_inputs) {
       updateTabsetPanel(session, "result_tabs", selected = "Descriptive Results")
     })
     
-    # --- Block E8 Part D: Model-Based Analysis (Non-CRD) ---
+    # --- Block E8 Part D: Model-Based Analysis (Non-CRD) - UPDATED WITH PROMISES ---
     observeEvent(input$run_model, {
       req(raw_data(), active_design(), !tolower(gsub("\\s+", "", active_design())) == "crd", input$traits, input$entry)
-      # ADD THIS WAITER_SHOW CALL
+      
+      # --- Show a waiter immediately ---
       waiter::waiter_show(
-        id = ns("main_panel_eda"), # Targets the main panel
+        id = ns("main_panel_eda"),
         html = tagList(
-          tags$img(src = "www/spinner2.gif", height = "240px"),
+          tags$img(src = "www/spinner3.gif", height = "240px"),
           h4("Running Model Analysis, this may take a while...", style = "color:darkblue;")
         ),
-        color = "white" 
+        color = "white"
       )
-      withProgress(message = 'Running Model Analysis...', value = 0, {
-        df <- raw_data(); design <- tolower(gsub("\\s+", "", active_design())); trial_type <- input$trial_type
-        genotype_model <- input$genotype_model
-        traits <- input$traits; entry_col <- make.names(input$entry); block_col <- make.names(input$block); rep_col <- if (!is.null(input$rep)) make.names(input$rep) else NULL; env_col <- if (trial_type == "Multi Environment" && !is.null(input$env)) make.names(input$env) else NULL
-        names(df) <- make.names(names(df)); cols_to_factor <- c(entry_col, block_col, rep_col, env_col); for (col in cols_to_factor) { if (!is.null(col) && col %in% names(df)) df[[col]] <- as.factor(df[[col]]) }
+      
+      # --- Prepare variables for the async block ---
+      df <- raw_data(); design <- tolower(gsub("\\s+", "", active_design())); trial_type <- input$trial_type
+      genotype_model <- input$genotype_model
+      traits <- input$traits; entry_col <- make.names(input$entry); block_col <- make.names(input$block); 
+      rep_col <- if (!is.null(input$rep)) make.names(input$rep) else NULL; 
+      env_col <- if (trial_type == "Multi Environment" && !is.null(input$env)) make.names(input$env) else NULL
+      compute_env_wise <- input$env_wise
+      
+      # --- Use future_promise to run the long calculation asynchronously ---
+      future_promise({
+        names(df) <- make.names(names(df)); 
+        cols_to_factor <- c(entry_col, block_col, rep_col, env_col); 
+        for (col in cols_to_factor) { 
+          if (!is.null(col) && col %in% names(df)) df[[col]] <- as.factor(df[[col]]) 
+        }
         
         all_results <- list(); bt <- function(x) paste0("`", x, "`")
+        
+        # This loop happens inside the future, off the main thread
         for (i in seq_along(traits)) {
           original_trait_name <- traits[i]; trait <- make.names(original_trait_name)
-          incProgress(1 / length(traits), detail = paste("Processing trait:", original_trait_name))
-          if (!is.numeric(df[[trait]])) { showNotification(paste("Skipping non-numeric trait:", original_trait_name), type = "warning"); next }
+          if (!is.numeric(df[[trait]])) next
           
           trait_results <- list(); fixed_formula_vc_str <- NULL; formula_random_str <- NULL
-          if (design %in% c("rcbd", "augmentedrcbd")) { if (is.null(env_col)) { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(block_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(block_col), ")") } else { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")") } 
-          } else if (design == "alphalattice") { req(rep_col); if (is.null(env_col)) { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")") } else { fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")"); formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")") } }
+          if (design %in% c("rcbd", "augmentedrcbd")) { 
+            if (is.null(env_col)) { 
+              fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(block_col), ")"); 
+              formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(block_col), ")") 
+            } else { 
+              fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")"); 
+              formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(env_col), ")") 
+            } 
+          } else if (design == "alphalattice") { 
+            req(rep_col); 
+            if (is.null(env_col)) { 
+              fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")"); 
+              formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(rep_col), ") + (1|", bt(block_col), ":", bt(rep_col), ")") 
+            } else { 
+              fixed_formula_vc_str <- paste(bt(trait), "~", bt(entry_col), "+ (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")"); 
+              formula_random_str <- paste(bt(trait), "~ (1|", bt(entry_col), ") + (1|", bt(env_col), ") + (1|", bt(entry_col), ":", bt(env_col), ") + (1|", bt(rep_col), ":", bt(env_col), ") + (1|", bt(block_col), ":", bt(rep_col), ":", bt(env_col), ")") 
+            } 
+          }
           
           if (genotype_model == "Fixed") {
             key <- get_equation_key(design, trial_type, "Fixed")
-            other_res <- run_model_and_extract(df, trait, fixed_formula_vc_str, NULL, "Fixed", entry_col, env_col, block_col, rep_col, design)
+            other_res <- run_model_and_extract(df, trait, fixed_formula_vc_str, NULL, "Fixed", entry_col, env_col, block_col, rep_col, design, compute_env_wise)
             trait_results$Fixed <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), other_res)
           }
           if (genotype_model == "Random") {
             key <- get_equation_key(design, trial_type, "Random")
-            res_rand <- run_model_and_extract(df, trait, NULL, formula_random_str, "Random", entry_col, env_col, block_col, rep_col, design)
+            res_rand <- run_model_and_extract(df, trait, NULL, formula_random_str, "Random", entry_col, env_col, block_col, rep_col, design, compute_env_wise)
             trait_results$Random <- c(list(equation_latex = model_equations[[key]] %||% model_equations$default), res_rand)
           }
           all_results[[original_trait_name]] <- trait_results
         }
-        model_results(all_results)
-        waiter::waiter_hide() 
+        return(all_results) # Return the final results from the future
+      }) %...>% (function(results) {
+        # --- This part runs ONLY after the async block is complete ---
+        model_results(results)
+        showNotification(paste(toupper(active_design()), "model analysis complete."), type = "message")
+        updateTabsetPanel(session, "result_tabs", selected = "Model Results")
+      }) %...>% (function(...) {
+        # --- This runs after everything, including updating the UI ---
+        waiter::waiter_hide()
+      }) %...!% (function(error) {
+        # --- This part runs if the async block fails ---
+        waiter::waiter_hide()
+        showModal(modalDialog(
+          title = "Model Analysis Error",
+          "An error occurred during the model computation:",
+          br(), br(),
+          verbatimTextOutput(error$message)
+        ))
       })
-      showNotification(paste(toupper(active_design()), "model analysis complete."), type = "message")
-      updateTabsetPanel(session, "result_tabs", selected = "Model Results")
     })
     
     # --- Block E8 Part E: UI Renderer for Model Results ---
