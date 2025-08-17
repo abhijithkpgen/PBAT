@@ -4,17 +4,15 @@
 # ===================================================================
 app_server <- function(input, output, session) {
   
-  # --- Hide the pre-loader once the main UI is ready ---
-  # Use debounce to add a small delay, ensuring the server is fully
-  # ready before hiding the loader. This prevents it from getting stuck.
-  hide_loader <- shiny::debounce(function() {
-    waiter::waiter_hide()
-  }, 1000) # 1000 milliseconds = 1 second delay
-  
-  shiny::observe({
-    shiny::req(input$main_navbar) # Waits until the main navbar is rendered
-    hide_loader()
-  })
+  # --- Hide the pre-loader once the main UI is fully ready ---
+  # This observer waits until the main navbar is rendered, then adds a small
+  # delay before hiding the loading screen. This prevents an "incomplete UI"
+  # flash by giving all initial components time to render.
+  observeEvent(input$main_navbar, {
+    shinyjs::delay(500, { # 500 milliseconds = 0.5 second delay
+      waiter::waiter_hide()
+    })
+  }, once = TRUE) # 'once = TRUE' ensures this only ever runs one time
   
   # --- Call the Home Module Server ---
   home_inputs <- homeServer(id = "home")
