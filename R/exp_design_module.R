@@ -588,8 +588,7 @@ analysisServer <- function(id, home_inputs) {
       waiter::waiter_show(
         id = ns("main_panel_eda"), # Targets the main panel
         html = tagList(
-          tags$img(src = "www/LogoNobg.png", height = "120px", style = "margin-bottom: 20px;"),
-          tags$img(src = "www/spinner2.gif", height = "70px"),
+          tags$img(src = "www/spinner3.gif", height = "170px"),
           h4("Running Model Analysis, this may take a while...", style = "color:white;")
         ),
         color = "white" 
