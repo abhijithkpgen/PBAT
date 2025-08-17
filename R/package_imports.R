@@ -29,8 +29,7 @@
 #' @importFrom factoextra fviz_ca_biplot fviz_cos2 fviz_pca_biplot fviz_pca_ind fviz_pca_var fviz_screeplot hcut get_eigenvalue
 #' @importFrom PerformanceAnalytics chart.Correlation
 #' @importFrom semPlot semPaths
-# TODO: Add specific ggplot2 functions you use below, for example:
-# #' @importFrom ggplot2 ggplot aes geom_point labs theme_minimal
+#' @importFrom ggplot2 aes element_text facet_wrap geom_boxplot geom_line geom_point ggplot labs scale_fill_brewer theme theme_bw theme_minimal
 #'
 # Statistics and Modeling
 #' @import promises
@@ -45,8 +44,7 @@
 #' @importFrom lmerTest lmer
 #' @importFrom multcomp cld glht
 #' @importFrom lavaan sem parameterEstimates
-# TODO: Add specific metan functions you use below, for example:
-# #' @importFrom metan performs_ammi
+#' @importFrom metan plot_scores
 #'
 # Base R and Utils
 #' @importFrom grDevices dev.off pdf
