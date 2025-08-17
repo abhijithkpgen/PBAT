@@ -89,7 +89,10 @@ analysisServer <- function(id, home_inputs) {
     gge_results <- reactiveVal(NULL)
     pca_results <- reactiveVal(NULL)
     crd_results <- reactiveValues() 
-    go_to_analysis2 <- reactiveVal(0)
+    
+    # *** NEW: Reactive trigger for redrawing the model results UI ***
+    model_ui_trigger <- reactiveVal(0)
+    
     corr_interpretation <- reactiveVal(NULL)
     
     observeEvent(home_inputs(), {
@@ -589,7 +592,7 @@ analysisServer <- function(id, home_inputs) {
       waiter::waiter_show(
         id = ns("main_panel_eda"),
         html = tagList(
-          tags$img(src = "www/spinner3.gif", height = "240px"),
+          tags$img(src = "www/spinner2.gif", height = "240px"),
           h4("Running Model Analysis, this may take a while...", style = "color:darkblue;")
         ),
         color = "white"
@@ -654,6 +657,7 @@ analysisServer <- function(id, home_inputs) {
       }) %...>% (function(results) {
         # --- This part runs ONLY after the async block is complete ---
         model_results(results)
+        model_ui_trigger(runif(1)) # *** NEW: Trigger the UI to redraw ***
         showNotification(paste(toupper(active_design()), "model analysis complete."), type = "message")
         updateTabsetPanel(session, "result_tabs", selected = "Model Results")
       }) %...>% (function(...) {
@@ -671,10 +675,34 @@ analysisServer <- function(id, home_inputs) {
       })
     })
     
-    # --- Block E8 Part E: UI Renderer for Model Results ---
+    # *** NEW: Observer for the refresh button ***
+    observeEvent(input$refresh_model_ui, {
+      model_ui_trigger(runif(1)) # Update the trigger to force a redraw
+      showNotification("Results display refreshed.", type = "message", duration = 3)
+    })
+    
+    
+    # --- Block E8 Part E: UI Renderer for Model Results - UPDATED ---
     output$model_ui <- renderUI({
+      model_ui_trigger() # *** NEW: Depend on the trigger ***
+      
       req(model_results())
-      results <- model_results(); if (length(results) == 0) return(h4("Run Analysis.", style="color:grey;"))
+      results <- model_results()
+      if (length(results) == 0) {
+        return(h4("Run Analysis.", style="color:grey;"))
+      }
+      
+      # --- ADD THE REFRESH BUTTON UI ---
+      refresh_button_ui <- div(
+        style = "margin-bottom: 15px; text-align: right;",
+        actionButton(
+          ns("refresh_model_ui"), 
+          "Refresh Display", 
+          icon = icon("sync"), 
+          class = "btn-sm btn-outline-primary",
+          style = "color: #142850; border-color: #142850; font-weight: bold;"
+        )
+      )
       
       create_explanation_ui <- function(id_prefix, content) {
         ns_prefix <- ns(id_prefix)
@@ -773,7 +801,11 @@ analysisServer <- function(id, home_inputs) {
         }
       })
       
-      do.call(tabsetPanel, unname(trait_tabs))
+      # *** NEW: Wrap the final UI in a tagList with the refresh button ***
+      tagList(
+        refresh_button_ui,
+        do.call(tabsetPanel, unname(trait_tabs))
+      )
     })
     
     # ===================================================================
