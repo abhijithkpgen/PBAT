@@ -592,10 +592,20 @@ analysisServer <- function(id, home_inputs) {
       waiter::waiter_show(
         id = ns("main_panel_eda"), # Targets the main panel
         html = tagList(
-          tags$img(src = "www/spinner3.gif", height = "170px"),
-          h4("Running Model Analysis, this may take a while...", style = "color:white;")
+          tags$img(src = "www/spinner3.gif", height = "140px"),
+          h4("Running Model Analysis, this may take a while...", style = "color: #333;"),
+          tags$div(
+            style = "margin-top: 25px; color: #555; font-size: 13px; text-align: center;",
+            tags$small(
+              HTML("<b>Tip:</b> If results don't render, reloading and rerunning the analysis can help."),
+              tags$br(), tags$br(),
+              HTML("<b>Note:</b> 'AJAX error' messages can often be ignored. See 'Help & Guide' for details."),
+              tags$br(), tags$br(),
+              HTML("<b>For large datasets:</b> Consider installing the PBAT R package from the Home tab for a smoother experience.")
+            )
+          )
         ),
-        color = "white" 
+        color = "rgba(255, 255, 255, 0.95)"
       )
       withProgress(message = 'Running Model Analysis...', value = 0, {
         df <- raw_data(); design <- tolower(gsub("\\s+", "", active_design())); trial_type <- input$trial_type
@@ -637,10 +647,14 @@ analysisServer <- function(id, home_inputs) {
       req(model_results())
       results <- model_results(); if (length(results) == 0) return(h4("Run Analysis.", style="color:grey;"))
       
-      create_explanation_ui <- function(id_prefix, content) {
-        ns_prefix <- ns(id_prefix)
-        link_id <- paste0("toggle_", ns_prefix); div_id <- paste0("div_", ns_prefix)
-        tagList(actionLink(link_id, "Show/Hide Explanation", style = "font-size: 12px;"), shinyjs::hidden(div(id = div_id, class = "alert alert-info", style = "margin-top: 10px;", content)))
+      # --- FIX: Corrected create_explanation_ui function ---
+      create_explanation_ui <- function(base_id, content) {
+        link_id <- paste0("toggle_", base_id)
+        div_id <- paste0("div_", base_id)
+        tagList(
+          actionLink(ns(link_id), "Show/Hide Explanation", style = "font-size: 12px;"),
+          shinyjs::hidden(div(id = ns(div_id), class = "alert alert-info", style = "margin-top: 10px;", content))
+        )
       }
       
       model_explanation_content <- function(model_type, design, trial_type) {
@@ -705,8 +719,16 @@ analysisServer <- function(id, home_inputs) {
         if (!is.null(trait_content$Fixed)) {
           tid_prefix <- make.names(paste0(trait_name, "_fixed"))
           local({
-            observeEvent(input[[paste0("toggle_model_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("model_exp_", tid_prefix))), anim = TRUE) })
-            observeEvent(input[[paste0("toggle_lrt_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("lrt_exp_", tid_prefix))), anim = TRUE) })
+            # --- FIX: Corrected observeEvent and shinyjs::toggle logic ---
+            model_exp_base_id <- paste0("model_exp_", tid_prefix)
+            lrt_exp_base_id   <- paste0("lrt_exp_", tid_prefix)
+            
+            observeEvent(input[[paste0("toggle_", model_exp_base_id)]], {
+              shinyjs::toggle(id = paste0("div_", model_exp_base_id), anim = TRUE)
+            })
+            observeEvent(input[[paste0("toggle_", lrt_exp_base_id)]], {
+              shinyjs::toggle(id = paste0("div_", lrt_exp_base_id), anim = TRUE)
+            })
             
             output[[paste0("anova_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$anova_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$anova_interpretation) })
             output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Fixed$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Fixed$lrt_interpretation) })
@@ -721,8 +743,16 @@ analysisServer <- function(id, home_inputs) {
         if (!is.null(trait_content$Random)) {
           tid_prefix <- make.names(paste0(trait_name, "_random"))
           local({
-            observeEvent(input[[paste0("toggle_model_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("model_exp_", tid_prefix))), anim = TRUE) })
-            observeEvent(input[[paste0("toggle_lrt_exp_", tid_prefix)]], { shinyjs::toggle(id = paste0("div_", ns(paste0("lrt_exp_", tid_prefix))), anim = TRUE) })
+            # --- FIX: Corrected observeEvent and shinyjs::toggle logic ---
+            model_exp_base_id <- paste0("model_exp_", tid_prefix)
+            lrt_exp_base_id   <- paste0("lrt_exp_", tid_prefix)
+            
+            observeEvent(input[[paste0("toggle_", model_exp_base_id)]], {
+              shinyjs::toggle(id = paste0("div_", model_exp_base_id), anim = TRUE)
+            })
+            observeEvent(input[[paste0("toggle_", lrt_exp_base_id)]], {
+              shinyjs::toggle(id = paste0("div_", lrt_exp_base_id), anim = TRUE)
+            })
             
             output[[paste0("equation_", tid_prefix)]] <- renderUI({ req(trait_content$Random$equation_latex); p(trait_content$Random$equation_latex) })
             output[[paste0("lrt_interp_", tid_prefix)]] <- renderUI({ req(trait_content$Random$lrt_interpretation); tags$div(class="alert alert-light", style="margin-top:10px; border-left: 3px solid #142850;", trait_content$Random$lrt_interpretation) })
