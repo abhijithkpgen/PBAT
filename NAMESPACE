@@ -2,8 +2,6 @@
 
 export(run_app)
 import(future)
-import(ggplot2)
-import(metan)
 import(promises)
 importFrom(DT,DTOutput)
 importFrom(DT,dataTableOutput)

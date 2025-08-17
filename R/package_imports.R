@@ -24,12 +24,13 @@
 #' @importFrom scales percent
 #'
 # Plotting and Visualization
-#' @import ggplot2
 #' @importFrom RColorBrewer brewer.pal.info brewer.pal
 #' @importFrom corrplot corrplot
 #' @importFrom factoextra fviz_ca_biplot fviz_cos2 fviz_pca_biplot fviz_pca_ind fviz_pca_var fviz_screeplot hcut get_eigenvalue
 #' @importFrom PerformanceAnalytics chart.Correlation
 #' @importFrom semPlot semPaths
+# TODO: Add specific ggplot2 functions you use below, for example:
+# #' @importFrom ggplot2 ggplot aes geom_point labs theme_minimal
 #'
 # Statistics and Modeling
 #' @import promises
@@ -42,9 +43,10 @@
 #' @importFrom FactoMineR CA PCA
 #' @importFrom lme4 VarCorr isSingular ranef fixef
 #' @importFrom lmerTest lmer
-#' @import metan
 #' @importFrom multcomp cld glht
 #' @importFrom lavaan sem parameterEstimates
+# TODO: Add specific metan functions you use below, for example:
+# #' @importFrom metan performs_ammi
 #'
 # Base R and Utils
 #' @importFrom grDevices dev.off pdf
@@ -52,31 +54,3 @@
 #' @importFrom stats aggregate anova aov as.formula cor lm median model.tables na.omit pf pt qf qt residuals runif sd shapiro.test update vcov
 #' @importFrom utils capture.output combn head tail write.csv zip
 NULL
-
-# ===================================================================
-# This file handles package checks and installations.
-# ===================================================================
-
-# List of all required packages from CRAN
-packages_to_check <- c(
-  "shiny", "bslib", "shinyjs", "waiter", "dplyr", "readr", "purrr", 
-  "ggplot2", "lme4", "lmerTest", "emmeans", "metan", "FactoMineR", 
-  "factoextra", "corrplot", "PerformanceAnalytics", "lavaan", 
-  "semPlot", "DT", "agricolae", "broom", "RColorBrewer", "scales", 
-  "tibble", "tidyr", "zip", "colourpicker", "promises", "future", "broom.mixed",
-  "car", "multcomp"
-)
-
-# Function to check for and install missing packages
-check_and_install_packages <- function() {
-  # Identify missing packages
-  missing_packages <- packages_to_check[!sapply(packages_to_check, requireNamespace, quietly = TRUE)]
-  
-  # If there are missing packages, install them
-  if (length(missing_packages) > 0) {
-    message("Installing missing packages: ", paste(missing_packages, collapse = ", "))
-    install.packages(missing_packages, dependencies = TRUE)
-  } else {
-    message("All required packages are already installed.")
-  }
-}
