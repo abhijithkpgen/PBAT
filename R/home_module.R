@@ -119,10 +119,10 @@ homeUI <- function(id) {
                  class = "btn btn-primary", 
                  style = "color: white !important; margin-right: 10px;", 
                  icon("github"), " View on GitHub"),
-          tags$a(href = "https://github.com/abhijithkpgen/PBAT/archive/refs/tags/v1.0.4.tar.gz", 
+          tags$a(href = "https://github.com/abhijithkpgen/PBAT/archive/refs/tags/v1.0.5.tar.gz", 
                  class = "btn btn-secondary", 
                  style = "color: white !important;", 
-                 icon("download"), " Download v1.0.4"),
+                 icon("download"), " Download v1.0.5"),
           
           tags$details(
             tags$summary(icon("terminal"), " Click to view Installation Instructions"),
