@@ -33,7 +33,6 @@
     -   Analyzes additive main effects and multiplicative interaction (AMMI) and
     -    genotype plus genotype by environment interaction effect (GGE) Biplots
 
-    -   
 -   **Downloads**
     -   Export all results as ZIP archives containing CSV tables and high-quality PDF plots.
 
