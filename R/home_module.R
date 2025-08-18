@@ -113,7 +113,7 @@ homeUI <- function(id) {
                    tags$img(src = "www/spinner2.gif", height = "150px", style = "margin-bottom: 5px; border: none;")
           ),
           h4(icon("laptop-code"), " Run Locally in R"),
-          p("You can install and run this application on your own computer directly within R or RStudio. This is a great option for offline use or for analyzing sensitive data."),
+          p("You can install and run this application on your own computer directly within R or RStudio. This is a great option for offline use or for analyzing large data sets."),
           tags$a(href = "https://github.com/abhijithkpgen/PBAT", 
                  target = "_blank", 
                  class = "btn btn-primary", 
