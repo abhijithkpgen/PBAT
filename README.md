@@ -21,14 +21,19 @@
     -   Generates publication-ready visualizations (boxplots, QQ plots, interaction plots).
 
 -   **Multivariate Analysis**
-    -   Performs PCA, GGE Biplot, and AMMI analysis.
+    -   Performs PCA.
     -   Conducts trait correlation and path analysis.
     -   Can be run in standalone mode or linked directly to EDA results.
 
 -   **Mating Design Analysis**
     -   Analyzes common mating designs, including Diallel (Griffing Methods I–IV, Partial Diallel) and Line × Tester.
     -   Calculates GCA/SCA effects, generates ANOVA tables, and estimates variance components.
+    -   
+-   **Stability Analysis**
+    -   Analyzes additive main effects and multiplicative interaction (AMMI) and
+    -    genotype plus genotype by environment interaction effect (GGE) Biplots
 
+    -   
 -   **Downloads**
     -   Export all results as ZIP archives containing CSV tables and high-quality PDF plots.
 
