@@ -1,10 +1,12 @@
 # mating_design_module.R
 #
 # This file contains the complete, corrected UI and Server logic for the Mating Design Analysis module.
-# This version includes all statistical functions and incorporates all previous suggestions.
+# This version includes all statistical functions and incorporates all previous suggestions,
+# including a database of equations and explanations with show/hide functionality.
 
 # Required Libraries
 library(shiny)
+library(shinyjs)
 library(dplyr)
 library(emmeans)
 library(tibble)
@@ -61,6 +63,8 @@ mating_design_ui <- function(id) {
       ),
       mainPanel(
         width = 9,
+        # Use shinyjs to enable show/hide functionality
+        useShinyjs(),
         div(style = "color: #142850;",
             tabsetPanel(
               id = ns("md_main_tabs"),
@@ -75,8 +79,88 @@ mating_design_ui <- function(id) {
 }
 
 # ===================================================================
+# EQUATION AND EXPLANATION DATABASE
+# ===================================================================
+mating_design_equations <- list(
+  griffing_m1 = list(
+    model = "Yij = µ + gi + gj + sij + rij",
+    model_explanation = HTML("Where:<br><b>µ</b>: Overall mean<br><b>gi, gj</b>: GCA effects for parents i and j<br><b>sij</b>: SCA effect for the cross<br><b>rij</b>: Reciprocal effect (difference between cross ij and ji)"),
+    gca_formula = "ĝi = (1/2p) * (Yi. + Y.i) - (1/p²) * Y..",
+    gca_explanation = HTML("The GCA effect for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' as a female<br><b>Y.i</b>: Sum of values for parent 'i' as a male<br><b>Y..</b>: Grand total of the data matrix"),
+    sca_formula = "ŝij = (1/2) * (Yij + Yji) - (1/2p) * (Yi. + Y.i) - (1/2p) * (Yj. + Y.j) + (1/p²) * Y..",
+    sca_explanation = "The SCA effect for the cross between 'i' and 'j'. It is the average performance of the cross and its reciprocal, adjusted for the GCA effects of both parents and the overall mean."
+  ),
+  griffing_m2 = list(
+    model = "Yij = µ + gi + gj + sij",
+    model_explanation = "Where: µ is the overall mean, gi and gj are the GCA effects, and sij is the SCA effect. Reciprocal effects are assumed to be absent.",
+    gca_formula = "ĝi = [1/(p+2)] * [Yi. + Yii - (2/p) * Y..]",
+    gca_explanation = HTML("The GCA for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' in all its crosses<br><b>Yii</b>: Performance of parent 'i' itself<br><b>Y..</b>: Grand total"),
+    sca_formula = "ŝij = Yij - [1/(p+2)] * (Yi. + Yii) - [1/(p+2)] * (Yj. + Yjj) + [2/((p+1)(p+2))] * Y..",
+    sca_explanation = "The SCA effect is the performance of the cross (Yij) adjusted for the GCA effects of its parents ('i' and 'j') and the grand mean."
+  ),
+  griffing_m3 = list(
+    model = "Yij = µ + gi + gj + sij + rij",
+    model_explanation = "Where: µ is the overall mean, gi and gj are GCA effects, sij is the SCA effect, and rij is the reciprocal effect. Parents are not included in the analysis.",
+    gca_formula = "ĝi = [1/(2(p-2))] * (Yi. + Y.i) - [1/(p(p-2))] * Y..",
+    gca_explanation = HTML("The GCA for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' as a female<br><b>Y.i</b>: Sum of values for parent 'i' as a male<br><b>Y..</b>: Grand total. The formula is adjusted because parental data is absent."),
+    sca_formula = "ŝij = (1/2) * (Yij + Yji) - [1/(2(p-2))] * (Yi. + Y.i + Yj. + Y.j) + [1/((p-1)(p-2))] * Y..",
+    sca_explanation = "The SCA effect is the average performance of the cross and its reciprocal, adjusted for the GCA effects of both parents and the overall mean, with formulas adapted for the absence of parental data."
+  ),
+  griffing_m4 = list(
+    model = "Yij = µ + gi + gj + sij",
+    model_explanation = "Where: µ is the overall mean, gi and gj are GCA effects, and sij is the SCA effect. Only F1 crosses (no parents or reciprocals) are analyzed.",
+    gca_formula = "ĝi = [1/(p-2)] * [Yi. - (2/p) * Y..]",
+    gca_explanation = HTML("The GCA for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' in all its crosses<br><b>Y..</b>: Grand total of all crosses."),
+    sca_formula = "ŝij = Yij - [1/(p-2)] * (Yi. + Yj.) + [2/((p-1)(p-2))] * Y..",
+    sca_explanation = "The SCA effect is the performance of the cross (Yij) adjusted for the GCA effects of its parents ('i' and 'j') and the grand mean."
+  ),
+  line_tester = list(
+    model = "Yijk = µ + rk + gi + gj + sij + eijk",
+    model_explanation = "Where: µ is the mean, rk is the replication effect, gi is the GCA of the i-th line, gj is the GCA of the j-th tester, sij is the SCA of their cross, and eijk is the error.",
+    gca_formula = "GCA (Line i) = Yi.. - Y... | GCA (Tester j) = Y.j. - Y...",
+    gca_explanation = HTML("The GCA of a line or tester is its average performance across all its crosses, expressed as a deviation from the grand mean.<br><b>Yi..</b>: Mean of line 'i'<br><b>Y.j.</b>: Mean of tester 'j'<br><b>Y...</b>: Grand mean"),
+    sca_formula = "SCA (ij) = Yij. - Yi.. - Y.j. + Y...",
+    sca_explanation = "The SCA of a specific cross is its mean performance (Yij.) adjusted for the GCA of the line, the GCA of the tester, and the grand mean."
+  ),
+  diallel_partial = list(
+    model = "Yij = µ + gi + gj + sij",
+    model_explanation = "Where: µ is the overall mean, gi and gj are GCA effects, and sij is the SCA effect.",
+    gca_formula = "Effects are estimated via least-squares matrix algebra.",
+    gca_explanation = "Due to the unbalanced nature of the partial diallel (not all crosses are made), GCA and SCA effects cannot be calculated with simple summation formulas. Instead, they are estimated simultaneously using a system of linear equations (least-squares method) to find the best fit for the observed data.",
+    sca_formula = "Effects are estimated via least-squares matrix algebra.",
+    sca_explanation = "Similar to GCA, SCA effects are estimated using the least-squares method. The SCA for a cross represents the deviation of its performance from the value predicted by the GCA of its two parents."
+  )
+)
+
+
+# ===================================================================
 # HELPER AND ANALYSIS FUNCTIONS
 # ===================================================================
+
+#' Create a Show/Hide UI for Explanations
+#'
+#' A helper function to generate a consistent UI for showing and hiding
+#' explanatory text content.
+#'
+#' @param ns The namespace function from the module server.
+#' @param base_id A unique string to identify the UI elements.
+#' @param content The HTML content to be shown or hidden.
+#' @return A tagList containing the action link and the hidden div.
+create_explanation_ui <- function(ns, base_id, content) {
+  link_id <- paste0("toggle_", base_id)
+  div_id <- paste0("div_", base_id)
+  tagList(
+    actionLink(ns(link_id), "Show/Hide Explanation", style = "font-size: 12px; font-style: italic;"),
+    shinyjs::hidden(
+      div(id = ns(div_id),
+          class = "alert alert-info",
+          style = "margin-top: 10px; font-size: 14px;",
+          content
+      )
+    )
+  )
+}
+
 
 add_significance_stars_robust <- function(df) {
   pval_col_name <- dplyr::case_when(
@@ -125,21 +209,30 @@ griffing_method1 <- function(df, rep_col = "Rep", male_col = "Male", female_col 
   ssrecp <- sum((myMatrix - t(myMatrix))^2)/4
   ssmat <- sum((Xi. - X.j)^2)/(2*p)
   ssnomat <- ssrecp - ssmat
-  Df <- c(p-1, p*(p-1)/2, p*(p-1)/2, p-1, (p-2)*(p-1)/2)
-  SSS <- c(ssgca, sssca, ssrecp, ssmat, ssnomat)*bc
-  MSSS <- SSS/Df
-  names(SSS) <- names(MSSS) <- c("GCA", "SCA", "Reciprocal", "Maternal", "No Maternal")
-  FVAL <- MSSS/MSEAD
-  pval <- 1 - pf(FVAL, Df, error_DF)
-  anova_diallel <- data.frame(Df=Df, `Sum Sq`=SSS, `Mean Sq`=MSSS, `F value`=FVAL, `Pr(>F)`=pval, row.names=names(SSS), check.names=FALSE)
+  
+  # Full calculation for internal use
+  Df_full <- c(p-1, p*(p-1)/2, p*(p-1)/2, p-1, (p-2)*(p-1)/2)
+  SSS_full <- c(ssgca, sssca, ssrecp, ssmat, ssnomat)*bc
+  
+  # Simplified ANOVA for display
+  Df_display <- c(p-1, p*(p-1)/2, p*(p-1)/2)
+  SSS_display <- c(ssgca, sssca, ssrecp) * bc
+  MSSS_display <- SSS_display / Df_display
+  names(SSS_display) <- names(MSSS_display) <- c("GCA", "SCA", "Reciprocal")
+  FVAL_display <- MSSS_display / MSEAD
+  pval_display <- 1 - pf(FVAL_display, Df_display, error_DF)
+  
+  anova_diallel <- data.frame(Df=Df_display, `Sum Sq`=SSS_display, `Mean Sq`=MSSS_display, `F value`=FVAL_display, `Pr(>F)`=pval_display, row.names=names(SSS_display), check.names=FALSE)
   anova_diallel <- add_significance_stars_robust(anova_diallel)
   anova_error <- data.frame(Df=error_DF, `Sum Sq`=MSEAD*error_DF, `Mean Sq`=MSEAD, `F value`=NA, `Pr(>F)`=NA, Signif="", row.names="Residual", check.names=FALSE)
   anova_final <- rbind(anova_diallel, anova_error)
+  
   gca <- (Xi. + X.j) / (2*p) - Xbar/(p^2)
   gca_se <- sqrt(((p-1) * MSEAD) / (2*p*p*bc))
   gca_df <- data.frame(Parent=ptypes, GCA=gca, SE=gca_se, T_value = gca/gca_se)
-  gca_df$p_value <- 2 * pt(-abs(gca_df$T_value), df = Df[1])
+  gca_df$p_value <- 2 * pt(-abs(gca_df$T_value), df = Df_display[1]) # Use GCA Df
   gca_df <- add_significance_stars_robust(gca_df)
+  
   sca <- (myMatrix + t(myMatrix))/2 - (matrix(Xi. + X.j, nrow=p, ncol=p, byrow=TRUE) + matrix(Xi. + X.j, nrow=p, ncol=p, byrow=FALSE))/(2*p) + Xbar/(p^2)
   sca[lower.tri(sca)] <- NA
   sca_se <- sqrt(((p*p - 2*p + 2) * MSEAD) / (2*p*p*bc))
@@ -147,10 +240,12 @@ griffing_method1 <- function(df, rep_col = "Rep", male_col = "Male", female_col 
   sca_df <- sca_df[!is.na(sca_df$SCA),]
   sca_df$SE <- sca_se
   sca_df$T_value <- sca_df$SCA / sca_df$SE
-  sca_df$p_value <- 2 * pt(-abs(sca_df$T_value), df = Df[2])
+  sca_df$p_value <- 2 * pt(-abs(sca_df$T_value), df = Df_display[2]) # Use SCA Df
   sca_df <- add_significance_stars_robust(sca_df)
+  
   return(list(method="I", anova=anova_final, gca=gca_df, sca=sca_df))
 }
+
 
 griffing_method2 <- function(df, rep_col = "Rep", male_col = "Male", female_col = "Female", trait_col = "Trait", blk_col = NULL) {
   data_ab1 <- df
@@ -245,23 +340,26 @@ griffing_method3 <- function(df, rep_col = "Rep", male_col = "Male", female_col 
   ssgca <- acon - (2 / (p * (p - 2))) * (Xbar^2)
   sssca <- sum((myMatrix + t(myMatrix))^2, na.rm=TRUE)/4 - acon + (Xbar^2)/((p-1)*(p-2))
   ssrecp <- sum((myMatrix - t(myMatrix))^2, na.rm=TRUE)/4
-  ssmat <- sum((Xi. - X.j)^2) / (2 * p)
-  ssnomat <- ssrecp - ssmat
-  Df <- c((p - 1), (p * (p - 3) / 2), (p * (p - 1) / 2), (p - 1), ((p - 2) * (p - 1) / 2))
-  SSS <- c(ssgca, sssca, ssrecp, ssmat, ssnomat) * bc
-  MSSS <- SSS / Df
-  names(SSS) <- names(MSSS) <- c("GCA", "SCA", "Reciprocal", "Maternal", "No Maternal")
-  FVAL <- MSSS / MSEAD
-  pval <- 1 - pf(FVAL, Df, error_DF)
-  anova_diallel <- data.frame(Df=Df, `Sum Sq`=SSS, `Mean Sq`=MSSS, `F value`=FVAL, `Pr(>F)`=pval, row.names=names(SSS), check.names=FALSE)
+  
+  # Simplified ANOVA for display
+  Df_display <- c((p - 1), (p * (p - 3) / 2), (p * (p - 1) / 2))
+  SSS_display <- c(ssgca, sssca, ssrecp) * bc
+  MSSS_display <- SSS_display / Df_display
+  names(SSS_display) <- names(MSSS_display) <- c("GCA", "SCA", "Reciprocal")
+  FVAL_display <- MSSS_display / MSEAD
+  pval_display <- 1 - pf(FVAL_display, Df_display, error_DF)
+  
+  anova_diallel <- data.frame(Df=Df_display, `Sum Sq`=SSS_display, `Mean Sq`=MSSS_display, `F value`=FVAL_display, `Pr(>F)`=pval_display, row.names=names(SSS_display), check.names=FALSE)
   anova_diallel <- add_significance_stars_robust(anova_diallel)
   anova_error <- data.frame(Df=error_DF, `Sum Sq`=MSEAD*error_DF, `Mean Sq`=MSEAD, `F value`=NA, `Pr(>F)`=NA, Signif="", row.names="Residual", check.names=FALSE)
   anova_final <- rbind(anova_diallel, anova_error)
+  
   gca <- (p * (Xi. + X.j) - 2 * Xbar) / (2 * p * (p - 2))
   gca_se <- sqrt(((p - 1) * MSEAD) / (2 * p * (p - 2) * bc))
   gca_df <- data.frame(Parent=ptypes, GCA=gca, SE=gca_se, T_value=gca/gca_se)
-  gca_df$p_value <- 2 * pt(-abs(gca_df$T_value), df = Df[1])
+  gca_df$p_value <- 2 * pt(-abs(gca_df$T_value), df = Df_display[1])
   gca_df <- add_significance_stars_robust(gca_df)
+  
   sca <- (myMatrix + t(myMatrix))/2 - (matrix(Xi.+X.j,nrow=p,ncol=p,byrow=TRUE) + matrix(Xi.+X.j,nrow=p,ncol=p,byrow=FALSE))/(2*(p-2)) + Xbar/((p-1)*(p-2))
   sca[lower.tri(sca, diag = TRUE)] <- NA
   sca_df <- expand.grid(Female=ptypes, Male=ptypes)
@@ -270,10 +368,12 @@ griffing_method3 <- function(df, rep_col = "Rep", male_col = "Male", female_col 
   sca_se <- sqrt(((p - 3) * MSEAD) / (2 * (p - 1) * bc))
   sca_df$SE <- sca_se
   sca_df$T_value <- sca_df$SCA / sca_df$SE
-  sca_df$p_value <- 2 * pt(-abs(sca_df$T_value), df = Df[2])
+  sca_df$p_value <- 2 * pt(-abs(sca_df$T_value), df = Df_display[2])
   sca_df <- add_significance_stars_robust(sca_df)
+  
   return(list(method="III", anova=anova_final, gca=gca_df, sca=sca_df))
 }
+
 
 griffing_method4 <- function(df, rep_col, male_col, female_col, trait_col, blk_col = NULL) {
   dat <- df[, c(rep_col, male_col, female_col, trait_col)]
@@ -583,7 +683,7 @@ mating_design_server <- function(id, shared_data) {
     output$md_dynamic_columns <- renderUI({
       df <- md_file_data()
       design <- active_mating_design()
-      req(df, design) 
+      req(df, design)
       all_cols <- names(df)
       num_cols <- all_cols[sapply(df, is.numeric)]
       switch(design,
@@ -617,6 +717,12 @@ mating_design_server <- function(id, shared_data) {
         showNotification("Analysis Complete!", type = "message", duration = 5)
       }
     })
+    
+    # --- Observers to handle Show/Hide clicks ---
+    observeEvent(input$toggle_anova_model, { shinyjs::toggle("div_anova_model", anim = TRUE) })
+    observeEvent(input$toggle_gca_formula, { shinyjs::toggle("div_gca_formula", anim = TRUE) })
+    observeEvent(input$toggle_sca_formula, { shinyjs::toggle("div_sca_formula", anim = TRUE) })
+    
     
     output$md_anova <- renderTable({
       req(md_results())
@@ -716,8 +822,14 @@ mating_design_server <- function(id, shared_data) {
     })
     
     output$anova_output_ui <- renderUI({
-      req(md_results())
+      req(md_results(), active_mating_design())
+      design <- active_mating_design()
+      eq <- mating_design_equations[[design]]
       tagList(
+        tags$h4("Model & Formula", style = "color: #142850;"),
+        tags$p(tags$b("Model: "), tags$code(eq$model)),
+        create_explanation_ui(ns, "anova_model", eq$model_explanation),
+        hr(),
         tags$h4("ANOVA Table", style = "color: #142850;"), tableOutput(ns("md_anova")), br(),
         tags$h4("Summary of Results", style = "color: #142850; margin-top: 15px;"), uiOutput(ns("md_interpretations")),
         if (active_mating_design() == "griffing_m2") {
@@ -727,16 +839,36 @@ mating_design_server <- function(id, shared_data) {
     })
     
     output$gca_output_ui <- renderUI({
-      req(md_results())
-      if (active_mating_design() == "line_tester") {
-        tagList(h4("Line GCA Effects", style = "color: #142850;"), tableOutput(ns("md_gca_lines")),
-                h4("Tester GCA Effects", style = "color: #142850;"), tableOutput(ns("md_gca_testers")))
-      } else {
-        tableOutput(ns("md_gca"))
-      }
+      req(md_results(), active_mating_design())
+      design <- active_mating_design()
+      eq <- mating_design_equations[[design]]
+      tagList(
+        tags$h4("GCA Formula", style = "color: #142850;"),
+        tags$p(tags$b("Formula: "), tags$code(eq$gca_formula)),
+        create_explanation_ui(ns, "gca_formula", eq$gca_explanation),
+        hr(),
+        if (active_mating_design() == "line_tester") {
+          tagList(h4("Line GCA Effects", style = "color: #142850;"), tableOutput(ns("md_gca_lines")),
+                  h4("Tester GCA Effects", style = "color: #142850;"), tableOutput(ns("md_gca_testers")))
+        } else {
+          tagList(h4("GCA Effects", style = "color: #142850;"), tableOutput(ns("md_gca")))
+        }
+      )
     })
     
-    output$sca_output_ui <- renderUI({ req(md_results()); tagList(h4("SCA Effects", style = "color: #142850;"), tableOutput(ns("md_sca"))) })
+    output$sca_output_ui <- renderUI({
+      req(md_results(), active_mating_design())
+      design <- active_mating_design()
+      eq <- mating_design_equations[[design]]
+      tagList(
+        tags$h4("SCA Formula", style = "color: #142850;"),
+        tags$p(tags$b("Formula: "), tags$code(eq$sca_formula)),
+        create_explanation_ui(ns, "sca_formula", eq$sca_explanation),
+        hr(),
+        h4("SCA Effects", style = "color: #142850;"),
+        tableOutput(ns("md_sca"))
+      )
+    })
     
     output$md_download_results <- downloadHandler(
       filename = function() { paste0("MatingDesign_Results_", active_mating_design(), "_", Sys.Date(), ".zip") },
