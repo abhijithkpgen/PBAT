@@ -11,7 +11,7 @@ homeUI <- function(id) {
   # Create a namespace function using the provided id
   ns <- NS(id)
   
-  # UI is now a flex container with three direct children panels
+  # UI is now a flex container with two direct children panels
   div(class = "home-container",
       
       # --- Panel 1: User Inputs (Left) ---
@@ -20,13 +20,13 @@ homeUI <- function(id) {
             ns("analysis_mode"),
             "Select Analysis Workflow",
             choices = c(
-              "Trait Explorer" = "trait_explorer",
               "Experimental Design" = "eda",
+              "Trait Explorer" = "trait_explorer",
               "Stability Analysis" = "stability",
               "Multivariate Analysis" = "multivariate",
               "Mating Design" = "mating"
             ),
-            selected = "trait_explorer"
+            selected = "eda"
           ),
           
           # --- NEW: Conditional UI for Trait Explorer Sub-types ---
@@ -99,7 +99,7 @@ homeUI <- function(id) {
           )
       ),
       
-      # --- Panel 2: Workflow Overview (Middle) ---
+      # --- Panel 2: Workflow Overview (Right) ---
       div(class = "overlay-panel",
           h4(tags$b("Application Workflow Overview")),
           p("PbAT is an end-to-end pipeline for statistical and multivariate analysis of plant breeding data. Follow these steps:"),
@@ -119,42 +119,6 @@ homeUI <- function(id) {
           tags$p(style = "font-size: 11px; margin-top: 10px;",
                  "PbAT is designed for intuitive data analysis without needing expertise in R. ",
                  tags$b("Sample datasets and detailed help are available in the Help & Guide tab.")
-          )
-      ),
-      
-      # --- Panel 3: Run Locally (Right) ---
-      div(class = "overlay-panel installation-box",
-          tags$div(style = "text-align: center;",
-                   tags$img(src = "www/spinner2.gif", height = "150px", style = "margin-bottom: 5px; border: none;")
-          ),
-          h4(icon("laptop-code"), " Run Locally in R"),
-          p("You can install and run this application on your own computer directly within R or RStudio. This is a great option for offline use or for analyzing large data sets."),
-          tags$a(href = "https://github.com/abhijithkpgen/PBAT", 
-                 target = "_blank", 
-                 class = "btn btn-primary", 
-                 style = "color: white !important; margin-right: 10px;", 
-                 icon("github"), " View on GitHub"),
-          tags$a(href = "https://github.com/abhijithkpgen/PBAT/archive/refs/tags/v1.0.5.tar.gz", 
-                 class = "btn btn-secondary", 
-                 style = "color: white !important;", 
-                 icon("download"), " Download v1.0.5"),
-          
-          tags$details(
-            tags$summary(icon("terminal"), " Click to view Installation Instructions"),
-            tags$pre(
-              tags$code(
-                HTML(
-                  '# Install devtools if not already installed<br>',
-                  'if (!require("devtools")) install.packages("devtools")<br><br>',
-                  '# Install PbAT from GitHub<br>',
-                  'devtools::install_github("abhijithkpgen/PBAT")<br><br>',
-                  '# Load the library<br>',
-                  'library(PBAT)<br><br>',
-                  '# Run the application<br>',
-                  'run_app()'
-                )
-              )
-            )
           )
       )
   )
