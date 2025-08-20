@@ -20,7 +20,6 @@ Depends:
 Imports:
     agricolae,
     broom,
-    broom.mixed,
     bslib,
     car,
     colourpicker,
@@ -32,13 +31,13 @@ Imports:
     FactoMineR,
     future,
     ggplot2,
+    htmlwidgets,
     lavaan,
     lme4,
     lmerTest,
     metan,
-    multcomp,
     PerformanceAnalytics,
-    promises,
+    plotly,
     purrr,
     RColorBrewer,
     readr,
@@ -60,4 +59,3 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Config/testthat/edition: 3
 Config/testthat/parallel: true
-

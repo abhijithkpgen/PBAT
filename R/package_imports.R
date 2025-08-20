@@ -1,54 +1,52 @@
 # R/package_imports.R
 
-# Centralize package imports for PBAT.
-# This file centralizes imports to keep NAMESPACE tidy.
+# This file centralizes all package imports for the PBAT application to ensure
+# that all necessary functions are available and the NAMESPACE is managed correctly.
 
 #' @keywords internal
 #'
 # Shiny and UI Packages
-#' @importFrom shiny actionButton actionLink br checkboxGroupInput checkboxInput column conditionalPanel div downloadButton downloadHandler fileInput fluidPage fluidRow h1 h2 h3 h4 h5 helpText hr HTML icon incProgress mainPanel modalDialog moduleServer navbarMenu navbarPage NS numericInput observe observeEvent p plotOutput radioButtons reactive reactiveVal reactiveValues reactiveValuesToList removeModal renderPlot renderPrint renderTable renderUI req selectInput showModal showNotification showTab sidebarLayout sidebarPanel span tableOutput tabPanel tabsetPanel tagList tags textInput uiOutput updateCheckboxGroupInput updateNavbarPage updateSelectInput updateTabsetPanel validate verbatimTextOutput wellPanel withProgress need
-#' @importFrom shinyjs useShinyjs runjs show hide toggle enable disable
+#' @importFrom shiny NS tabPanel sidebarLayout sidebarPanel uiOutput mainPanel fluidPage div h2 h3 h4 h5 p tags actionButton br checkboxGroupInput checkboxInput conditionalPanel downloadButton fileInput hr numericInput radioButtons reactive reactiveVal reactiveValues observeEvent renderUI req selectInput tabsetPanel updateNavbarPage updateTabsetPanel updateSelectInput showModal modalDialog need validate actionLink moduleServer HTML tagList wellPanel helpText reactiveValuesToList verbatimTextOutput span icon tableOutput plotOutput fluidRow column renderTable renderPlot withProgress incProgress showNotification observe updateCheckboxGroupInput renderPrint navbarPage navbarMenu downloadHandler
+#' @importFrom shinyjs useShinyjs delay runjs toggle hidden
 #' @importFrom bslib bs_theme page_navbar
 #' @importFrom waiter use_waiter waiter_hide waiter_show spin_fading_circles waiter_show_on_load
-#' @importFrom DT DTOutput renderDT datatable renderDataTable dataTableOutput
-#' @importFrom zip zipr
+#' @importFrom DT DTOutput renderDT datatable
+#' @importFrom plotly plotlyOutput renderPlotly ggplotly
+#' @importFrom htmlwidgets saveWidget
 #' @importFrom colourpicker colourInput
 #'
 # Tidyverse and Data Manipulation
-#' @importFrom dplyr %>% across all_of any_of arrange bind_rows contains distinct filter full_join group_by left_join mutate n pull recode select starts_with summarise summarise_all where
+#' @importFrom dplyr %>% across all_of any_of arrange bind_rows contains distinct filter full_join group_by left_join mutate n pull recode select starts_with summarise ungroup row_number ntile if_else case_when rename where
 #' @importFrom tidyr drop_na pivot_longer pivot_wider separate
 #' @importFrom tibble as_tibble tibble rownames_to_column
-#' @importFrom purrr map map_chr map_dbl map_dfc map_dfr map_int map_lgl pmap some iwalk walk2 imap
+#' @importFrom purrr map iwalk
 #' @importFrom readr read_csv write_csv
 #' @importFrom rlang .data := sym
 #' @importFrom scales percent
 #'
 # Plotting and Visualization
-#' @importFrom RColorBrewer brewer.pal.info brewer.pal
+#' @importFrom RColorBrewer brewer.pal.info
 #' @importFrom corrplot corrplot
-#' @importFrom factoextra fviz_ca_biplot fviz_cos2 fviz_pca_biplot fviz_pca_ind fviz_pca_var fviz_screeplot hcut get_eigenvalue
+#' @importFrom factoextra fviz_pca_ind fviz_screeplot fviz_pca_var get_eigenvalue
 #' @importFrom PerformanceAnalytics chart.Correlation
 #' @importFrom semPlot semPaths
-#' @importFrom ggplot2 aes coord_fixed element_blank element_text facet_wrap geom_bar geom_boxplot geom_col geom_errorbar geom_hline geom_line geom_path geom_point geom_text geom_tile ggplot ggtitle labs scale_fill_brewer scale_fill_gradient2 scale_y_continuous stat_qq stat_qq_line theme theme_bw theme_minimal
+#' @importFrom ggplot2 ggplot aes geom_tile scale_fill_viridis_c labs theme_minimal theme element_blank element_text scale_color_manual scale_linetype_manual geom_boxplot geom_jitter geom_line geom_point facet_wrap theme_bw scale_fill_brewer geom_crossbar
 #'
 # Statistics and Modeling
-#' @import promises
-#' @import future
-#' @importFrom agricolae HSD.test LSD.test duncan.test friedman kruskal kurtosis reg.homog skewness waerden.test
+#' @importFrom future plan multisession
+#' @importFrom agricolae duncan.test
 #' @importFrom broom tidy
-#' @importFrom broom.mixed tidy
-#' @importFrom car Anova leveneTest qqPlot
-#' @importFrom emmeans emmeans contrast
-#' @importFrom FactoMineR CA PCA
-#' @importFrom lme4 VarCorr isSingular ranef fixef
+#' @importFrom car Anova
+#' @importFrom emmeans emmeans
+#' @importFrom FactoMineR PCA
+#' @importFrom lme4 isSingular
 #' @importFrom lmerTest lmer
-#' @importFrom multcomp cld glht
 #' @importFrom lavaan sem parameterEstimates
-#' @importFrom metan plot_scores
+#' @importFrom metan performs_ammi waasb ammi_indexes gge plot_scores
+#' @importFrom stats aov as.formula na.omit p.adjust pf pnorm pt quantile residuals sd shapiro.test aggregate lm anova median runif cor
 #'
 # Base R and Utils
+#' @importFrom utils capture.output combn write.csv
 #' @importFrom grDevices dev.off pdf
-#' @importFrom utils install.packages
-#' @importFrom stats aggregate anova aov as.formula cor lm median model.tables na.omit pf pt qf qt residuals runif sd shapiro.test update vcov
-#' @importFrom utils capture.output combn head tail write.csv zip
+#' @importFrom zip zipr
 NULL

@@ -14,14 +14,14 @@ app_ui <- function() {
       span("PbAT: Plant Breeding Analytical Tools  v1.0.5")
     ),
     id = "main_navbar", 
-    theme = bs_theme(
+    theme = bslib::bs_theme(
       version = 4,
       bootswatch = "cerulean",
       primary = "#e17055",
       secondary = "#00b894"
     ),
     header = tagList(
-      useShinyjs(),
+      shinyjs::useShinyjs(),
       waiter::use_waiter(),
       
       waiter::waiter_show_on_load(
@@ -29,7 +29,7 @@ app_ui <- function() {
           tags$div(
             style = "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;",
             tags$img(src = "www/LogoNobg.png", height = "200px", style = "margin-bottom: 20px;"),
-            spin_fading_circles()
+            waiter::spin_fading_circles()
           )
         ),
         color = "#e17055" # orange background
@@ -151,6 +151,9 @@ app_ui <- function() {
                analysisUI(id = "eda")[[1]], 
                analysisUI(id = "eda")[[2]]
     ),
+    
+    # --- NEW: Trait Explorer module added as a top-level tab ---
+    traitExplorerUI(id = "trait_explorer"),
     
     stability_analysis_ui(id = "stability"),
     

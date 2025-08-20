@@ -20,13 +20,27 @@ homeUI <- function(id) {
             ns("analysis_mode"),
             "Select Analysis Workflow",
             choices = c(
+              "Trait Explorer" = "trait_explorer",
               "Experimental Design" = "eda",
               "Stability Analysis" = "stability",
               "Multivariate Analysis" = "multivariate",
               "Mating Design" = "mating"
             ),
-            selected = "eda"
+            selected = "trait_explorer"
           ),
+          
+          # --- NEW: Conditional UI for Trait Explorer Sub-types ---
+          conditionalPanel(
+            condition = paste0("input['", ns("analysis_mode"), "'] == 'trait_explorer'"),
+            selectInput(
+              ns("explorer_type"), "Select Explorer Type",
+              choices = c(
+                "Spatial Trait Explorer" = "spatial",
+                "Data Curation & Outlier Analysis" = "curation"
+              )
+            )
+          ),
+          
           fileInput(ns("file"), "Upload CSV File", accept = c("text/csv", ".csv")),
           
           # --- Conditional UI for Stability Analysis ---
@@ -95,6 +109,7 @@ homeUI <- function(id) {
             tags$li(tags$b("Map Data Columns:"), " Assign the appropriate columns to enable correct analysis."),
             tags$li(tags$b("Run Analysis:"), tags$ul(
               tags$li(tags$b("Experimental Designs:"), " Generate summary statistics, ANOVA, BLUEs/BLUPs, diagnostics, and post-hoc tests."),
+              tags$li(tags$b("Trait Explorer:"), " Visually map trait performance and curate data for outliers."),
               tags$li(tags$b("Stability Analysis:"), " Perform AMMI and GGE biplot analysis for GxE interaction."),
               tags$li(tags$b("Multivariate Analysis:"), " Perform PCA, correlation, and path analysis."),
               tags$li(tags$b("Mating Design Analysis:"), " Analyze Diallel and Line x Tester designs.")
@@ -161,9 +176,12 @@ homeServer <- function(id) {
     observeEvent(input$go_to_analysis, {
       req(input$file)
       df <- readr::read_csv(input$file$datapath, na = c("", "NA"), show_col_types = FALSE)
+      
+      # UPDATED: Added explorer_type to the list of settings
       settings <- list(
         file_data = df,
         analysis_mode = input$analysis_mode,
+        explorer_type = input$explorer_type, # Captures the new dropdown value
         design = input$design,
         stab_subtype = input$stab_subtype,
         multi_subtype = input$multi_subtype,
