@@ -83,48 +83,48 @@ mating_design_ui <- function(id) {
 # ===================================================================
 mating_design_equations <- list(
   griffing_m1 = list(
-    model = "Yij = xx + gi + gj + sij + rij",
-    model_explanation = HTML("Where:<br><b>xx</b>: Overall mean<br><b>gi, gj</b>: GCA effects for parents i and j<br><b>sij</b>: SCA effect for the cross<br><b>rij</b>: Reciprocal effect (difference between cross ij and ji)"),
-    gca_formula = "xxi = (1/2p) * (Yi. + Y.i) - (1/pxx) * Y..",
+    model = "Yij = µ + gi + gj + sij + rij",
+    model_explanation = HTML("Where:<br><b>µ</b>: Overall mean<br><b>gi, gj</b>: GCA effects for parents i and j<br><b>sij</b>: SCA effect for the cross<br><b>rij</b>: Reciprocal effect (difference between cross ij and ji)"),
+    gca_formula = "ĝi = (1/2p) * (Yi. + Y.i) - (1/p²) * Y..",
     gca_explanation = HTML("The GCA effect for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' as a female<br><b>Y.i</b>: Sum of values for parent 'i' as a male<br><b>Y..</b>: Grand total of the data matrix"),
-    sca_formula = "xxij = (1/2) * (Yij + Yji) - (1/2p) * (Yi. + Y.i) - (1/2p) * (Yj. + Y.j) + (1/pxx) * Y..",
+    sca_formula = "ŝij = (1/2) * (Yij + Yji) - (1/2p) * (Yi. + Y.i) - (1/2p) * (Yj. + Y.j) + (1/p²) * Y..",
     sca_explanation = "The SCA effect for the cross between 'i' and 'j'. It is the average performance of the cross and its reciprocal, adjusted for the GCA effects of both parents and the overall mean."
   ),
   griffing_m2 = list(
-    model = "Yij = xx + gi + gj + sij",
-    model_explanation = "Where: xx is the overall mean, gi and gj are the GCA effects, and sij is the SCA effect. Reciprocal effects are assumed to be absent.",
-    gca_formula = "xxi = [1/(p+2)] * [Yi. + Yii - (2/p) * Y..]",
+    model = "Yij = µ + gi + gj + sij",
+    model_explanation = "Where: µ is the overall mean, gi and gj are the GCA effects, and sij is the SCA effect. Reciprocal effects are assumed to be absent.",
+    gca_formula = "ĝi = [1/(p+2)] * [Yi. + Yii - (2/p) * Y..]",
     gca_explanation = HTML("The GCA for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' in all its crosses<br><b>Yii</b>: Performance of parent 'i' itself<br><b>Y..</b>: Grand total"),
-    sca_formula = "xxij = Yij - [1/(p+2)] * (Yi. + Yii) - [1/(p+2)] * (Yj. + Yjj) + [2/((p+1)(p+2))] * Y..",
+    sca_formula = "ŝij = Yij - [1/(p+2)] * (Yi. + Yii) - [1/(p+2)] * (Yj. + Yjj) + [2/((p+1)(p+2))] * Y..",
     sca_explanation = "The SCA effect is the performance of the cross (Yij) adjusted for the GCA effects of its parents ('i' and 'j') and the grand mean."
   ),
   griffing_m3 = list(
-    model = "Yij = xx + gi + gj + sij + rij",
-    model_explanation = "Where: xx is the overall mean, gi and gj are GCA effects, sij is the SCA effect, and rij is the reciprocal effect. Parents are not included in the analysis.",
-    gca_formula = "xxi = [1/(2(p-2))] * (Yi. + Y.i) - [1/(p(p-2))] * Y..",
+    model = "Yij = µ + gi + gj + sij + rij",
+    model_explanation = "Where: µ is the overall mean, gi and gj are GCA effects, sij is the SCA effect, and rij is the reciprocal effect. Parents are not included in the analysis.",
+    gca_formula = "ĝi = [1/(2(p-2))] * (Yi. + Y.i) - [1/(p(p-2))] * Y..",
     gca_explanation = HTML("The GCA for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' as a female<br><b>Y.i</b>: Sum of values for parent 'i' as a male<br><b>Y..</b>: Grand total. The formula is adjusted because parental data is absent."),
-    sca_formula = "xxij = (1/2) * (Yij + Yji) - [1/(2(p-2))] * (Yi. + Y.i + Yj. + Y.j) + [1/((p-1)(p-2))] * Y..",
+    sca_formula = "ŝij = (1/2) * (Yij + Yji) - [1/(2(p-2))] * (Yi. + Y.i + Yj. + Y.j) + [1/((p-1)(p-2))] * Y..",
     sca_explanation = "The SCA effect is the average performance of the cross and its reciprocal, adjusted for the GCA effects of both parents and the overall mean, with formulas adapted for the absence of parental data."
   ),
   griffing_m4 = list(
-    model = "Yij = xx + gi + gj + sij",
-    model_explanation = "Where: xx is the overall mean, gi and gj are GCA effects, and sij is the SCA effect. Only F1 crosses (no parents or reciprocals) are analyzed.",
-    gca_formula = "xxi = [1/(p-2)] * [Yi. - (2/p) * Y..]",
+    model = "Yij = µ + gi + gj + sij",
+    model_explanation = "Where: µ is the overall mean, gi and gj are GCA effects, and sij is the SCA effect. Only F1 crosses (no parents or reciprocals) are analyzed.",
+    gca_formula = "ĝi = [1/(p-2)] * [Yi. - (2/p) * Y..]",
     gca_explanation = HTML("The GCA for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' in all its crosses<br><b>Y..</b>: Grand total of all crosses."),
-    sca_formula = "xxij = Yij - [1/(p-2)] * (Yi. + Yj.) + [2/((p-1)(p-2))] * Y..",
+    sca_formula = "ŝij = Yij - [1/(p-2)] * (Yi. + Yj.) + [2/((p-1)(p-2))] * Y..",
     sca_explanation = "The SCA effect is the performance of the cross (Yij) adjusted for the GCA effects of its parents ('i' and 'j') and the grand mean."
   ),
   line_tester = list(
-    model = "Yijk = xx + rk + gi + gj + sij + eijk",
-    model_explanation = "Where: xx is the mean, rk is the replication effect, gi is the GCA of the i-th line, gj is the GCA of the j-th tester, sij is the SCA of their cross, and eijk is the error.",
+    model = "Yijk = µ + rk + gi + gj + sij + eijk",
+    model_explanation = "Where: µ is the mean, rk is the replication effect, gi is the GCA of the i-th line, gj is the GCA of the j-th tester, sij is the SCA of their cross, and eijk is the error.",
     gca_formula = "GCA (Line i) = Yi.. - Y... | GCA (Tester j) = Y.j. - Y...",
     gca_explanation = HTML("The GCA of a line or tester is its average performance across all its crosses, expressed as a deviation from the grand mean.<br><b>Yi..</b>: Mean of line 'i'<br><b>Y.j.</b>: Mean of tester 'j'<br><b>Y...</b>: Grand mean"),
     sca_formula = "SCA (ij) = Yij. - Yi.. - Y.j. + Y...",
     sca_explanation = "The SCA of a specific cross is its mean performance (Yij.) adjusted for the GCA of the line, the GCA of the tester, and the grand mean."
   ),
   diallel_partial = list(
-    model = "Yij = xx + gi + gj + sij",
-    model_explanation = "Where: xx is the overall mean, gi and gj are GCA effects, and sij is the SCA effect.",
+    model = "Yij = µ + gi + gj + sij",
+    model_explanation = "Where: µ is the overall mean, gi and gj are GCA effects, and sij is the SCA effect.",
     gca_formula = "Effects are estimated via least-squares matrix algebra.",
     gca_explanation = "Due to the unbalanced nature of the partial diallel (not all crosses are made), GCA and SCA effects cannot be calculated with simple summation formulas. Instead, they are estimated simultaneously using a system of linear equations (least-squares method) to find the best fit for the observed data.",
     sca_formula = "Effects are estimated via least-squares matrix algebra.",
@@ -210,11 +210,6 @@ griffing_method1 <- function(df, rep_col = "Rep", male_col = "Male", female_col 
   ssmat <- sum((Xi. - X.j)^2)/(2*p)
   ssnomat <- ssrecp - ssmat
   
-  # Full calculation for internal use
-  Df_full <- c(p-1, p*(p-1)/2, p*(p-1)/2, p-1, (p-2)*(p-1)/2)
-  SSS_full <- c(ssgca, sssca, ssrecp, ssmat, ssnomat)*bc
-  
-  # Simplified ANOVA for display
   Df_display <- c(p-1, p*(p-1)/2, p*(p-1)/2)
   SSS_display <- c(ssgca, sssca, ssrecp) * bc
   MSSS_display <- SSS_display / Df_display
@@ -230,16 +225,20 @@ griffing_method1 <- function(df, rep_col = "Rep", male_col = "Male", female_col 
   gca <- (Xi. + X.j) / (2*p) - Xbar/(p^2)
   gca_se <- sqrt(((p-1) * MSEAD) / (2*p*p*bc))
   gca_df <- data.frame(Parent=ptypes, GCA=gca, SE=gca_se, T_value = gca/gca_se)
-  gca_df$p_value <- 2 * pt(-abs(gca_df$T_value), df = Df_display[1]) # Use GCA Df
+  gca_df$p_value <- 2 * pt(-abs(gca_df$T_value), df = Df_display[1])
   gca_df <- add_significance_stars_robust(gca_df)
   
   sca <- (myMatrix + t(myMatrix))/2 - (matrix(Xi. + X.j, nrow=p, ncol=p, byrow=TRUE) + matrix(Xi. + X.j, nrow=p, ncol=p, byrow=FALSE))/(2*p) + Xbar/(p^2)
   sca[lower.tri(sca)] <- NA
+  
+  # --- FIX: Define sca_se before using it ---
+  sca_se <- sqrt(((p-1) * MSEAD) / (2 * bc))
+  
   sca_df <- data.frame(expand.grid(Female=ptypes, Male=ptypes), SCA=as.vector(sca))
   sca_df <- sca_df[!is.na(sca_df$SCA),]
   sca_df$SE <- sca_se
   sca_df$T_value <- sca_df$SCA / sca_df$SE
-  sca_df$p_value <- 2 * pt(-abs(sca_df$T_value), df = Df_display[2]) # Use SCA Df
+  sca_df$p_value <- 2 * pt(-abs(sca_df$T_value), df = Df_display[2])
   sca_df <- add_significance_stars_robust(sca_df)
   
   return(list(method="I", anova=anova_final, gca=gca_df, sca=sca_df))
@@ -340,7 +339,6 @@ griffing_method3 <- function(df, rep_col = "Rep", male_col = "Male", female_col 
   sssca <- sum((myMatrix + t(myMatrix))^2, na.rm=TRUE)/4 - acon + (Xbar^2)/((p-1)*(p-2))
   ssrecp <- sum((myMatrix - t(myMatrix))^2, na.rm=TRUE)/4
   
-  # Simplified ANOVA for display
   Df_display <- c((p - 1), (p * (p - 3) / 2), (p * (p - 1) / 2))
   SSS_display <- c(ssgca, sssca, ssrecp) * bc
   MSSS_display <- SSS_display / Df_display
