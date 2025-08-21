@@ -8,7 +8,7 @@
 # Shiny and UI Packages
 #' @importFrom shiny NS tabPanel sidebarLayout sidebarPanel uiOutput mainPanel fluidPage div h2 h3 h4 h5 p tags actionButton br checkboxGroupInput checkboxInput conditionalPanel downloadButton fileInput hr numericInput radioButtons reactive reactiveVal reactiveValues observeEvent renderUI req selectInput tabsetPanel updateNavbarPage updateTabsetPanel updateSelectInput showModal modalDialog need validate actionLink moduleServer HTML tagList wellPanel helpText reactiveValuesToList verbatimTextOutput span icon tableOutput plotOutput fluidRow column renderTable renderPlot withProgress incProgress showNotification observe updateCheckboxGroupInput renderPrint navbarPage navbarMenu downloadHandler
 #' @importFrom shinyjs useShinyjs delay runjs toggle hidden
-#' @importFrom bslib bs_theme page_navbar
+#' @importFrom bslib bs_theme
 #' @importFrom waiter use_waiter waiter_hide waiter_show spin_fading_circles waiter_show_on_load
 #' @importFrom DT DTOutput renderDT datatable
 #' @importFrom plotly plotlyOutput renderPlotly ggplotly
@@ -30,7 +30,7 @@
 #' @importFrom factoextra fviz_pca_ind fviz_screeplot fviz_pca_var get_eigenvalue
 #' @importFrom PerformanceAnalytics chart.Correlation
 #' @importFrom semPlot semPaths
-#' @importFrom ggplot2 ggplot aes geom_tile scale_fill_viridis_c labs theme_minimal theme element_blank element_text scale_color_manual scale_linetype_manual geom_boxplot geom_jitter geom_line geom_point facet_wrap theme_bw scale_fill_brewer geom_crossbar
+#' @importFrom ggplot2 aes element_blank element_text facet_wrap geom_boxplot geom_crossbar geom_jitter geom_line geom_point geom_text geom_tile ggplot ggsave ggtitle labs scale_color_manual scale_fill_brewer scale_fill_viridis_c scale_linetype_manual stat_qq stat_qq_line theme theme_bw theme_minimal
 #'
 # Statistics and Modeling
 #' @importFrom future plan multisession
