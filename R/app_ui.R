@@ -1,11 +1,5 @@
-# ===================================================================
-# FINAL INTEGRATED SHINY APPLICATION
-# This app.R file loads all modules and connects them with a custom UI.
-# ===================================================================
+# R/app_ui.R
 
-# ===================================================================
-# 3. DEFINE THE USER INTERFACE (UI)
-# ===================================================================
 app_ui <- function() {
   navbarPage(
     title = div(
@@ -45,9 +39,9 @@ app_ui <- function() {
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        flex-wrap: wrap; /* Allows panels to wrap on smaller screens */
+        flex-wrap: wrap; 
         min-height: 85vh;
-        gap: 25px; /* Spacing between panels */
+        gap: 25px; 
         margin-top: 30px;
         background: none;
       }
@@ -56,9 +50,9 @@ app_ui <- function() {
         padding: 20px;
         border-radius: 12px;
         box-shadow: 0 0 18px rgba(0,0,0,0.17);
-        flex: 1; /* Allow panels to grow */
-        min-width: 340px; /* Minimum width before wrapping */
-        max-width: 450px; /* Maximum width */
+        flex: 1; 
+        min-width: 340px; 
+        max-width: 450px; 
         font-size: 13px;
         color: #fafcff !important;
         border: 1px solid #223870;
@@ -103,7 +97,6 @@ app_ui <- function() {
         color: #142850 !important;
       }
       
-      /* Style for the new installation box */
       .installation-box {
         background-color: #f8f9fa !important;
         color: #142850 !important;
@@ -125,9 +118,8 @@ app_ui <- function() {
         padding: 15px;
         border-radius: 5px;
         border: 1px solid #ced4da;
-        white-space: pre-wrap; /* Ensures code wraps */
+        white-space: pre-wrap; 
       }
-      /* Styling for the collapsible details element */
       .installation-box details {
         border: 1px solid #ced4da;
         border-radius: 5px;
@@ -147,12 +139,13 @@ app_ui <- function() {
     
     tabPanel("Home", homeUI(id = "home")),
     
+    designExperimentUI(id = "design_experiment"), 
+    
     navbarMenu("Experimental Design",
                analysisUI(id = "eda")[[1]], 
                analysisUI(id = "eda")[[2]]
     ),
     
-    # --- NEW: Trait Explorer module added as a top-level tab ---
     traitExplorerUI(id = "trait_explorer"),
     
     stability_analysis_ui(id = "stability"),

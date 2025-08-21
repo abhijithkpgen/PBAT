@@ -7,7 +7,8 @@ Authors@R:
            role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8641-026X"))
 Description: Provides an interactive Shiny application for plant breeding 
-    analyses, including Experimental design analysis, mating design analytics, 
+    analyses, including designing experiments (RCBD, Augmented RCBD, Alpha 
+    Lattice), analyzing experimental data, mating design analytics, 
     stability analysis, and multivariate analysis. Designed for 
     non-programmers with a point-and-click interface.
 License: MIT + file LICENSE

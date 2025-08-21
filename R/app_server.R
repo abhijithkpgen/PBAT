@@ -17,14 +17,14 @@ app_server <- function(input, output, session) {
   # --- Create Reactive Values for each downstream module ---
   eda_shared_data <- reactiveVal()
   trait_explorer_shared_data <- reactiveVal()
+  design_exp_shared_data <- reactiveVal()
   stability_shared_data <- reactiveValues(file_data = NULL, stab_subtype = NULL)
   mating_shared_data <- reactiveValues(file_data = NULL, mating_design = NULL)
   multi_shared_data  <- reactiveValues(file_data = NULL, multi_subtype = NULL)
   
   # --- Dynamic Tab Navigation (Hide/Show Tabs) ---
-  
-  # Hide all analysis tabs/menus at startup
   observe({
+    hideTab("main_navbar", "Design Your Trial")
     hideTab("main_navbar", "Experimental Design")
     hideTab("main_navbar", "Trait Explorer")
     hideTab("main_navbar", "Stability Analysis")
@@ -37,15 +37,21 @@ app_server <- function(input, output, session) {
     req(home_inputs())
     mode <- home_inputs()$analysis_mode
     
-    # Hide all analysis tabs first to ensure a clean state
+    # Hide all analysis tabs first
+    hideTab("main_navbar", "Design Your Trial")
     hideTab("main_navbar", "Experimental Design")
     hideTab("main_navbar", "Trait Explorer")
     hideTab("main_navbar", "Stability Analysis")
     hideTab("main_navbar", "Mating Design Analysis")
     hideTab("main_navbar", "Multivariate Analysis")
     
-    # Show and select the right tab(s) based on user's choice
-    if (mode == "eda") {
+    # Show and select the right tab(s)
+    if (mode == "design_exp") {
+      design_exp_shared_data(home_inputs())
+      showTab("main_navbar", "Design Your Trial")
+      updateNavbarPage(session, "main_navbar", selected = "Design Your Trial")
+      
+    } else if (mode == "eda") {
       eda_shared_data(home_inputs())
       showTab("main_navbar", "Experimental Design")
       updateNavbarPage(session, "main_navbar", selected = "Analysis 1")
@@ -55,15 +61,9 @@ app_server <- function(input, output, session) {
       showTab("main_navbar", "Trait Explorer")
       updateNavbarPage(session, "main_navbar", selected = "Trait Explorer")
       
-      # UPDATED: Switch to the correct sub-tab within Trait Explorer
       explorer_type <- home_inputs()$explorer_type
       if (!is.null(explorer_type)) {
-        sub_tab_name <- if (explorer_type == "spatial") {
-          "Spatial Trait Explorer"
-        } else {
-          "Data Curation & Outlier Analysis"
-        }
-        # The ID is namespaced: "mainModuleID-subModuleTabsetID"
+        sub_tab_name <- if (explorer_type == "spatial") "Spatial Trait Explorer" else "Data Curation & Outlier Analysis"
         updateTabsetPanel(session, "trait_explorer-explorer_tabs", selected = sub_tab_name)
       }
       
@@ -88,6 +88,9 @@ app_server <- function(input, output, session) {
   })
   
   # --- Call the Server Logic for each Analysis Module ---
+  # THE FIX IS HERE: Pass the correct reactive data to the design module server
+  designExperimentServer(id = "design_experiment", home_inputs = design_exp_shared_data) 
+  
   analysisServer(id = "eda", home_inputs = eda_shared_data)
   traitExplorerServer(id = "trait_explorer", home_inputs = trait_explorer_shared_data)
   stability_analysis_server(id = "stability", shared_data = stability_shared_data)
