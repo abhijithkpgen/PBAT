@@ -4,6 +4,32 @@
 # ===================================================================
 app_server <- function(input, output, session) {
   
+  # --- START: Add this code block for the welcome pop-up ---
+  
+  # This observer triggers once when the app loads for a new user
+  observeEvent(session$clientData$url_hostname, {
+    showModal(modalDialog(
+      title = tags$div(style = "display: flex; align-items: center;", 
+                       icon("info-circle", style = "margin-right: 10px; color: #1F4E79;"), 
+                       "Welcome to PBAT!"),
+      HTML("New to the app? <br><br> Check out the <b>Help & Guide</b> section for tutorials and to download sample data files with the correct input formats."),
+      footer = tagList(
+        modalButton("Dismiss"),
+        actionButton("go_to_help", "Take me to the Guide", class = "btn-success")
+      ),
+      easyClose = TRUE,
+      size = "m"
+    ))
+  }, once = TRUE)
+  
+  # This observer listens for the button click inside the modal
+  observeEvent(input$go_to_help, {
+    updateNavbarPage(session, "main_navbar", selected = "Help & Guide")
+    removeModal()
+  })
+  
+  # --- END:  ---
+  
   # --- Hide the pre-loader once the main UI is fully ready ---
   observeEvent(input$main_navbar, {
     shinyjs::delay(500, {

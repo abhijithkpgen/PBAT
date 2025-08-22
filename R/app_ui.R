@@ -4,15 +4,17 @@ app_ui <- function() {
   navbarPage(
     title = div(
       style = "display: flex; align-items: center; gap: 16px;",
-      tags$img(src = "www/LogoNobg.png", height = "60px", style = "margin-right: 8px;"),
-      span("PbAT: Plant Breeding Analytical Tools  v1.0.5")
+      tags$img(src = "www/LogoNobg.png", height = "50px", style = "margin-right: 8px;"),
+      span("PbAT: Plant Breeding Analytical Tools v1.0.5", style = "font-weight: 800; font-size: 1.4rem;")
     ),
     id = "main_navbar", 
     theme = bslib::bs_theme(
       version = 4,
-      bootswatch = "cerulean",
-      primary = "#e17055",
-      secondary = "#00b894"
+      bg = "#FFFFFF", 
+      fg = "black",
+      primary = "#1F4E79", 
+      secondary = "#3FA796",
+      "navbar-light-bg" = "white"
     ),
     header = tagList(
       shinyjs::useShinyjs(),
@@ -26,117 +28,187 @@ app_ui <- function() {
             waiter::spin_fading_circles()
           )
         ),
-        color = "#e17055" # orange background
+        color = "#3FA796" 
       ),
       
-      tags$head(tags$style(HTML("
+      tags$head(
+        tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"),
+        tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"),
+        
+        tags$style(HTML("
+      /* --- Main Body & Layout --- */
       body {
-        background: linear-gradient(135deg, #b0e0ff 0%, #fffbe0 100%);
-        background-attachment: fixed;
-        min-height: 100vh;
+        background: #4AC29A;
+        background: -webkit-linear-gradient(to right, #BDFFF3, #4AC29A);
+        background: linear-gradient(to right, #BDFFF3, #4AC29A);
+        font-family: 'Inter', sans-serif;
       }
       .home-container {
         display: flex;
-        justify-content: center;
+        justify-content: flex-start; /* Pushes content to the left */
+        padding-left: 50px; /* Adds some space from the edge */
         align-items: flex-start;
         flex-wrap: wrap; 
         min-height: 85vh;
-        gap: 25px; 
-        margin-top: 30px;
+        gap: 30px; 
+        margin-top: 40px;
         background: none;
       }
-      .overlay-panel {
-        background-color: #142850 !important;
-        padding: 20px;
+      
+      /* --- Navbar Styling --- */
+      .navbar .navbar-brand, .navbar .nav-link, .navbar .navbar-nav .nav-link {
+        color: #1F4E79 !important;
+        font-weight: 1000;
+      }
+      .navbar .nav-link:hover {
+        color: #1F4E79 !important;
+      }
+      #main_navbar .navbar-nav > li.active > a {
+        font-weight: 700 !important;
+        color: #3FA796 !important;
+        border-bottom: 3px solid #3FA796 !important;
+      }
+
+      /* --- Panel Styling (Cards) --- */
+      .card-panel {
+        background-color: #FFFFFF !important;
+        padding: 25px;
         border-radius: 12px;
-        box-shadow: 0 0 18px rgba(0,0,0,0.17);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         flex: 1; 
-        min-width: 340px; 
-        max-width: 450px; 
-        font-size: 13px;
-        color: #fafcff !important;
-        border: 1px solid #223870;
-      }
-      .compact-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-      }
-      .half-width { width: 49%; }
-      .btn-primary {
-        background-color: #00b894 !important;
-        border: none !important;
-      }
-      .btn-primary:hover {
-        background-color: #00cec9 !important;
-      }
-      .navbar, .navbar.navbar-dark, .navbar.bg-primary, .navbar-dark.bg-primary {
-        background-color: #142850 !important;
-        min-height: 70px !important;
-        padding-top: 10px;
-        padding-bottom: 10px;
-        box-shadow: 0 2px 8px rgba(20, 40, 80, 0.08);
-      }
-      .navbar .navbar-brand {
-        color: #fff !important;
-        font-size: 1.45rem;
-        font-weight: bold;
-        letter-spacing: 0.5px;
-        padding-top: 6px;
-        padding-bottom: 6px;
-      }
-      .navbar .navbar-nav .nav-link {
-        font-size: 1.1rem;
-        padding-top: 14px !important;
-        padding-bottom: 14px !important;
-      }
-      .sidebarPanel, .sidebarPanel label, .sidebarPanel .control-label,
-      .sidebarPanel .form-control, .sidebarPanel .selectize-input,
-      .sidebarPanel .checkbox, .sidebarPanel .radio,
-      .sidebarPanel .checkbox label, .sidebarPanel .radio label {
-        color: #142850 !important;
+        min-width: 360px; 
+        max-width: 480px; 
+        font-size: 14px;
+        color: #333333 !important;
+        border: 1px solid #e9ecef;
       }
       
-      .installation-box {
-        background-color: #f8f9fa !important;
-        color: #142850 !important;
-        border-left: 5px solid #00b894;
-      }
-      .installation-box h4 {
-        color: #142850 !important;
+      /* --- Button Styling --- */
+      .btn {
+        border-radius: 8px;
         font-weight: bold;
+        text-transform: uppercase;
+        padding: 10px 15px;
+        transition: all 0.2s ease-in-out;
       }
-      .installation-box code {
-        background-color: #e9ecef;
-        color: #333;
-        padding: 2px 4px;
-        border-radius: 4px;
-        font-size: 12px;
+      .btn-primary {
+        background-image: linear-gradient(to right, #1565C0, #1E88E5) !important;
+        border: none !important;
+        font-size: 16px;
+        padding: 12px 20px;
       }
-      .installation-box pre {
-        background-color: #e9ecef;
-        padding: 15px;
-        border-radius: 5px;
+      .btn-primary:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transform: translateY(-2px);
+      }
+
+      /* --- Workflow Selection Box --- */
+      .workflow-box .shiny-input-radiogroup > label {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1F4E79;
+        margin-bottom: 15px;
+      }
+      .workflow-box .radio label {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 6px;
         border: 1px solid #ced4da;
-        white-space: pre-wrap; 
-      }
-      .installation-box details {
-        border: 1px solid #ced4da;
-        border-radius: 5px;
-        margin-top: 10px;
-      }
-      .installation-box summary {
-        padding: 10px;
-        font-weight: bold;
+        background-color: #F1F3F4;
+        color: #495057;
         cursor: pointer;
-        outline: none;
+        transition: all 0.2s ease-in-out;
+        margin-bottom: 8px;
       }
-      .installation-box details[open] summary {
-        border-bottom: 1px solid #ced4da;
+      .workflow-box .radio label:hover {
+        background-color: #E3F2FD;
+        border-left: 4px solid #3FA796;
+        padding-left: 11px;
       }
+      .workflow-box .radio input[type='radio'] {
+        display: none;
+      }
+      .workflow-box .radio label.active-workflow {
+        background-color: #3FA796 !important;
+        border-color: #3FA796 !important;
+        color: white !important;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(63, 167, 150, 0.4);
+      }
+      .workflow-box .radio i {
+        margin-right: 12px;
+        width: 20px;
+      }
+      
+      /* --- File Upload Area --- */
+      .file-upload-area {
+        border: 2px dashed #ced4da;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        background-color: #F1F3F4;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        transition: background-color 0.2s ease-in-out;
+      }
+      .file-upload-area:hover {
+        background-color: #E3F2FD;
+      }
+
+      /* --- Tabs --- */
+      .nav-tabs .nav-link {
+        border-bottom: 2px solid transparent;
+      }
+      .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+        color: #1F4E79 !important;
+        border-color: transparent transparent #1F4E79 transparent !important;
+        font-weight: 600;
+      }
+      
+      /* --- Help Text / Tips --- */
+      .help-block {
+        background-color: #F5F9FF;
+        border-left: 4px solid #007bff;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+
+      /* --- Workflow Overview Styling --- */
+      .workflow-overview ol {
+        list-style: none;
+        padding-left: 0;
+      }
+      .workflow-overview li {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e9ecef;
+      }
+      .workflow-overview li:last-child {
+        border-bottom: none;
+      }
+      .workflow-overview .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #1F4E79;
+        color: white;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+      
     ")))
     ),
     
+    # --- UPDATED HOME TAB ---
     tabPanel("Home", homeUI(id = "home")),
     
     designExperimentUI(id = "design_experiment"), 
@@ -160,22 +232,6 @@ app_ui <- function() {
                    h2("Help & Guide", style = "color: #23272b;"),
                    tabsetPanel(
                      id = "help_tabs",
-                     tabPanel("Troubleshooting",
-                              div(style = "padding-top: 20px;",
-                                  h3("Troubleshooting Common Issues"),
-                                  p("Encountering an issue? Most problems with complex model analyses are related to network connection timeouts or temporary rendering glitches. Here are a few simple steps you can take to resolve common errors."),
-                                  h4("Problem: Results Not Appearing After Running an Analysis"),
-                                  p(HTML("<b>Cause:</b> This can happen when an analysis takes a while to complete, especially on a slower internet connection, or if there's a temporary glitch while displaying the results. The analysis likely finished successfully on the server, but the results weren't displayed correctly in your browser.")),
-                                  h4("Solutions (Try these in order):"),
-                                  tags$ul(
-                                    tags$li(HTML("<b>1. Reload and Rerun:</b><br>This is the easiest and most common fix. If the results area is blank, simply reload the entire web page and run the analysis again. This resolves most temporary rendering issues.")),
-                                    tags$li(HTML("<b>2. Ensure a Stable Internet Connection:</b><br>Since these analyses involve sending data and waiting for results, a stable connection is key. If you are on a weak Wi-Fi signal, try moving closer to your router or connect to a more reliable network before rerunning the analysis.")),
-                                    tags$li(HTML("<b>3. Reduce the Analysis Workload:</b><br>The more traits you select, the longer the server needs to compute. If the analysis is still failing, try reducing the complexity by selecting fewer traits at a time.")),
-                                    tags$li(HTML("<b>4. Be Patient:</b><br>A complex mixed-model analysis on a large dataset can take some time. After clicking 'Run,' please allow up to a minute for the server to process before assuming there is an error.")),
-                                    tags$li(HTML("<b>5. Use the R Package Locally:</b><br>For very large datasets or complex multi-trait analyses, consider installing the PBAT R package (instructions on the Home tab) and running it on your own computer for the smoothest and fastest experience."))
-                                  )
-                              )
-                     ),
                      tabPanel("Sample Data",
                               div(style = "padding-top: 20px;",
                                   h3("Sample Data Downloads"),
@@ -193,6 +249,24 @@ app_ui <- function() {
                                     tags$li(tags$a(href = "www/AMMI_GGE_Sample_Data.csv", "Biplot Sample Format CSV", download = NA, target = "_blank")),
                                     tags$li(tags$a(href = "www/Mult_Variate_sample_format.csv", "Multivariate Analysis Sample Format CSV", download = NA, target = "_blank")),
                                     tags$li(tags$a(href = "www/RCBD_sample.csv", "RCBD Sample CSV", download = NA, target = "_blank"))
+                                  )
+                              )
+                     ),
+                     tabPanel("Troubleshooting",
+                              div(style = "padding-top: 20px;",
+                                  h3("Troubleshooting Common Issues"),
+                                  p("Encountering an issue? Most problems with complex model analyses are related to network connection timeouts or temporary rendering glitches. Here are a few simple steps you can take to resolve common errors."),
+                                  h4("Problem: Results Not Appearing After Running an Analysis"),
+                                  p(HTML("<b>Cause:</b> This can happen when an analysis takes a while to complete, especially on a slower internet connection, or if there's a temporary glitch while displaying the results. The analysis likely finished successfully on the server, but the results weren't displayed correctly in your browser.")),
+                                  h4("Solutions (Try these in order):"),
+                                  tags$ul(
+                                    tags$li(HTML("<b>1. Reload and Rerun:</b><br>This is the easiest and most common fix. If the results area is blank, simply reload the entire web page and run the analysis again. This resolves most temporary rendering issues.")),
+                                    tags$li(HTML("<b>2. Ensure a Stable Internet Connection:</b><br>Since these analyses involve sending data and waiting for results, a stable connection is key. If you are on a weak Wi-Fi signal, try moving closer to your router or connect to a more reliable network before rerunning the analysis.")),
+                                    tags$li(HTML("<b>3. Reduce the Analysis Workload:</b><br>The more traits you select, the longer the server needs to compute. If the analysis is still failing, try reducing the complexity by selecting fewer traits at a time.")),
+                                    tags$li(HTML("<b>4. Be Patient:</b><br>A complex mixed-model analysis on a large dataset can take some time. After clicking 'Run,' please allow up to a minute for the server to process before assuming there is an error.")),
+                                    tags$li(HTML("<b>5. Use the R Package Locally:</b><br>For very large datasets or complex multi-trait analyses, consider installing the PBAT R package (instructions on the Home tab) and running it on your own computer for the smoothest and fastest experience."))
+                                    
+                                    
                                   )
                               )
                      )

@@ -74,18 +74,59 @@ spatialExplorerServer <- function(id, home_inputs) {
       all_cols <- names(df)
       numeric_cols <- all_cols[sapply(df, is.numeric)]
       
-      selected_genotype <- intersect(c("Genotype", "GEN", "Entry"), all_cols)[1]
-      selected_rep <- intersect(c("Replication", "Rep", "REP"), all_cols)[1]
-      selected_env <- intersect(c("Location", "LOC", "Environment"), all_cols)[1]
-      selected_check <- intersect(c("Type", "Entry_Type"), all_cols)[1]
-      selected_plot <- intersect(c("Plot", "Plot_No"), all_cols)[1]
+      available_traits <- if (!is.null(input$env_col) && !is.null(input$trial_type) && input$trial_type == "Multi Environment") {
+        setdiff(numeric_cols, input$env_col)
+      } else {
+        numeric_cols
+      }
+      
+      # *** THE FIX: Updated logic to preserve user's selection on UI refresh ***
+      selected_genotype <- if (!is.null(input$geno_col) && input$geno_col %in% all_cols) {
+        input$geno_col
+      } else {
+        intersect(c("Genotype", "GEN", "Entry"), all_cols)[1]
+      }
+      
+      selected_rep <- if (!is.null(input$rep_col) && input$rep_col %in% all_cols) {
+        input$rep_col
+      } else {
+        intersect(c("Replication", "Rep", "REP"), all_cols)[1]
+      }
+      
+      selected_env <- if (!is.null(input$env_col) && input$env_col %in% all_cols) {
+        input$env_col
+      } else {
+        intersect(c("Location", "LOC", "Environment"), all_cols)[1]
+      }
+      
+      selected_check <- if (!is.null(input$check_col) && input$check_col %in% all_cols) {
+        input$check_col
+      } else {
+        intersect(c("Type", "Entry_Type"), all_cols)[1]
+      }
+      
+      selected_plot <- if (!is.null(input$plot_col) && input$plot_col %in% all_cols) {
+        input$plot_col
+      } else {
+        intersect(c("Plot", "Plot_No", "Plot_number"), all_cols)[1]
+      }
+      
+      selected_block <- if (!is.null(input$block_col_alpha) && input$block_col_alpha %in% all_cols) {
+        input$block_col_alpha
+      } else if (!is.null(input$block_col_aug) && input$block_col_aug %in% all_cols) {
+        input$block_col_aug
+      } else {
+        intersect(c("Block", "BLOCK"), all_cols)[1]
+      }
+      # *** END OF FIX ***
       
       tagList(
         h4("Step 1: Define Layout"),
         selectInput(ns("design"), "Select Experimental Design",
                     choices = c("Alpha Lattice" = "alphalattice", "RCBD" = "rcbd", "Augmented RCBD" = "augmentedrcbd")),
         selectInput(ns("trial_type"), "Select Trial Type",
-                    choices = c("Single Environment", "Multi Environment")),
+                    choices = c("Single Environment", "Multi Environment"),
+                    selected = if(!is.null(input$trial_type)) input$trial_type else "Single Environment"),
         conditionalPanel(
           condition = paste0("input['", ns("trial_type"), "'] == 'Multi Environment'"),
           selectInput(ns("env_col"), "Environment/Location Column", choices = all_cols, selected = selected_env)
@@ -94,22 +135,28 @@ spatialExplorerServer <- function(id, home_inputs) {
         h4("Step 2: Map Data Columns"),
         selectInput(ns("plot_col"), "Plot Number Column", choices = all_cols, selected = selected_plot),
         selectInput(ns("geno_col"), "Genotype Column", choices = all_cols, selected = selected_genotype),
+        
         conditionalPanel(
-          condition = "input.design == 'alphalattice' || input.design == 'rcbd' || input.design == 'augmentedrcbd'",
+          condition = "input.design == 'alphalattice' || input.design == 'rcbd'",
           ns = ns,
           selectInput(ns("rep_col"), "Replication Column", choices = all_cols, selected = selected_rep)
         ),
         conditionalPanel(
           condition = "input.design == 'alphalattice'", ns = ns,
-          numericInput(ns("alpha_k"), "Block Size (k)", value = 10, min = 2, step = 1)
+          tagList(
+            selectInput(ns("block_col_alpha"), "Block Column", choices = all_cols, selected = selected_block)
+          )
         ),
         conditionalPanel(
           condition = "input.design == 'augmentedrcbd'", ns = ns,
-          selectInput(ns("check_col"), "Check/Test Column", choices = all_cols, selected = selected_check)
+          tagList(
+            selectInput(ns("block_col_aug"), "Block Column", choices = all_cols, selected = selected_block),
+            selectInput(ns("check_col"), "Check/Test Column", choices = all_cols, selected = selected_check)
+          )
         ),
         hr(),
         h4("Step 3: Select Trait & Options"),
-        selectInput(ns("trait_col"), "Select Trait to Visualize", choices = numeric_cols),
+        selectInput(ns("trait_col"), "Select Trait to Visualize", choices = available_traits),
         uiOutput(ns("highlight_ui")),
         selectInput(ns("palette"), "Color Palette",
                     choices = c("Viridis", "Plasma", "Inferno", "Magma", "RdYlBu", "Blues", "Greens", "Reds"),
@@ -133,10 +180,10 @@ spatialExplorerServer <- function(id, home_inputs) {
         return(tags$div(h4("Click 'Generate Map' to view results.", style = "color: grey; text-align: center; margin-top: 50px;")))
       }
       if (input$trial_type == "Multi Environment") {
-        tabs <- lapply(names(plot_list), function(loc) {
-          plot_output_id <- ns(paste0("spatial_plot_", loc))
-          output[[paste0("spatial_plot_", loc)]] <- plotly::renderPlotly({ plot_list[[loc]] })
-          tabPanel(title = as.character(loc), plotly::plotlyOutput(plot_output_id, height = "700px"))
+        tabs <- lapply(names(plot_list), function(loc_name) {
+          plot_output_id <- ns(paste0("spatial_plot_", make.names(loc_name)))
+          output[[paste0("spatial_plot_", make.names(loc_name))]] <- plotly::renderPlotly({ plot_list[[loc_name]] })
+          tabPanel(title = as.character(loc_name), plotly::plotlyOutput(plot_output_id, height = "700px"))
         })
         do.call(tabsetPanel, tabs)
       } else {
@@ -153,11 +200,16 @@ spatialExplorerServer <- function(id, home_inputs) {
       
       df_processed <- tryCatch({
         df_temp <- df_orig %>% arrange(!!sym(input$plot_col))
-        if (input$design %in% c("rcbd", "augmentedrcbd")) {
-          req(input$rep_col); df_temp$inferred_block <- as.factor(df_temp[[input$rep_col]])
+        
+        if (input$design == "rcbd") {
+          req(input$rep_col)
+          df_temp$inferred_block <- as.factor(df_temp[[input$rep_col]])
+        } else if (input$design == "augmentedrcbd") {
+          req(input$block_col_aug)
+          df_temp$inferred_block <- as.factor(df_temp[[input$block_col_aug]])
         } else if (input$design == "alphalattice") {
-          req(input$rep_col, input$alpha_k)
-          df_temp <- df_temp %>% group_by(!!sym(input$rep_col)) %>% mutate(inferred_block = as.factor(ceiling(row_number() / input$alpha_k))) %>% ungroup()
+          req(input$block_col_alpha)
+          df_temp$inferred_block <- as.factor(df_temp[[input$block_col_alpha]])
         }
         df_temp
       }, error = function(e) { showModal(modalDialog(title = "Layout Error", paste("Could not infer layout:", e$message))); return(NULL) })
@@ -168,7 +220,13 @@ spatialExplorerServer <- function(id, home_inputs) {
       
       for (loc in locations) {
         df_location <- if (loc == "single") df_processed else df_processed[df_processed[[input$env_col]] == loc, ]
-        df_location <- df_location %>% group_by(inferred_block) %>% arrange(!!sym(input$plot_col)) %>% mutate(plot_in_block = row_number()) %>% ungroup()
+        
+        df_location <- df_location %>% 
+          group_by(inferred_block) %>% 
+          arrange(!!sym(input$plot_col)) %>% 
+          mutate(plot_in_block = row_number()) %>% 
+          ungroup()
+        
         cols_to_check <- c("plot_in_block", "inferred_block", input$trait_col)
         df_clean <- df_location %>% tidyr::drop_na(all_of(cols_to_check))
         if(nrow(df_clean) == 0) next
@@ -182,14 +240,39 @@ spatialExplorerServer <- function(id, home_inputs) {
           labs(fill = input$trait_col, title = paste("Spatial Distribution of", input$trait_col, if(loc != "single") paste("in", loc) else ""), x = "Plot within Block", y = "Block") +
           theme_minimal() + theme(axis.title = element_text(size=12), axis.text.x = element_blank(), axis.ticks.x = element_blank(), panel.grid = element_blank())
         
+        geom_layers <- list()
+        color_values <- c()
+        linetype_values <- c()
+        
         if (input$design == "augmentedrcbd" && !is.null(input$check_col) && input$check_col %in% names(df_clean)) {
           check_data <- df_clean[df_clean[[input$check_col]] != "test", , drop = FALSE]
-          if(nrow(check_data) > 0) { p <- p + geom_tile(data = check_data, aes(x = as.factor(plot_in_block), y = as.factor(inferred_block), linetype = "Check Plots"), fill = NA, color = "black", size = 1.5, width = 0.9, height = 0.9, inherit.aes = FALSE) + scale_linetype_manual(name = "Plot Type", values = "dashed") }
+          if(nrow(check_data) > 0) {
+            geom_layers <- c(geom_layers, list(
+              geom_tile(data = check_data, aes(x = as.factor(plot_in_block), y = as.factor(inferred_block), linetype = "Check Plots"), fill = NA, color = "black", size = 1.2, width = 0.9, height = 0.9, inherit.aes = FALSE)
+            ))
+            linetype_values["Check Plots"] <- "dashed"
+          }
         }
+        
         if (!is.null(input$highlight_geno) && input$highlight_geno != "None") {
           highlight_data <- df_clean[df_clean[[input$geno_col]] == input$highlight_geno, , drop = FALSE]
-          if(nrow(highlight_data) > 0) { p <- p + geom_tile(data = highlight_data, aes(x = as.factor(plot_in_block), y = as.factor(inferred_block), color = input$highlight_geno), fill = NA, size = 1.5, width = 0.9, height = 0.9, inherit.aes = FALSE) + scale_color_manual(name = "Highlighted", values = "red") }
+          if(nrow(highlight_data) > 0) {
+            geom_layers <- c(geom_layers, list(
+              geom_tile(data = highlight_data, aes(x = as.factor(plot_in_block), y = as.factor(inferred_block), color = "Highlighted Genotype"), fill = NA, size = 1.2, width = 0.9, height = 0.9, inherit.aes = FALSE)
+            ))
+            color_values["Highlighted Genotype"] <- "red"
+          }
         }
+        
+        if(length(geom_layers) > 0) p <- p + geom_layers
+        
+        if(length(color_values) > 0) {
+          p <- p + scale_color_manual(name = "", values = color_values)
+        }
+        if(length(linetype_values) > 0) {
+          p <- p + scale_linetype_manual(name = "", values = linetype_values)
+        }
+        
         plot_objects[[loc]] <- plotly::ggplotly(p, tooltip = "text")
       }
     })
@@ -262,13 +345,21 @@ dataCurationServer <- function(id, home_inputs) {
       tagList(
         h4("Step 1: Map Data Columns"),
         selectInput(ns("geno_col"), "Genotype Column", choices = all_cols, selected = selected_geno),
-        selectInput(ns("env_col"), "Environment/Location Column", choices = c("None", all_cols), selected = selected_env),
+        
+        selectInput(ns("trial_type"), "Select Trial Type",
+                    choices = c("Single Environment", "Multi Environment"),
+                    selected = "Single Environment"),
+        conditionalPanel(
+          condition = "input.trial_type == 'Multi Environment'", ns = ns,
+          selectInput(ns("env_col"), "Environment/Location Column", choices = all_cols, selected = selected_env)
+        ),
+        
         hr(),
         h4("Step 2: Define Analysis Scope & Method"),
         checkboxGroupInput(ns("traits_to_check"), "Trait(s) to Analyze", choices = numeric_cols, selected = numeric_cols[1]),
         
         conditionalPanel(
-          condition = "input.env_col != 'None'", ns = ns,
+          condition = "input.trial_type == 'Multi Environment' && input.env_col != 'None'", ns = ns,
           radioButtons(ns("analysis_scope"), "Analysis Scope",
                        choices = c("Within each Environment" = "environment", "Globally (across all data)" = "global"),
                        selected = "environment")
@@ -293,13 +384,15 @@ dataCurationServer <- function(id, home_inputs) {
       req(rv$original_data, input$traits_to_check)
       
       df <- rv$original_data
-      factor_cols <- c(input$geno_col, if(input$env_col != "None") input$env_col)
-      for (col in factor_cols) { if (col %in% names(df)) df[[col]] <- as.factor(df[[col]]) }
+      grouping_env_col <- if(!is.null(input$env_col) && input$trial_type == 'Multi Environment') input$env_col else NULL
+      
+      factor_cols <- c(input$geno_col, grouping_env_col)
+      for (col in factor_cols) { if (!is.null(col) && col %in% names(df)) df[[col]] <- as.factor(df[[col]]) }
       
       traits <- input$traits_to_check
       method <- input$outlier_method
-      groups <- if (!is.null(input$analysis_scope) && input$analysis_scope == "environment" && input$env_col != "None") {
-        input$env_col
+      groups <- if (!is.null(input$analysis_scope) && input$analysis_scope == "environment" && !is.null(grouping_env_col)) {
+        grouping_env_col
       } else {
         character(0)
       }
@@ -361,7 +454,6 @@ dataCurationServer <- function(id, home_inputs) {
       showNotification(paste("Found", nrow(all_outliers), "potential outlier entries."), type = "message")
     })
     
-    ### FIX ###: Updated UI to remove the Curation Actions tab.
     output$curation_main_ui <- renderUI({
       if (is.null(rv$outlier_report)) {
         return(tags$div(h4("Map your data columns and click 'Find Potential Outliers' to begin.", style = "color: grey; text-align: center; margin-top: 50px;")))
@@ -371,7 +463,7 @@ dataCurationServer <- function(id, home_inputs) {
         tabPanel("Outlier Report",
                  DT::DTOutput(ns("outlier_table")),
                  hr(),
-                 uiOutput(ns("manual_curation_instructions_ui")) # Instructions and download button are now here
+                 uiOutput(ns("manual_curation_instructions_ui"))
         )
       )
     })
@@ -392,13 +484,16 @@ dataCurationServer <- function(id, home_inputs) {
           df <- rv$original_data
           outliers <- rv$outlier_report
           
-          outliers_for_this_trait <- outliers %>% filter(Trait_Flagged == trait)
-          ids_for_this_trait <- outliers_for_this_trait$pbat_row_id
+          if (nrow(outliers) > 0 && "Trait_Flagged" %in% names(outliers)) {
+            outliers_for_this_trait <- outliers %>% filter(Trait_Flagged == trait)
+            ids_for_this_trait <- outliers_for_this_trait$pbat_row_id
+          } else {
+            ids_for_this_trait <- integer(0) 
+          }
           
           df$outlier_flag <- ifelse(df$pbat_row_id %in% ids_for_this_trait, "Outlier", "Normal")
-          tooltip_text <- paste0("Genotype: ", df[[input$geno_col]])
           
-          x_axis_var <- if (!is.null(input$analysis_scope) && input$analysis_scope == "environment" && input$env_col != "None") {
+          x_axis_var <- if (input$trial_type == "Multi Environment" && !is.null(input$analysis_scope) && input$analysis_scope == "environment" && !is.null(input$env_col) && input$env_col != "None") {
             input$env_col
           } else {
             "All Data"
@@ -417,9 +512,17 @@ dataCurationServer <- function(id, home_inputs) {
               .groups = 'drop'
             )
           
+          # *** FIX 2: Corrected the ggplot aesthetic for the tooltip ***
           p <- ggplot(df, aes(x = x_group, y = !!sym(trait))) +
             geom_boxplot(outlier.shape = NA) +
-            geom_jitter(aes(color = outlier_flag, text = tooltip_text), width = 0.2) +
+            geom_jitter(
+              aes(
+                color = outlier_flag,
+                text = paste0("Genotype: ", .data[[input$geno_col]], 
+                              "<br>", trait, ": ", round(.data[[trait]], 2))
+              ), 
+              width = 0.2
+            ) +
             {
               if (input$outlier_method %in% c("iqr", "combined")) {
                 list(
@@ -463,7 +566,6 @@ dataCurationServer <- function(id, home_inputs) {
       
     }, options = list(scrollX = TRUE))
     
-    ### FIX ###: New UI element with improved instructions for manual curation.
     output$manual_curation_instructions_ui <- renderUI({
       req(rv$outlier_report)
       
@@ -497,14 +599,12 @@ dataCurationServer <- function(id, home_inputs) {
       }
     })
     
-    ### FIX ###: New download handler specifically for the outlier report.
     output$download_report <- downloadHandler(
       filename = function() {
         paste0("outlier_report_", Sys.Date(), ".csv")
       },
       content = function(file) {
         req(rv$outlier_report)
-        # We remove the internal row ID before saving, as it's not useful to the user.
         report_to_download <- rv$outlier_report %>% select(-pbat_row_id)
         readr::write_csv(report_to_download, file, na = "")
       }
