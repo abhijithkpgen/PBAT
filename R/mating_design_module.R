@@ -83,48 +83,48 @@ mating_design_ui <- function(id) {
 # ===================================================================
 mating_design_equations <- list(
   griffing_m1 = list(
-    model = "Yij = µ + gi + gj + sij + rij",
-    model_explanation = HTML("Where:<br><b>µ</b>: Overall mean<br><b>gi, gj</b>: GCA effects for parents i and j<br><b>sij</b>: SCA effect for the cross<br><b>rij</b>: Reciprocal effect (difference between cross ij and ji)"),
-    gca_formula = "ĝi = (1/2p) * (Yi. + Y.i) - (1/p²) * Y..",
+    model = "Yij =  + gi + gj + sij + rij",
+    model_explanation = HTML("Where:<br><b></b>: Overall mean<br><b>gi, gj</b>: GCA effects for parents i and j<br><b>sij</b>: SCA effect for the cross<br><b>rij</b>: Reciprocal effect (difference between cross ij and ji)"),
+    gca_formula = "i = (1/2p) * (Yi. + Y.i) - (1/p) * Y..",
     gca_explanation = HTML("The GCA effect for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' as a female<br><b>Y.i</b>: Sum of values for parent 'i' as a male<br><b>Y..</b>: Grand total of the data matrix"),
-    sca_formula = "ŝij = (1/2) * (Yij + Yji) - (1/2p) * (Yi. + Y.i) - (1/2p) * (Yj. + Y.j) + (1/p²) * Y..",
+    sca_formula = "ij = (1/2) * (Yij + Yji) - (1/2p) * (Yi. + Y.i) - (1/2p) * (Yj. + Y.j) + (1/p) * Y..",
     sca_explanation = "The SCA effect for the cross between 'i' and 'j'. It is the average performance of the cross and its reciprocal, adjusted for the GCA effects of both parents and the overall mean."
   ),
   griffing_m2 = list(
-    model = "Yij = µ + gi + gj + sij",
-    model_explanation = "Where: µ is the overall mean, gi and gj are the GCA effects, and sij is the SCA effect. Reciprocal effects are assumed to be absent.",
-    gca_formula = "ĝi = [1/(p+2)] * [Yi. + Yii - (2/p) * Y..]",
+    model = "Yij =  + gi + gj + sij",
+    model_explanation = "Where:  is the overall mean, gi and gj are the GCA effects, and sij is the SCA effect. Reciprocal effects are assumed to be absent.",
+    gca_formula = "i = [1/(p+2)] * [Yi. + Yii - (2/p) * Y..]",
     gca_explanation = HTML("The GCA for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' in all its crosses<br><b>Yii</b>: Performance of parent 'i' itself<br><b>Y..</b>: Grand total"),
-    sca_formula = "ŝij = Yij - [1/(p+2)] * (Yi. + Yii) - [1/(p+2)] * (Yj. + Yjj) + [2/((p+1)(p+2))] * Y..",
+    sca_formula = "ij = Yij - [1/(p+2)] * (Yi. + Yii) - [1/(p+2)] * (Yj. + Yjj) + [2/((p+1)(p+2))] * Y..",
     sca_explanation = "The SCA effect is the performance of the cross (Yij) adjusted for the GCA effects of its parents ('i' and 'j') and the grand mean."
   ),
   griffing_m3 = list(
-    model = "Yij = µ + gi + gj + sij + rij",
-    model_explanation = "Where: µ is the overall mean, gi and gj are GCA effects, sij is the SCA effect, and rij is the reciprocal effect. Parents are not included in the analysis.",
-    gca_formula = "ĝi = [1/(2(p-2))] * (Yi. + Y.i) - [1/(p(p-2))] * Y..",
+    model = "Yij =  + gi + gj + sij + rij",
+    model_explanation = "Where:  is the overall mean, gi and gj are GCA effects, sij is the SCA effect, and rij is the reciprocal effect. Parents are not included in the analysis.",
+    gca_formula = "i = [1/(2(p-2))] * (Yi. + Y.i) - [1/(p(p-2))] * Y..",
     gca_explanation = HTML("The GCA for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' as a female<br><b>Y.i</b>: Sum of values for parent 'i' as a male<br><b>Y..</b>: Grand total. The formula is adjusted because parental data is absent."),
-    sca_formula = "ŝij = (1/2) * (Yij + Yji) - [1/(2(p-2))] * (Yi. + Y.i + Yj. + Y.j) + [1/((p-1)(p-2))] * Y..",
+    sca_formula = "ij = (1/2) * (Yij + Yji) - [1/(2(p-2))] * (Yi. + Y.i + Yj. + Y.j) + [1/((p-1)(p-2))] * Y..",
     sca_explanation = "The SCA effect is the average performance of the cross and its reciprocal, adjusted for the GCA effects of both parents and the overall mean, with formulas adapted for the absence of parental data."
   ),
   griffing_m4 = list(
-    model = "Yij = µ + gi + gj + sij",
-    model_explanation = "Where: µ is the overall mean, gi and gj are GCA effects, and sij is the SCA effect. Only F1 crosses (no parents or reciprocals) are analyzed.",
-    gca_formula = "ĝi = [1/(p-2)] * [Yi. - (2/p) * Y..]",
+    model = "Yij =  + gi + gj + sij",
+    model_explanation = "Where:  is the overall mean, gi and gj are GCA effects, and sij is the SCA effect. Only F1 crosses (no parents or reciprocals) are analyzed.",
+    gca_formula = "i = [1/(p-2)] * [Yi. - (2/p) * Y..]",
     gca_explanation = HTML("The GCA for parent 'i'.<br><b>p</b>: Number of parents<br><b>Yi.</b>: Sum of values for parent 'i' in all its crosses<br><b>Y..</b>: Grand total of all crosses."),
-    sca_formula = "ŝij = Yij - [1/(p-2)] * (Yi. + Yj.) + [2/((p-1)(p-2))] * Y..",
+    sca_formula = "ij = Yij - [1/(p-2)] * (Yi. + Yj.) + [2/((p-1)(p-2))] * Y..",
     sca_explanation = "The SCA effect is the performance of the cross (Yij) adjusted for the GCA effects of its parents ('i' and 'j') and the grand mean."
   ),
   line_tester = list(
-    model = "Yijk = µ + rk + gi + gj + sij + eijk",
-    model_explanation = "Where: µ is the mean, rk is the replication effect, gi is the GCA of the i-th line, gj is the GCA of the j-th tester, sij is the SCA of their cross, and eijk is the error.",
+    model = "Yijk =  + rk + gi + gj + sij + eijk",
+    model_explanation = "Where:  is the mean, rk is the replication effect, gi is the GCA of the i-th line, gj is the GCA of the j-th tester, sij is the SCA of their cross, and eijk is the error.",
     gca_formula = "GCA (Line i) = Yi.. - Y... | GCA (Tester j) = Y.j. - Y...",
     gca_explanation = HTML("The GCA of a line or tester is its average performance across all its crosses, expressed as a deviation from the grand mean.<br><b>Yi..</b>: Mean of line 'i'<br><b>Y.j.</b>: Mean of tester 'j'<br><b>Y...</b>: Grand mean"),
     sca_formula = "SCA (ij) = Yij. - Yi.. - Y.j. + Y...",
     sca_explanation = "The SCA of a specific cross is its mean performance (Yij.) adjusted for the GCA of the line, the GCA of the tester, and the grand mean."
   ),
   diallel_partial = list(
-    model = "Yij = µ + gi + gj + sij",
-    model_explanation = "Where: µ is the overall mean, gi and gj are GCA effects, and sij is the SCA effect.",
+    model = "Yij =  + gi + gj + sij",
+    model_explanation = "Where:  is the overall mean, gi and gj are GCA effects, and sij is the SCA effect.",
     gca_formula = "Effects are estimated via least-squares matrix algebra.",
     gca_explanation = "Due to the unbalanced nature of the partial diallel (not all crosses are made), GCA and SCA effects cannot be calculated with simple summation formulas. Instead, they are estimated simultaneously using a system of linear equations (least-squares method) to find the best fit for the observed data.",
     sca_formula = "Effects are estimated via least-squares matrix algebra.",
