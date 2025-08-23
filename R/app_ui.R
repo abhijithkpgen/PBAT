@@ -9,7 +9,7 @@ app_ui <- function() {
     ),
     id = "main_navbar", 
     theme = bslib::bs_theme(
-      version = 4,
+      version = 5,
       bg = "#FFFFFF", 
       fg = "black",
       primary = "#1F4E79", 
@@ -63,10 +63,19 @@ app_ui <- function() {
       .navbar .nav-link:hover {
         color: #1F4E79 !important;
       }
- #main_navbar .navbar-nav > li.active > a {
+      
+      /* --- CORRECTED RULE: Add space to the LEFT of the tabs --- */
+          .navbar-nav {
+            margin-left: 50px !important; /* Adjust this value for more/less space */
+          }
+
+      /* --- NEW: Custom class for the active navbar tab --- */
+      .custom-active-tab {
         font-weight: 700 !important;
-        color: #E67E22 !important; /* Changed to a distinct orange color */
-        border-bottom: 3px solid #E67E22 !important; /* Matched the border to the new color */
+        color: #E67E22 !important; 
+        background-color: #FEF5E7 !important; /* Light orange background */
+        border-bottom: 3px solid #E67E22 !important;
+        border-radius: 5px 5px 0 0;
       }
       
       /* --- Panel Styling (Cards) --- */
