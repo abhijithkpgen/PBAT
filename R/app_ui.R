@@ -63,12 +63,12 @@ app_ui <- function() {
       .navbar .nav-link:hover {
         color: #1F4E79 !important;
       }
-      #main_navbar .navbar-nav > li.active > a {
+ #main_navbar .navbar-nav > li.active > a {
         font-weight: 700 !important;
-        color: #3FA796 !important;
-        border-bottom: 3px solid #3FA796 !important;
+        color: #E67E22 !important; /* Changed to a distinct orange color */
+        border-bottom: 3px solid #E67E22 !important; /* Matched the border to the new color */
       }
-
+      
       /* --- Panel Styling (Cards) --- */
       .card-panel {
         background-color: #FFFFFF !important;

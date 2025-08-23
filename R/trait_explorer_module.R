@@ -123,7 +123,8 @@ spatialExplorerServer <- function(id, home_inputs) {
       tagList(
         h4("Step 1: Define Layout"),
         selectInput(ns("design"), "Select Experimental Design",
-                    choices = c("Alpha Lattice" = "alphalattice", "RCBD" = "rcbd", "Augmented RCBD" = "augmentedrcbd")),
+                    choices = c("Alpha Lattice" = "alphalattice", "RCBD" = "rcbd", "Augmented RCBD" = "augmentedrcbd"),
+                    selected = if(!is.null(input$design)) input$design else "alphalattice"), # <-- ADD THIS LINE
         selectInput(ns("trial_type"), "Select Trial Type",
                     choices = c("Single Environment", "Multi Environment"),
                     selected = if(!is.null(input$trial_type)) input$trial_type else "Single Environment"),

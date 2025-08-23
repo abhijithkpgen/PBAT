@@ -6,7 +6,7 @@ homeUI <- function(id) {
   tagList(
     # Absolutely positioned container for the GIF
     tags$div(
-      style = "position: absolute; top: 80px; right: 20px; z-index: 1;",
+      style = "position: absolute; top: 120px; right: 20px; z-index: 1;",
       tags$img(src = "www/pbat_loop.gif", style = "width: 100%; max-width: 450px; height: auto;")
     ),
     
