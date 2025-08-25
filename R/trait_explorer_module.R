@@ -462,7 +462,7 @@ dataCurationServer <- function(id, home_inputs) {
       tabsetPanel(
         tabPanel("Visual Summary", uiOutput(ns("visual_summary_tabs"))),
         tabPanel("Outlier Report",
-                 DT::DTOutput(ns("outlier_table")),
+                 tableOutput(ns("outlier_table")),
                  hr(),
                  uiOutput(ns("manual_curation_instructions_ui"))
         )
@@ -548,15 +548,19 @@ dataCurationServer <- function(id, home_inputs) {
       })
     })
     
-    output$outlier_table <- DT::renderDT({
+    output$outlier_table <- renderTable({
       req(rv$outlier_report)
       
       report <- rv$outlier_report
+      # Define columns to show, excluding the internal row ID
       cols_to_show <- c("Trait_Flagged", names(rv$original_data)[!names(rv$original_data) %in% "pbat_row_id"], "Flagged_By")
       
+      # Select and rename columns for the final report
       final_report <- report %>% 
-        select(any_of(cols_to_show), 
-               any_of(c("sd_val", "iqr_val", "p_adj"))) %>%
+        select(
+          any_of(cols_to_show), 
+          any_of(c("sd_val", "iqr_val", "p_adj"))
+        ) %>%
         rename(
           "SD_of_Group" = any_of("sd_val"),
           "IQR_of_Group" = any_of("iqr_val"),
@@ -564,8 +568,7 @@ dataCurationServer <- function(id, home_inputs) {
         )
       
       final_report
-      
-    }, options = list(scrollX = TRUE))
+    })
     
     output$manual_curation_instructions_ui <- renderUI({
       req(rv$outlier_report)
