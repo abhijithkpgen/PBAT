@@ -12,7 +12,7 @@ app_server <- function(input, output, session) {
       title = tags$div(style = "display: flex; align-items: center;", 
                        icon("info-circle", style = "margin-right: 10px; color: #1F4E79;"), 
                        "Welcome to PBAT!"),
-      HTML("New to the app? <br><br> Check out the <b>Help & Guide</b> section for tutorials and to download sample data files with the correct input formats.<br><br> If you’re having trouble seeing the output results, just reload the app—it usually works like magic! "),
+      HTML("New to the app? <br><br> Check out the <b>Help & Guide</b> section for tutorials and to download sample data files with the correct input formats.<br> Tip:Running into issues with output not showing? A quick app reload should do the trick."),
       footer = tagList(
         modalButton("Dismiss"),
         actionButton("go_to_help", "Take me to the Guide", class = "btn-success")
@@ -28,7 +28,7 @@ app_server <- function(input, output, session) {
     removeModal()
   })
   
-  # --- END:  ---
+  # --- END: Welcome Pop-up ---
   
   # --- Hide the pre-loader once the main UI is fully ready ---
   observeEvent(input$main_navbar, {
@@ -36,6 +36,22 @@ app_server <- function(input, output, session) {
       waiter::waiter_hide()
     })
   }, once = TRUE)
+  
+  # --- START: JAVASCRIPT TO HIGHLIGHT ACTIVE TAB ---
+  observeEvent(input$main_navbar, {
+    # This JavaScript code finds the active tab link and adds your custom class
+    # while removing it from any other tab that might have had it before.
+    shinyjs::runjs(
+      "
+      // First, remove the custom class from all tab links
+      $('#main_navbar .nav-link').removeClass('custom-active-tab');
+      
+      // Then, find the link inside the currently active list item and add the class
+      $('#main_navbar .nav-item.active .nav-link').addClass('custom-active-tab');
+      "
+    )
+  }, ignoreNULL = FALSE) # ignoreNULL = FALSE ensures it runs on app load
+  # --- END: JAVASCRIPT HIGHLIGHT ---
   
   # --- Call the Home Module Server ---
   home_inputs <- homeServer(id = "home")
@@ -114,9 +130,7 @@ app_server <- function(input, output, session) {
   })
   
   # --- Call the Server Logic for each Analysis Module ---
-  # THE FIX IS HERE: Pass the correct reactive data to the design module server
   designExperimentServer(id = "design_experiment", home_inputs = design_exp_shared_data) 
-  
   analysisServer(id = "eda", home_inputs = eda_shared_data)
   traitExplorerServer(id = "trait_explorer", home_inputs = trait_explorer_shared_data)
   stability_analysis_server(id = "stability", shared_data = stability_shared_data)
