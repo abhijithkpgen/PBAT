@@ -12,7 +12,7 @@ app_server <- function(input, output, session) {
       title = tags$div(style = "display: flex; align-items: center;", 
                        icon("info-circle", style = "margin-right: 10px; color: #1F4E79;"), 
                        "Welcome to PBAT!"),
-      HTML("New to the app? <br><br> Check out the <b>Help & Guide</b> section for tutorials and to download sample data files with the correct input formats."),
+      HTML("New to the app? <br><br> Check out the <b>Help & Guide</b> section for tutorials and to download sample data files with the correct input formats.<br><br> If you’re having trouble seeing the output results, just reload the app—it usually works like magic! "),
       footer = tagList(
         modalButton("Dismiss"),
         actionButton("go_to_help", "Take me to the Guide", class = "btn-success")
