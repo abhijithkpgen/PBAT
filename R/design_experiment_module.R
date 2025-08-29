@@ -3,7 +3,7 @@
 # Required libraries for this module
 library(shiny)
 library(dplyr)
-library(DT)
+# library(DT) # DT is no longer needed
 library(ggplot2)
 library(plotly)
 
@@ -173,7 +173,7 @@ designExperimentUI <- function(id) {
                  tabPanel("Field Book", 
                           h4("Generated Field Layout Table"),
                           p("This table shows the randomized layout for your experiment. You can sort, search, and copy the data."),
-                          DT::dataTableOutput(ns("design_table"))
+                          tableOutput(ns("design_table")) # REPLACED DT::dataTableOutput
                  )
                )
              )
@@ -405,9 +405,9 @@ designExperimentServer <- function(id, home_inputs) {
     })
     
     # --- Render Outputs ---
-    output$design_table <- DT::renderDataTable({
+    output$design_table <- renderTable({ # REPLACED DT::renderDataTable
       req(rv$design_output)
-      datatable(rv$design_output, options = list(pageLength = 25, scrollX = TRUE), rownames = FALSE)
+      rv$design_output
     })
     
     output$layout_plot <- plotly::renderPlotly({
