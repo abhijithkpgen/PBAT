@@ -3,7 +3,6 @@
 # Required libraries for this module
 library(shiny)
 library(dplyr)
-# library(DT) # DT is no longer needed
 library(ggplot2)
 library(plotly)
 
@@ -159,7 +158,7 @@ designExperimentUI <- function(id) {
              sidebarPanel(
                width = 3,
                h4("Trial Design Generator"),
-               p("Select a design, map your genotype columns, set the parameters, and generate a field layout."),
+               p("Select a design, input your genotypes, set parameters, and generate a field layout."),
                uiOutput(ns("design_sidebar_ui")) 
              ),
              mainPanel(
@@ -173,7 +172,7 @@ designExperimentUI <- function(id) {
                  tabPanel("Field Book", 
                           h4("Generated Field Layout Table"),
                           p("This table shows the randomized layout for your experiment. You can sort, search, and copy the data."),
-                          tableOutput(ns("design_table")) # REPLACED DT::dataTableOutput
+                          tableOutput(ns("design_table"))
                  )
                )
              )
@@ -190,10 +189,7 @@ designExperimentServer <- function(id, home_inputs) {
     
     rv <- reactiveValues(design_output = NULL, plot_object = NULL)
     
-    geno_data <- reactive({
-      req(home_inputs()$analysis_mode == "design_exp")
-      home_inputs()$geno_data
-    })
+    geno_data <- reactiveVal(NULL)
     
     active_design <- reactive({
       req(home_inputs()$analysis_mode == "design_exp")
@@ -201,27 +197,53 @@ designExperimentServer <- function(id, home_inputs) {
     })
     
     output$design_sidebar_ui <- renderUI({
-      df <- geno_data()
       design <- active_design()
-      req(df, design)
-      
-      col_names <- names(df)
+      req(design)
       
       tagList(
-        h4("Step 1: Map Columns"),
-        if (design %in% c("rcbd", "alpha")) {
-          selectInput(ns("geno_col_std"), "Genotype Column", choices = col_names)
-        },
-        if (design == "augmented") {
-          tagList(
-            selectInput(ns("test_col_aug"), "Test Genotypes Column", choices = col_names, selected = col_names[1]),
-            selectInput(ns("check_col_aug"), "Check Genotypes Column", choices = col_names, selected = col_names[2])
+        h4("Step 1: Genotype Input"),
+        radioButtons(ns("geno_input_type"), "Genotype Input Method",
+                     choices = c("Custom", "System Generated"), selected = "Custom"),
+        
+        conditionalPanel(
+          condition = paste0("input['", ns("geno_input_type"), "'] == 'Custom'"),
+          radioButtons(ns("custom_input_method"), "Custom Input Type",
+                       choices = c("Upload CSV", "Paste Names"), selected = "Upload CSV"),
+          
+          conditionalPanel(
+            condition = paste0("input['", ns("custom_input_method"), "'] == 'Upload CSV'"),
+            fileInput(ns("geno_file"), "Upload Genotypes CSV", accept = ".csv"),
+            uiOutput(ns("map_columns_ui"))
+          ),
+          
+          conditionalPanel(
+            condition = paste0("input['", ns("custom_input_method"), "'] == 'Paste Names'"),
+            textAreaInput(ns("pasted_test_geno"), "Paste Test Genotypes (one per line)"),
+            if (design == "augmented") {
+              textAreaInput(ns("pasted_check_geno"), "Paste Check Genotypes (one per line)")
+            }
           )
-        },
+        ),
+        
+        conditionalPanel(
+          condition = paste0("input['", ns("geno_input_type"), "'] == 'System Generated'"),
+          numericInput(ns("num_test_geno"), "Number of Test Genotypes", value = 50, min = 1),
+          textInput(ns("prefix_test_geno"), "Prefix for Test Genotypes", value = "G"),
+          if (design == "augmented") {
+            tagList(
+              numericInput(ns("num_check_geno"), "Number of Check Genotypes", value = 5, min = 1),
+              textInput(ns("prefix_check_geno"), "Prefix for Check Genotypes", value = "C")
+            )
+          }
+        ),
+        
         hr(),
         h4("Step 2: Set Parameters"),
         if (design == "rcbd") {
-          numericInput(ns("rcbd_reps"), "Number of Replications", value = 3, min = 2)
+          tagList(
+            numericInput(ns("rcbd_reps"), "Number of Replications", value = 3, min = 2),
+            uiOutput(ns("rcbd_reps_suggestion_ui"))
+          )
         } else if (design == "augmented") {
           tagList(
             numericInput(ns("aug_blocks"), "Number of Blocks", value = 5, min = 2),
@@ -230,8 +252,8 @@ designExperimentServer <- function(id, home_inputs) {
         } else if (design == "alpha") {
           tagList(
             numericInput(ns("alpha_reps"), "Number of Replications", value = 2, min = 2),
-            numericInput(ns("alpha_k"), "Number of Plots per Block (k)", value = 5, min = 2),
-            helpText("Note: For Alpha Lattice, the total number of genotypes must be a multiple of 'k'.")
+            numericInput(ns("alpha_b"), "Number of Blocks per Replication", value = 5, min = 2),
+            uiOutput(ns("alpha_block_suggestion_ui"))
           )
         },
         hr(),
@@ -244,14 +266,57 @@ designExperimentServer <- function(id, home_inputs) {
       )
     })
     
+    observeEvent(input$geno_file, {
+      req(input$geno_file)
+      df <- read.csv(input$geno_file$datapath)
+      geno_data(df)
+    })
+    
+    output$map_columns_ui <- renderUI({
+      df <- geno_data()
+      design <- active_design()
+      req(df, design)
+      
+      col_names <- names(df)
+      
+      if (design == "augmented") {
+        tagList(
+          selectInput(ns("test_col_aug"), "Test Genotypes Column", choices = col_names, selected = col_names[1]),
+          selectInput(ns("check_col_aug"), "Check Genotypes Column", choices = col_names, selected = col_names[2])
+        )
+      } else {
+        selectInput(ns("geno_col_std"), "Genotype Column", choices = col_names)
+      }
+    })
+    
+    output$rcbd_reps_suggestion_ui <- renderUI({
+      helpText(HTML("<b>Statistical Tip:</b> Using at least 3-4 replications is generally recommended to ensure a reliable estimate of experimental error."))
+    })
+    
     output$aug_block_suggestion_ui <- renderUI({
       design <- active_design()
       req(design == "augmented")
-      df <- geno_data()
-      req(df, input$test_col_aug, input$check_col_aug)
       
-      n_test <- length(na.omit(df[[input$test_col_aug]]))
-      n_check <- length(na.omit(df[[input$check_col_aug]]))
+      n_test <- 0
+      n_check <- 0
+      
+      # This logic block now safely handles all input types and their reactive nature
+      if (input$geno_input_type == "Custom") {
+        if (input$custom_input_method == "Upload CSV") {
+          df <- geno_data()
+          req(df, input$test_col_aug, input$check_col_aug)
+          n_test <- length(unique(na.omit(df[[input$test_col_aug]])))
+          n_check <- length(unique(na.omit(df[[input$check_col_aug]])))
+        } else { # Paste names
+          n_test <- length(unique(scan(text = input$pasted_test_geno, what = "", quiet = TRUE)))
+          n_check <- length(unique(scan(text = input$pasted_check_geno, what = "", quiet = TRUE)))
+        }
+      } else { # System generated
+        req(input$num_test_geno, input$num_check_geno)
+        n_test <- input$num_test_geno
+        n_check <- input$num_check_geno
+      }
+      
       
       # --- Suggestion for avoiding fillers ---
       get_factors <- function(n) {
@@ -287,38 +352,99 @@ designExperimentServer <- function(id, home_inputs) {
       )
     })
     
+    output$alpha_block_suggestion_ui <- renderUI({
+      design <- active_design()
+      req(design == "alpha")
+      
+      n_geno <- 0
+      
+      if (input$geno_input_type == "Custom") {
+        if (input$custom_input_method == "Upload CSV") {
+          df <- geno_data()
+          req(df, input$geno_col_std)
+          n_geno <- length(unique(na.omit(df[[input$geno_col_std]])))
+        } else { # Paste names
+          n_geno <- length(unique(scan(text = input$pasted_test_geno, what = "", quiet = TRUE)))
+        }
+      } else { # System generated
+        req(input$num_test_geno)
+        n_geno <- input$num_test_geno
+      }
+      
+      get_factors <- function(n) {
+        if (n <= 1) return(integer(0))
+        x <- 1:floor(sqrt(n))
+        factors <- x[n %% x == 0]
+        unique(sort(c(factors, n/factors)))
+      }
+      
+      divisors <- get_factors(n_geno)
+      divisors <- divisors[divisors > 1]
+      
+      suggestion_text <- if (length(divisors) > 0) {
+        paste("With", n_geno, "genotypes, valid choices for 'Number of Blocks per Replication' are:", paste(divisors, collapse=", "))
+      } else {
+        paste("With", n_geno, "genotypes, a valid Alpha Lattice design cannot be formed. Please adjust the number of genotypes.")
+      }
+      
+      helpText(HTML(paste0("<b>Design Tip:</b> ", suggestion_text)))
+    })
+    
     
     observeEvent(input$generate_design, {
       
-      df <- geno_data()
       design <- active_design()
-      req(df, design)
+      req(design)
       
       gen_names <- character(0)
       check_names <- character(0)
       
       tryCatch({
-        if (design %in% c("rcbd", "alpha")) {
-          req(input$geno_col_std)
-          gen_names <- na.omit(df[[input$geno_col_std]])
-        } else if (design == "augmented") {
-          req(input$test_col_aug, input$check_col_aug)
-          gen_names <- na.omit(df[[input$test_col_aug]])
-          check_names <- na.omit(df[[input$check_col_aug]])
-          if (length(check_names) == 0) {
-            stop("Augmented design requires at least one check genotype.")
+        if (input$geno_input_type == "Custom") {
+          if (input$custom_input_method == "Upload CSV") {
+            df <- geno_data()
+            req(df)
+            if (design %in% c("rcbd", "alpha")) {
+              req(input$geno_col_std)
+              gen_names <- unique(na.omit(df[[input$geno_col_std]]))
+            } else if (design == "augmented") {
+              req(input$test_col_aug, input$check_col_aug)
+              gen_names <- unique(na.omit(df[[input$test_col_aug]]))
+              check_names <- unique(na.omit(df[[input$check_col_aug]]))
+            }
+          } else { # Paste Names
+            gen_names <- unique(scan(text = input$pasted_test_geno, what = "", quiet = TRUE))
+            if (design == "augmented") {
+              check_names <- unique(scan(text = input$pasted_check_geno, what = "", quiet = TRUE))
+            }
+          }
+        } else { # System Generated
+          gen_names <- paste0(input$prefix_test_geno, 1:input$num_test_geno)
+          if (design == "augmented") {
+            check_names <- paste0(input$prefix_check_geno, 1:input$num_check_geno)
           }
         }
         
         if (length(gen_names) == 0) {
-          stop("No valid test genotypes were found in the mapped column.")
+          stop("No valid test genotypes were found.")
+        }
+        if (design == "augmented" && length(check_names) == 0) {
+          stop("Augmented design requires at least one check genotype.")
         }
         
         layout <- switch(
           design,
           "rcbd" = custom_design_rcbd(treatments = gen_names, reps = input$rcbd_reps),
           "augmented" = custom_design_augmented_rcbd(test_treatments = gen_names, check_treatments = check_names, blocks = input$aug_blocks),
-          "alpha" = custom_design_alpha(treatments = gen_names, k = input$alpha_k, r = input$alpha_reps)
+          "alpha" = {
+            b <- input$alpha_b
+            v <- length(gen_names)
+            if (v %% b != 0) {
+              stop("The total number of genotypes must be a multiple of the number of blocks.")
+            }
+            k <- v / b
+            custom_design_alpha(treatments = gen_names, k = k, r = input$alpha_reps)
+          }
         )
         
         # 1. Standardize column names
@@ -328,23 +454,18 @@ designExperimentServer <- function(id, home_inputs) {
         names(plot_data)[names(plot_data) == "replication"] <- "Replication"
         names(plot_data)[names(plot_data) == "block"] <- "Block"
         
-        # 2. Create Row and Column coordinates using Base R
-        if ("Block" %in% names(plot_data)) {
-          grouping_cols <- c("Replication", "Block")[c("Replication", "Block") %in% names(plot_data)]
-          plot_data <- do.call(rbind, by(plot_data, plot_data[, grouping_cols, drop = FALSE], function(sub_df) {
-            sub_df$Column <- 1:nrow(sub_df)
-            sub_df
-          }))
-          
-          if ("Replication" %in% names(plot_data)) {
-            plot_data$Row <- as.integer(factor(paste(plot_data$Replication, plot_data$Block, sep="-")))
-          } else {
-            plot_data$Row <- as.integer(factor(plot_data$Block))
-          }
-        } else {
-          plot_data$Row <- 1
-          plot_data$Column <- 1:nrow(plot_data)
-        }
+        # 2. Create Row and Column coordinates with FULL randomization
+        total_blocks <- length(unique(plot_data$Block))
+        block_positions <- data.frame(Block = unique(plot_data$Block))
+        block_positions <- block_positions[sample(nrow(block_positions)), , drop = FALSE]
+        block_positions$Row <- 1:nrow(block_positions)
+        
+        plot_data <- merge(plot_data, block_positions, by = "Block")
+        
+        plot_data <- plot_data %>%
+          group_by(Block) %>%
+          mutate(Column = 1:n()) %>%
+          ungroup()
         
         # 3. Create labels
         plot_data$box_label <- if("Replication" %in% names(plot_data)) {
@@ -364,13 +485,12 @@ designExperimentServer <- function(id, home_inputs) {
         
         # 4. Save final table for output (using robust base R)
         final_df <- plot_data[order(plot_data$Plot), ]
-        final_df$Plot_Num <- 1:nrow(final_df)
         
         # Define final columns explicitly to avoid errors
         if (design %in% c("rcbd", "alpha")) {
-          final_cols <- c("Plot_Num", "Plot", "Row", "Column", "Replication", "Block", "Genotype")
+          final_cols <- c("Plot", "Row", "Column", "Replication", "Block", "Genotype")
         } else { # Augmented
-          final_cols <- c("Plot_Num", "Plot", "Row", "Column", "Block", "Genotype", "Type")
+          final_cols <- c("Plot", "Row", "Column", "Block", "Genotype", "Type")
         }
         # Ensure all selected columns actually exist before subsetting
         final_cols_exist <- final_cols[final_cols %in% names(final_df)]
@@ -405,7 +525,7 @@ designExperimentServer <- function(id, home_inputs) {
     })
     
     # --- Render Outputs ---
-    output$design_table <- renderTable({ # REPLACED DT::renderDataTable
+    output$design_table <- renderTable({
       req(rv$design_output)
       rv$design_output
     })
