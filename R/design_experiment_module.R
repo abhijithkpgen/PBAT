@@ -167,7 +167,8 @@ designExperimentUI <- function(id) {
                  tabPanel("Visualize Layout", 
                           h4("Interactive Field Plot"),
                           p("Hover over the plots to see details. Use the tools in the top-right corner to pan, zoom, and save a static image."),
-                          plotly::plotlyOutput(ns("layout_plot"), height = "800px")
+                          # CORRECTED: Changed to uiOutput to allow dynamic rendering
+                          uiOutput(ns("layout_plot_ui"))
                  ),
                  tabPanel("Field Book", 
                           h4("Generated Field Layout Table"),
@@ -300,7 +301,6 @@ designExperimentServer <- function(id, home_inputs) {
       n_test <- 0
       n_check <- 0
       
-      # This logic block now safely handles all input types and their reactive nature
       if (input$geno_input_type == "Custom") {
         if (input$custom_input_method == "Upload CSV") {
           df <- geno_data()
@@ -318,7 +318,6 @@ designExperimentServer <- function(id, home_inputs) {
       }
       
       
-      # --- Suggestion for avoiding fillers ---
       get_factors <- function(n) {
         if (n <= 1) return(integer(0))
         x <- 1:floor(sqrt(n))
@@ -335,7 +334,6 @@ designExperimentServer <- function(id, home_inputs) {
         paste("With", n_test, "test entries, filler plots will likely be needed to ensure equal block sizes.")
       }
       
-      # --- Suggestion for statistical power (degrees of freedom) ---
       min_df_error <- 12
       suggestion_text_stats <- NULL
       if (n_check > 1) {
@@ -345,7 +343,6 @@ designExperimentServer <- function(id, home_inputs) {
         suggestion_text_stats <- "Note: With only one check entry, the error degrees of freedom cannot be estimated from checks alone. Consider adding more checks for a more robust analysis."
       }
       
-      # Combine the suggestions into a single UI element
       tagList(
         helpText(HTML(paste0("<b>Layout Tip:</b> ", suggestion_text_filler))),
         helpText(HTML(paste0("<b>Statistical Tip:</b> ", suggestion_text_stats)))
@@ -447,14 +444,12 @@ designExperimentServer <- function(id, home_inputs) {
           }
         )
         
-        # 1. Standardize column names
         plot_data <- layout
         names(plot_data)[names(plot_data) == "plots"] <- "Plot"
         names(plot_data)[names(plot_data) == "treatments"] <- "Genotype"
         names(plot_data)[names(plot_data) == "replication"] <- "Replication"
         names(plot_data)[names(plot_data) == "block"] <- "Block"
         
-        # 2. Create Row and Column coordinates with FULL randomization
         total_blocks <- length(unique(plot_data$Block))
         block_positions <- data.frame(Block = unique(plot_data$Block))
         block_positions <- block_positions[sample(nrow(block_positions)), , drop = FALSE]
@@ -467,7 +462,6 @@ designExperimentServer <- function(id, home_inputs) {
           mutate(Column = 1:n()) %>%
           ungroup()
         
-        # 3. Create labels
         plot_data$box_label <- if("Replication" %in% names(plot_data)) {
           paste0(plot_data$Genotype, "\n(R", plot_data$Replication, ")")
         } else {
@@ -483,20 +477,16 @@ designExperimentServer <- function(id, home_inputs) {
           if ("Replication" %in% names(plot_data)) paste("<br>Replication:", plot_data$Replication) else ""
         )
         
-        # 4. Save final table for output (using robust base R)
         final_df <- plot_data[order(plot_data$Plot), ]
         
-        # Define final columns explicitly to avoid errors
         if (design %in% c("rcbd", "alpha")) {
           final_cols <- c("Plot", "Row", "Column", "Replication", "Block", "Genotype")
-        } else { # Augmented
+        } else {
           final_cols <- c("Plot", "Row", "Column", "Block", "Genotype", "Type")
         }
-        # Ensure all selected columns actually exist before subsetting
         final_cols_exist <- final_cols[final_cols %in% names(final_df)]
         rv$design_output <- final_df[, final_cols_exist]
         
-        # 5. Create plot object
         p <- ggplot(plot_data, aes(x = as.factor(Column), y = as.factor(Row), text = tooltip, fill = as.factor(Genotype))) +
           geom_tile(color = "white", size = 0.5, width = 0.95, height = 0.95) +
           geom_text(aes(label = box_label), size = 2.5, color = "black") +
@@ -530,6 +520,12 @@ designExperimentServer <- function(id, home_inputs) {
       rv$design_output
     })
     
+    # CORRECTED: This ensures the plot UI is dynamically created and then rendered
+    output$layout_plot_ui <- renderUI({
+      req(rv$plot_object)
+      plotly::plotlyOutput(ns("layout_plot"), height = "800px")
+    })
+    
     output$layout_plot <- plotly::renderPlotly({
       req(rv$plot_object)
       plotly::ggplotly(rv$plot_object, tooltip = "text")
@@ -558,3 +554,4 @@ designExperimentServer <- function(id, home_inputs) {
     
   })
 }
+
