@@ -7,5 +7,8 @@ utils::globalVariables(c(
   "Trait_Flagged", "sd_val", "q3", "q1", "iqr_val", "p_val", "p_adj",
   "outlier_sd", "outlier_iqr", "is_outlier", "x_group", "iqr", "outlier_flag",
   "upper_bound", "lower_bound", "pbat_row_id", "inferred_block",
-  "plot_in_block", "tooltip", "Cross", "sca_se"
+  "plot_in_block", "tooltip", "Cross", "sca_se",
+  # Add the new variables here
+  "replication", "block", "plots", "Column", "Row", "Genotype", "box_label",
+  "geom_segment", "arrow", "unit"
 ))

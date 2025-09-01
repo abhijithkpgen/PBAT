@@ -35,37 +35,14 @@ homeUI <- function(id) {
               )
           ),
           
-          # --- Conditional Panel for Trial Design Inputs ---
+          # --- Conditional UIs for workflow-specific settings ---
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'design_exp'"),
             selectInput(ns("design_type_home"), "Select Design Type",
                         choices = c("Randomized Complete Block Design (RCBD)" = "rcbd",
                                     "Augmented RCBD" = "augmented",
-                                    "Alpha Lattice Design" = "alpha")),
-            
-            conditionalPanel(
-              condition = "input.design_type_home == 'rcbd' || input.design_type_home == 'alpha'", ns = ns,
-              div(class="file-upload-area", 
-                  fileInput(ns("geno_file_std_home"), tagList(icon("upload"), "Upload Genotypes CSV (Single Column)"), accept = ".csv")
-              )
-            ),
-            conditionalPanel(
-              condition = "input.design_type_home == 'augmented'", ns = ns,
-              div(class="file-upload-area",
-                  fileInput(ns("geno_file_aug_home"), tagList(icon("upload"), "Upload Genotypes CSV (Two Columns: Test, Check)"), accept = ".csv")
-              )
-            )
+                                    "Alpha Lattice Design" = "alpha"))
           ),
-          
-          # --- Conditional File Input for all OTHER analysis modes ---
-          conditionalPanel(
-            condition = paste0("input['", ns("analysis_mode"), "'] != 'design_exp'"),
-            div(class="file-upload-area",
-                fileInput(ns("file"), tagList(icon("upload"), "Upload CSV File for Analysis"), accept = c("text/csv", ".csv"))
-            )
-          ),
-          
-          # --- Other conditional UIs ---
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'trait_explorer'"),
             selectInput(ns("explorer_type"), "Select Explorer Type", choices = c("Spatial Trait Explorer" = "spatial", "Data Curation & Outlier Analysis" = "curation"))
@@ -85,6 +62,14 @@ homeUI <- function(id) {
           conditionalPanel(
             condition = paste0("input['", ns("analysis_mode"), "'] == 'mating'"),
             selectInput(ns("md_mating_design"), "Select Mating Design", choices = c("Griffing Method I (Full Diallel: Parents, F1s, Reciprocals)" = "griffing_m1", "Griffing Method II (Parents & F1s, No Reciprocals)" = "griffing_m2", "Griffing Method III (F1s & Reciprocals, No Parents)" = "griffing_m3", "Griffing Method IV (F1s Only, No Parents, No Reciprocals)" = "griffing_m4", "Partial Diallel" = "diallel_partial", "Line x Tester" = "line_tester"))
+          ),
+          
+          # --- MODIFIED: File Input is now at the bottom for relevant modes ---
+          conditionalPanel(
+            condition = paste0("input['", ns("analysis_mode"), "'] != 'design_exp'"),
+            div(class="file-upload-area",
+                fileInput(ns("file"), tagList(icon("upload"), "Upload CSV File for Analysis"), accept = c("text/csv", ".csv"))
+            )
           ),
           
           actionButton(ns("go_to_analysis"), "Proceed to Analysis", class = "btn btn-primary btn-block"),
@@ -110,7 +95,6 @@ homeServer <- function(id) {
     ns <- session$ns
     results_to_return <- reactiveVal()
     
-    # *** THE FIX: Add JavaScript to handle radio button styling ***
     observeEvent(input$analysis_mode, {
       js_selector <- paste0("#", ns("analysis_mode"), " .radio label")
       js_checked_selector <- paste0("#", ns("analysis_mode"), " input:checked")
@@ -121,30 +105,20 @@ homeServer <- function(id) {
           $('%s').parent('label').addClass('active-workflow');
         ", js_selector, js_checked_selector)
       )
-    }, ignoreNULL = FALSE, ignoreInit = TRUE) # ignoreInit=FALSE ensures it runs on load
+    }, ignoreNULL = FALSE, ignoreInit = TRUE) 
     
     observeEvent(input$go_to_analysis, {
       
       mode <- input$analysis_mode
       df <- NULL
-      geno_df <- NULL
       
       if (mode != "design_exp") {
         req(input$file)
         df <- readr::read_csv(input$file$datapath, na = c("", "NA"), show_col_types = FALSE)
-      } else {
-        if (input$design_type_home %in% c("rcbd", "alpha")) {
-          req(input$geno_file_std_home)
-          geno_df <- readr::read_csv(input$geno_file_std_home$datapath, show_col_types = FALSE)
-        } else if (input$design_type_home == "augmented") {
-          req(input$geno_file_aug_home)
-          geno_df <- readr::read_csv(input$geno_file_aug_home$datapath, show_col_types = FALSE)
-        }
       }
       
       settings <- list(
         file_data = df,
-        geno_data = geno_df,
         analysis_mode = mode,
         design_type_home = input$design_type_home,
         explorer_type = input$explorer_type,
@@ -167,7 +141,7 @@ homeServer <- function(id) {
           h4(tags$b("Design Your Trial Workflow")),
           div(class="workflow-overview", tags$ol(
             tags$li(span(class="step-number", "1"), div(tags$b("Select Design Type:"), "Choose from RCBD, Augmented RCBD, or Alpha Lattice.")),
-            tags$li(span(class="step-number", "2"), div(tags$b("Upload Genotypes:"), "Provide a CSV file with your test (and check) genotype names.")),
+            tags$li(span(class="step-number", "2"), div(tags$b("Input Genotypes:"), "Upload a CSV or paste names for your test (and check) genotypes in the next screen.")),
             tags$li(span(class="step-number", "3"), div(tags$b("Set Parameters:"), "Specify the number of replications, blocks, etc.")),
             tags$li(span(class="step-number", "4"), div(tags$b("Generate & Download:"), "Create and visualize the randomized field plan and download the field book as a CSV."))
           ))
