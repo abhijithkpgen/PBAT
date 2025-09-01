@@ -2,6 +2,7 @@
 #
 # This file contains the UI and Server logic for the updated Multivariate Analysis module.
 # PCA plots have been updated to use plotly for interactivity.
+# Path analysis plotting is now handled by the tidySEM package.
 
 # Required Libraries
 library(shiny)
@@ -10,7 +11,7 @@ library(FactoMineR)
 library(factoextra)
 library(corrplot)
 library(lavaan)
-library(semPlot)
+library(tidySEM)
 library(DT)
 library(plotly)
 library(htmlwidgets)
@@ -126,8 +127,7 @@ multivariate_analysis_server <- function(id, shared_data) {
       } else if (multi_subtype_selected() == "path") {
         tabsetPanel(
           tabPanel("Path Diagram", plotOutput(ns("multi_path_diagram"))),
-          tabPanel("Path Coefficients Table", tableOutput(ns("multi_path_coef"))),
-          tabPanel("Model Fit Summary", verbatimTextOutput(ns("multi_path_fit")))
+          tabPanel("Path Coefficients Table", tableOutput(ns("multi_path_coef")))
         )
       }
     })
@@ -228,17 +228,14 @@ multivariate_analysis_server <- function(id, shared_data) {
         fit <- lavaan::sem(model_str, data = df_path, meanstructure = TRUE)
         path_results(fit)
         
+        # New code using tidySEM
         output$multi_path_diagram <- renderPlot({
-          semPlot::semPaths(fit, whatLabels = "std", layout = "tree", 
-                            edge.label.cex = 1.1, sizeMan = 6,
-                            fade = FALSE, posCol = "darkgreen", negCol = "darkred")
+          tidySEM::graph_sem(fit)
         })
         output$multi_path_coef <- renderTable({
           subset(lavaan::parameterEstimates(fit, standardized = TRUE), op == "~")
         }, rownames = FALSE)
-        output$multi_path_fit <- renderPrint({
-          summary(fit, fit.measures = TRUE, standardized = TRUE)
-        })
+        
         output$multi_path_status <- renderUI({ span(style = "color: green;", icon("check"), " Path Analysis Completed") })
       }, error = function(e) {
         showModal(modalDialog(title = "Path Analysis Error", e$message))
@@ -292,13 +289,10 @@ multivariate_analysis_server <- function(id, shared_data) {
         
         if (multi_subtype_selected() == "path" && !is.null(path_results())) {
           fit <- path_results()
-          pdf(file.path(tmp_dir, "Path_Diagram.pdf"))
-          semPlot::semPaths(fit, "std", layout="tree", fade=FALSE, posCol="darkgreen", negCol="darkred")
-          dev.off()
+          path_plot <- tidySEM::graph_sem(fit)
+          ggsave(file.path(tmp_dir, "Path_Diagram.pdf"), plot = path_plot, device = "pdf", width = 11, height = 8.5)
           write.csv(lavaan::parameterEstimates(fit, standardized=TRUE), file.path(tmp_dir, "Path_Coefficients.csv"))
-          capture.output(summary(fit, fit.measures=TRUE), file = file.path(tmp_dir, "Path_Summary.txt"))
-          files <- c(files, file.path(tmp_dir, "Path_Diagram.pdf"), file.path(tmp_dir, "Path_Coefficients.csv"),
-                     file.path(tmp_dir, "Path_Summary.txt"))
+          files <- c(files, file.path(tmp_dir, "Path_Diagram.pdf"), file.path(tmp_dir, "Path_Coefficients.csv"))
         }
         
         zip::zip(zipfile = file, files = files, mode = "cherry-pick")

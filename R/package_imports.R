@@ -28,7 +28,7 @@
 #' @importFrom RColorBrewer brewer.pal.info
 #' @importFrom corrplot corrplot
 #' @importFrom factoextra fviz_pca_ind fviz_screeplot fviz_pca_var get_eigenvalue
-#' @importFrom semPlot semPaths
+#' @importFrom tidySEM graph_sem
 #' @importFrom ggplot2 aes element_blank element_text facet_wrap geom_boxplot geom_crossbar geom_jitter geom_line geom_point geom_text geom_tile ggplot ggsave ggtitle labs scale_color_manual scale_fill_brewer scale_fill_viridis_c scale_linetype_manual stat_qq stat_qq_line theme theme_bw theme_minimal
 #'
 # Statistics and Modeling
@@ -48,3 +48,4 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom zip zipr
 NULL
+

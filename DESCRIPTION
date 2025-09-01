@@ -42,11 +42,11 @@ Imports:
     readr,
     rlang,
     scales,
-    semPlot,
     shiny,
     shinyjs,
     tibble,
     tidyr,
+    tidySEM,
     waiter,
     zip,
     utils
