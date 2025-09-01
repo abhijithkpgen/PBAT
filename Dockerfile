@@ -23,4 +23,4 @@ RUN R -e "remotes::install_local('/usr/src/pbat_src', dependencies = TRUE)"
 EXPOSE 8080
 
 # The command to run when the container starts
-CMD ["R", "-e", "PBAT::run_app()"]
+CMD ["R", "-e", "PbAT::run_app()"]
