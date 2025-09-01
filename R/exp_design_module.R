@@ -504,20 +504,40 @@ analysisServer <- function(id, home_inputs) {
         # --- FIX: Define grouping variables ---
         grouping_cols <- c(env_col, entry_col) %>% purrr::discard(is.null)
         
-        # --- FIX: Group by all relevant factors ---
-        summary_tbl <- df_trait %>%
-          dplyr::group_by(across(all_of(grouping_cols))) %>%
-          dplyr::summarise(
-            Trait = trait,
-            Mean = round(mean(.data[[trait]], na.rm = TRUE), 2),
-            SD = round(sd(.data[[trait]], na.rm = TRUE), 2),
-            SE = round(SD / sqrt(n()), 2),
-            CV = round(100 * SD / Mean, 2),
-            Min = round(min(.data[[trait]], na.rm = TRUE), 2),
-            Max = round(max(.data[[trait]], na.rm = TRUE), 2),
-            N = n(),
-            .groups = "drop"
-          )
+        # --- NEW: Corrected summary logic to group by environment ---
+        summary_tbl <- if (trial_type == "Multi Environment" && !is.null(env_col)) {
+          df %>%
+            dplyr::group_by(!!sym(env_col)) %>%
+            dplyr::summarise(
+              Trait = trait,
+              Mean = round(mean(.data[[trait]], na.rm = TRUE), 2),
+              SD = round(sd(.data[[trait]], na.rm = TRUE), 2),
+              N = sum(!is.na(.data[[trait]])),
+              SE = round(SD / sqrt(N), 2),
+              CV = round(100 * SD / Mean, 2),
+              Min = round(min(.data[[trait]], na.rm = TRUE), 2),
+              Max = round(max(.data[[trait]], na.rm = TRUE), 2),
+              Missing = sum(is.na(.data[[trait]])),
+              `Missing Percent` = scales::percent(Missing / n(), accuracy = 0.01),
+              .groups = "drop"
+            ) %>%
+            rename(Environment = !!sym(env_col))
+        } else {
+          df %>%
+            dplyr::summarise(
+              Environment = "Overall",
+              Trait = trait,
+              Mean = round(mean(.data[[trait]], na.rm = TRUE), 2),
+              SD = round(sd(.data[[trait]], na.rm = TRUE), 2),
+              N = sum(!is.na(.data[[trait]])),
+              SE = round(SD / sqrt(N), 2),
+              CV = round(100 * SD / Mean, 2),
+              Min = round(min(.data[[trait]], na.rm = TRUE), 2),
+              Max = round(max(.data[[trait]], na.rm = TRUE), 2),
+              Missing = sum(is.na(.data[[trait]])),
+              `Missing Percent` = scales::percent(Missing / n(), accuracy = 0.01)
+            )
+        }
         
         # This part remains the same, showing overall boxplot per environment
         df_trait$Environment <- if (is.null(env_col)) factor("All") else as.factor(df_trait[[env_col]])
