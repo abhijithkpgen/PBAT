@@ -451,17 +451,10 @@ analysisServer <- function(id, home_inputs) {
       if (is.null(design)) return(NULL)
       
       if (toupper(design) == "CRD") {
-        # THE FIX: Convert the reactiveValues object to a regular list
-        # without calling it as a function.
         res <- reactiveValuesToList(crd_results)
-        
-        # If no results have been generated yet, show a message.
         if (length(res) == 0) {
           return(div(h4("No CRD results yet. Click a 'Run' button to begin.")))
         }
-        
-        # Build the UI by looping through the traits selected by the user.
-        # This is more robust than trying to guess traits from the results list.
         tab_list <- lapply(req(input$crd_traits), function(trait) {
           trait_id <- make.names(trait)
           tabPanel(
@@ -469,18 +462,15 @@ analysisServer <- function(id, home_inputs) {
             tabsetPanel(
               tabPanel("Summary Table", DT::dataTableOutput(ns(paste0("crd_sum_", trait_id)))),
               tabPanel("ANOVA Table", DT::dataTableOutput(ns(paste0("crd_anova_", trait_id)))),
-              tabPanel("DMRT Results", verbatimTextOutput(ns(paste0("crd_dmrt_", trait_id)))),
+              tabPanel("Post-Hoc Test (Tukey HSD)", DT::dataTableOutput(ns(paste0("crd_posthoc_", trait_id)))),
               tabPanel("Missing Combinations", DT::dataTableOutput(ns(paste0("crd_missing_", trait_id)))),
               tabPanel("Interaction Plots", uiOutput(ns(paste0("crd_interaction_panel_", trait_id))))
             )
           )
         })
-        
-        # Use do.call to correctly build the tabsetPanel
         return(do.call(tabsetPanel, c(list(id = ns("crd_trait_tabs")), tab_list)))
         
       } else {
-        # This part for other designs remains unchanged.
         tabsetPanel(
           id = ns("result_tabs"),
           tabPanel("Descriptive Results", uiOutput(ns("descriptive_ui"))),
@@ -814,14 +804,13 @@ analysisServer <- function(id, home_inputs) {
     })
     
     
-    # --- Block C5: ANOVA + Post-Hoc (Corrected for reactiveValues) ---
+    # --- Block C5: ANOVA + Post-Hoc (FORMATTING IMPROVED) ---
     observeEvent(input$run_crd_anova, {
       req(raw_data(), input$crd_traits, input$crd_n_factors > 0)
       df <- raw_data(); nfac <- as.numeric(input$crd_n_factors)
       factor_names <- paste0("crd_factor", 1:nfac)
       factor_cols <- na.omit(unname(sapply(factor_names, function(x) input[[x]])))
       
-      # --- Original validation logic ---
       if (any(duplicated(factor_cols))) {
         showNotification("Please select unique factors for each Factor slot!", type = "error"); return(NULL)
       }
@@ -838,60 +827,74 @@ analysisServer <- function(id, home_inputs) {
         showNotification(msg, type = "error"); return(NULL)
       }
       
-      withProgress(message = 'Running ANOVA + Post Hoc (DMRT)...', value = 0, {
+      withProgress(message = 'Running ANOVA + Post Hoc (Tukey HSD)...', value = 0, {
         for (trait in input$crd_traits) {
           local({
             trait_local <- trait; trait_id <- make.names(trait_local)
             incProgress(1/length(input$crd_traits), detail = paste("Trait:", trait_local))
             
-            # --- Original analysis variables and logic ---
-            anova_str <- ""; dmrt_str <- ""; anova_df <- data.frame(); missing <- data.frame()
+            anova_df <- data.frame(); posthoc_list <- list(); missing <- data.frame()
             
             if (!is.numeric(df[[trait_local]])) {
-              anova_str <- paste("Trait", trait_local, "is not numeric. Cannot run ANOVA.")
-              anova_df <- data.frame(Message = anova_str)
+              anova_df <- data.frame(Message = paste("Trait", trait_local, "is not numeric. Cannot run ANOVA."))
             } else {
               factors_bt <- sapply(factor_cols, function(x) if (grepl("[^A-Za-z0-9_.]", x)) paste0("`", x, "`") else x)
               formula_str <- if (length(factors_bt) == 1) { paste(trait_local, "~", factors_bt[1]) } else { paste(trait_local, "~", paste(factors_bt, collapse = " * ")) }
               fit <- tryCatch(aov(as.formula(formula_str), data = df), error = function(e) NULL)
               
               if (!is.null(fit)) {
-                anova_df <- broom::tidy(fit)
-                anova_str <- "Shapiro-Wilk Test for Normality of Residuals:\n"
-                res <- tryCatch(residuals(fit), error = function(e) NULL)
-                if (!is.null(res) && length(res) > 3) {
-                  shapiro <- tryCatch(shapiro.test(res), error = function(e) NULL)
-                  if (!is.null(shapiro)) anova_str <- paste0(anova_str, paste(capture.output(shapiro), collapse = "\n"), "\n")
+                anova_df <- broom::tidy(fit) %>%
+                  mutate(across(where(is.numeric), ~round(.x, 2))) %>%
+                  mutate(Significance = add_significance_stars(p.value))
+                
+                tukey_hsd <- tryCatch(TukeyHSD(fit), error = function(e) NULL)
+                if (!is.null(tukey_hsd)) {
+                  posthoc_list <- lapply(names(tukey_hsd), function(term) {
+                    df <- as.data.frame(tukey_hsd[[term]])
+                    df <- tibble::rownames_to_column(df, "Comparison")
+                    df <- df %>%
+                      mutate(across(where(is.numeric), ~round(.x, 2))) %>%
+                      mutate(Significance = add_significance_stars(`p adj`))
+                    return(df)
+                  })
+                  names(posthoc_list) <- names(tukey_hsd)
+                } else {
+                  posthoc_list <- list(error = data.frame(Message = "Tukey HSD could not be computed."))
                 }
-                if (requireNamespace("agricolae", quietly = TRUE)) {
-                  for (ff in factors_bt) {
-                    dmrt <- tryCatch(agricolae::duncan.test(fit, ff, group=TRUE), error = function(e) NULL)
-                    if (!is.null(dmrt)) dmrt_str <- paste0(dmrt_str, "\nDMRT for ", ff, ":\n", paste(capture.output(dmrt$groups), collapse = "\n"), "\n")
-                  }
-                  if (length(factors_bt) > 1) {
-                    all_interactions <- unlist(lapply(2:length(factors_bt), function(m) combn(factors_bt, m, simplify = FALSE)), recursive = FALSE)
-                    for (inter in all_interactions) {
-                      term <- paste(inter, collapse=":")
-                      dmrt <- tryCatch(agricolae::duncan.test(fit, term, group=TRUE), error = function(e) NULL)
-                      if (!is.null(dmrt)) dmrt_str <- paste0(dmrt_str, "\nDMRT for interaction ", term, ":\n", paste(capture.output(dmrt$groups), collapse = "\n"), "\n")
-                    }
-                  }
-                } else { dmrt_str <- "\nagricolae package not available. DMRT not run.\n" }
-              } else { anova_str <- "ANOVA failed."; anova_df <- data.frame(Message = anova_str) }
+              } else { anova_df <- data.frame(Message = "ANOVA failed.") }
             }
             full_grid <- expand.grid(lapply(df[factor_cols], function(x) levels(x))); actual <- df[, factor_cols, drop = FALSE] %>% distinct()
             missing <- dplyr::anti_join(full_grid, actual, by = factor_cols)
             
-            # Assign each result directly to its own slot
+            # Assign results to reactiveValues
             crd_results[[paste0("anova_table_", trait_id)]] <- anova_df
-            crd_results[[paste0("dmrt_text_", trait_id)]] <- dmrt_str
-            crd_results[[paste0("report_", trait_id)]] <- paste(anova_str, "\n", dmrt_str)
+            crd_results[[paste0("posthoc_tables_", trait_id)]] <- posthoc_list
             crd_results[[paste0("missing_combinations_", trait_id)]] <- missing
             
-            # --- UI rendering logic ---
-            output[[paste0("crd_anova_", trait_id)]] <- DT::renderDataTable({ req(crd_results[[paste0("anova_table_", trait_id)]]) })
-            output[[paste0("crd_dmrt_", trait_id)]] <- renderPrint({ cat(crd_results[[paste0("dmrt_text_", trait_id)]]) })
-            output[[paste0("crd_missing_", trait_id)]] <- DT::renderDataTable({ req(crd_results[[paste0("missing_combinations_", trait_id)]]) })
+            # Render outputs
+            output[[paste0("crd_anova_", trait_id)]] <- DT::renderDataTable({
+              req(crd_results[[paste0("anova_table_", trait_id)]])
+            }, options = list(pageLength = 10))
+            
+            output[[paste0("crd_posthoc_", trait_id)]] <- DT::renderDataTable({
+              req(crd_results[[paste0("posthoc_tables_", trait_id)]])
+              # This will now be a list of data frames
+              tables <- crd_results[[paste0("posthoc_tables_", trait_id)]]
+              if (length(tables) > 0 && !is.null(names(tables))) {
+                # Combine tables for display
+                bind_rows(lapply(names(tables), function(name) {
+                  df <- tables[[name]]
+                  df$Term <- name # Add a column to indicate which term it is
+                  df
+                }), .id = NULL)
+              } else {
+                data.frame(Message = "No post-hoc results to display.")
+              }
+            }, options = list(pageLength = 10))
+            
+            output[[paste0("crd_missing_", trait_id)]] <- DT::renderDataTable({
+              req(crd_results[[paste0("missing_combinations_", trait_id)]])
+            }, options = list(pageLength = 10))
           })
         }
       })
@@ -1197,11 +1200,11 @@ analysisServer <- function(id, home_inputs) {
             files_to_zip <- c(files_to_zip, fname)
           }
           
-          # --- Save DMRT Text File ---
-          dmrt_key <- paste0("dmrt_text_", trait_id)
-          if (!is.null(res[[dmrt_key]]) && nzchar(res[[dmrt_key]])) {
-            fname <- file.path(tmp_dir, paste0(tname, "_dmrt_results.txt"))
-            writeLines(res[[dmrt_key]], fname)
+          # --- Save Post-Hoc Text File ---
+          posthoc_key <- paste0("posthoc_text_", trait_id)
+          if (!is.null(res[[posthoc_key]]) && nzchar(res[[posthoc_key]])) {
+            fname <- file.path(tmp_dir, paste0(tname, "_posthoc_results.txt"))
+            writeLines(res[[posthoc_key]], fname)
             files_to_zip <- c(files_to_zip, fname)
           }
           
@@ -1296,6 +1299,7 @@ analysisServer <- function(id, home_inputs) {
     )
     
     
+    
     # -------- Block D3: Download Handler - Analysis 2 ZIP (FINAL CORRECTED) --------
     output$download_analysis2 <- downloadHandler(
       filename = function() paste0("PbAT_Analysis2_Results_", Sys.Date(), ".zip"),
@@ -1358,3 +1362,4 @@ analysisServer <- function(id, home_inputs) {
     
   })
 }
+
