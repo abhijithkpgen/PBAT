@@ -48,14 +48,20 @@ jobs:
       fail-fast: false
       matrix:
         config:
+                   # macOS: only current release
           - { os: macos-latest,   r: 'release',  build_manual: false }
+
+          # Windows: just release (like CRAN win-builder)
           - { os: windows-latest, r: 'release',  build_manual: false }
-          - { os: windows-latest, r: 'oldrel-1', build_manual: false }
-          - { os: windows-latest, r: 'oldrel-2', build_manual: false }
-          - { os: windows-latest, r: 'oldrel-3', build_manual: false }
-          - { os: windows-latest, r: 'oldrel-4', build_manual: false }
+
+          # Linux (Ubuntu): full CRAN matrix
           - { os: ubuntu-latest,  r: 'devel',    http-user-agent: 'release', build_manual: false }
-          - { os: ubuntu-latest,  r: 'release',  build_manual: true }    # only job that builds PDF manual
+          - { os: ubuntu-latest,  r: 'release',  build_manual: true }    # builds PDF manual here
+          - { os: ubuntu-latest,  r: 'oldrel-1', build_manual: false }
+          - { os: ubuntu-latest,  r: 'oldrel-2', build_manual: false }
+          - { os: ubuntu-latest,  r: 'oldrel-3', build_manual: false }
+          - { os: ubuntu-latest,  r: 'oldrel-4', build_manual: false }
+
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
