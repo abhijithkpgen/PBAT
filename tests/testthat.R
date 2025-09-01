@@ -1,4 +1,4 @@
 # tests/testthat.R
 library(testthat)
-library(PBAT)
-test_check("PBAT")
+library(PbAT)
+test_check("PbAT")

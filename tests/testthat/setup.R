@@ -1,3 +1,3 @@
 # tests/testthat/setup.R
-library(PBAT)
+library(PbAT)
 options(shiny.testmode = TRUE)   # optional, keeps Shiny quieter in tests

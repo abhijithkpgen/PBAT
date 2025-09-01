@@ -1,4 +1,4 @@
-Package: PBAT
+Package: PbAT
 Title: Plant Breeding Analytical Tools (Shiny Application)
 Version: 1.0.5
 Authors@R: 
@@ -50,7 +50,8 @@ Imports:
     tibble,
     tidyr,
     waiter,
-    zip
+    zip,
+    utils
 Suggests:
     testthat (>= 3.0.0),
     covr,
