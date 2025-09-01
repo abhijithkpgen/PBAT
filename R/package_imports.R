@@ -41,7 +41,7 @@
 #' @importFrom lmerTest lmer rand
 #' @importFrom lavaan sem parameterEstimates
 #' @importFrom metan performs_ammi waasb ammi_indexes gge plot_scores
-#' @importFrom stats aov as.formula na.omit p.adjust pf pnorm pt quantile residuals sd shapiro.test aggregate lm anova median runif cor
+#' @importFrom stats aov as.formula na.omit p.adjust pf pnorm pt quantile residuals sd shapiro.test aggregate lm anova median runif cor TukeyHSD
 #'
 # Base R and Utils
 #' @importFrom utils capture.output combn write.csv read.csv

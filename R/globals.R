@@ -10,5 +10,5 @@ utils::globalVariables(c(
   "plot_in_block", "tooltip", "Cross", "sca_se",
   # Add the new variables here
   "replication", "block", "plots", "Column", "Row", "Genotype", "box_label",
-  "geom_segment", "arrow", "unit"
+  "geom_segment", "arrow", "unit", "p adj"
 ))
