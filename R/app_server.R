@@ -11,7 +11,7 @@ app_server <- function(input, output, session) {
     showModal(modalDialog(
       title = tags$div(style = "display: flex; align-items: center;", 
                        icon("info-circle", style = "margin-right: 10px; color: #1F4E79;"), 
-                       "Welcome to PBAT!"),
+                       "Welcome to PbAT!"),
       HTML("New to the app? <br><br> Check out the <b>Help & Guide</b> section for tutorials and to download sample data files with the correct input formats.<br> Tip:Running into issues with output not showing? A quick app reload should do the trick."),
       footer = tagList(
         modalButton("Dismiss"),
