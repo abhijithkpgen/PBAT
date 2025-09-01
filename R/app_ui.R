@@ -261,6 +261,43 @@ app_ui <- function() {
                                   )
                               )
                      ),
+                     # --- NEW: CITATION TAB ---
+                     tabPanel("Citation Recommendation",
+                              div(style = "padding-top: 20px;",
+                                  h3("Citation Recommendations"),
+                                  p("If you use PbAT in your research, please cite this application and if you happen to use any of these below analyses please cite the core R packages that perform the analyses."),
+                                  
+                                  div(
+                                    h4("For the PbAT Application:", style="color:#1F4E79;"),
+                                    tags$blockquote("Abhijith et al. 2025  PbAT: Plant Breeding Analytical Tools (Version 1.0.5). [Software]. Available from https://github.com/abhijithkpgen/PBAT")
+                                  ),
+                                  
+                                  div(
+                                    h4("For Path Analysis:", style="color:#1F4E79;"),
+                                    tags$blockquote("Rosseel, Y. (2012). lavaan: An R Package for Structural Equation Modeling. Journal of Statistical Software, 48(2), 1-36.")
+                                  ),
+                                  
+                                  div(
+                                    h4("For Stability Analysis (AMMI/GGE):", style="color:#1F4E79;"),
+                                    tags$blockquote("Olivoto, T., & Gabriel, L. (2019). metan: An R package for multi-environment trial analysis. Methods in Ecology and Evolution, 10(6), 760-768.")
+                                  ),
+                                  
+                                  div(
+                                    h4("For Mixed Model Analysis:", style="color:#1F4E79;"),
+                                    tags$blockquote("Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting Linear Mixed-Effects Models Using lme4. Journal of Statistical Software, 67(1), 1-48.")
+                                  ),
+                                  
+                                  div(
+                                    h4("For Principal Component Analysis (PCA):", style="color:#1F4E79;"),
+                                    tags$blockquote("Kassambara, A., & Mundt, F. (2020). factoextra: Extract and Visualize the Results of Multivariate Data Analyses. R package version 1.0.7.")
+                                  ),
+                                  
+                                  div(
+                                    h4("For Graphical Outputs:", style="color:#1F4E79;"),
+                                    tags$blockquote("Wickham, H. (2016). ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York.")
+                                  )
+                              )
+                     ),
                      tabPanel("Troubleshooting",
                               div(style = "padding-top: 20px;",
                                   h3("Troubleshooting Common Issues"),
