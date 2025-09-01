@@ -50,7 +50,10 @@ jobs:
         config:
           - { os: macos-latest,   r: 'release',  build_manual: false }
           - { os: windows-latest, r: 'release',  build_manual: false }
-          - { os: windows-latest, r: 'oldrel-1', build_manual: false }   # added Windows old R
+          - { os: windows-latest, r: 'oldrel-1', build_manual: false }
+          - { os: windows-latest, r: 'oldrel-2', build_manual: false }
+          - { os: windows-latest, r: 'oldrel-3', build_manual: false }
+          - { os: windows-latest, r: 'oldrel-4', build_manual: false }
           - { os: ubuntu-latest,  r: 'devel',    http-user-agent: 'release', build_manual: false }
           - { os: ubuntu-latest,  r: 'release',  build_manual: true }    # only job that builds PDF manual
 
