@@ -284,7 +284,7 @@ app_ui <- function() {
                                   
                                   div(
                                     h4("For Mixed Model Analysis:", style="color:#1F4E79;"),
-                                    tags$blockquote("Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting Linear Mixed-Effects Models Using lme4. Journal of Statistical Software, 67(1), 1-48.")
+                                    tags$blockquote("Bates, D., Mchler, M., Bolker, B., & Walker, S. (2015). Fitting Linear Mixed-Effects Models Using lme4. Journal of Statistical Software, 67(1), 1-48.")
                                   ),
                                   
                                   div(
