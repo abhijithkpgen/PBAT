@@ -9,7 +9,6 @@ library(dplyr)
 library(FactoMineR)
 library(factoextra)
 library(corrplot)
-library(PerformanceAnalytics)
 library(lavaan)
 library(semPlot)
 library(DT)
@@ -117,14 +116,12 @@ multivariate_analysis_server <- function(id, shared_data) {
         tabsetPanel(
           tabPanel("Individual Biplot", plotlyOutput(ns("multi_pca_biplot"), height = "600px")),
           tabPanel("Scree Plot", plotlyOutput(ns("multi_pca_scree"), height = "600px")),
-          # *** FIX 1: Changed plotlyOutput to plotOutput for the variable contributions plot ***
           tabPanel("Variable Contributions", plotOutput(ns("multi_pca_varcontrib"), height = "600px")),
           tabPanel("Summary Table", DT::DTOutput(ns("multi_pca_eigen")))
         )
       } else if (multi_subtype_selected() == "correlation") {
         tabsetPanel(
-          tabPanel("Correlation Matrix Plot", plotOutput(ns("multi_corr_corrplot"))),
-          tabPanel("Pairs Plot", plotOutput(ns("multi_corr_pairsplot")))
+          tabPanel("Correlation Matrix Plot", plotOutput(ns("multi_corr_corrplot")))
         )
       } else if (multi_subtype_selected() == "path") {
         tabsetPanel(
@@ -180,7 +177,6 @@ multivariate_analysis_server <- function(id, shared_data) {
           ggplotly(p)
         })
         
-        # *** FIX 2: Changed renderPlotly to renderPlot and removed ggplotly() conversion ***
         output$multi_pca_varcontrib <- renderPlot({
           fviz_pca_var(res.pca, repel = TRUE)
         })
@@ -206,9 +202,6 @@ multivariate_analysis_server <- function(id, shared_data) {
       tryCatch({
         output$multi_corr_corrplot <- renderPlot({
           corrplot(cor(df_corr), method = "number", type = "upper", order = "hclust")
-        })
-        output$multi_corr_pairsplot <- renderPlot({
-          PerformanceAnalytics::chart.Correlation(df_corr, histogram = FALSE)
         })
         output$multi_corr_status <- renderUI({ span(style = "color: green;", icon("check"), " Correlation Completed") })
       }, error = function(e) {
@@ -292,9 +285,8 @@ multivariate_analysis_server <- function(id, shared_data) {
         
         if (multi_subtype_selected() == "correlation" && !is.null(corr_data())) {
           pdf(file.path(tmp_dir, "Correlation_MatrixPlot.pdf")); corrplot(cor(corr_data()), method="number", type="upper"); dev.off()
-          pdf(file.path(tmp_dir, "Correlation_Pairs.pdf")); PerformanceAnalytics::chart.Correlation(corr_data(), histogram=FALSE); dev.off()
           write.csv(cor(corr_data()), file.path(tmp_dir, "Correlation_Matrix.csv"))
-          files <- c(files, file.path(tmp_dir, "Correlation_MatrixPlot.pdf"), file.path(tmp_dir, "Correlation_Pairs.pdf"),
+          files <- c(files, file.path(tmp_dir, "Correlation_MatrixPlot.pdf"),
                      file.path(tmp_dir, "Correlation_Matrix.csv"))
         }
         
@@ -315,3 +307,4 @@ multivariate_analysis_server <- function(id, shared_data) {
     
   })
 }
+

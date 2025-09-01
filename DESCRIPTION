@@ -19,7 +19,6 @@ Language: en-US
 Depends:
     R (>= 4.1)
 Imports:
-    agricolae,
     broom,
     bslib,
     car,
@@ -37,7 +36,6 @@ Imports:
     lme4,
     lmerTest,
     metan,
-    PerformanceAnalytics,
     plotly,
     purrr,
     RColorBrewer,

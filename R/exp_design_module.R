@@ -445,7 +445,7 @@ analysisServer <- function(id, home_inputs) {
       })
     })
     
-    # -------- Block C2: Dynamic Main Panel UI (Corrected for reactiveValues) -----------
+    # -------- Block C2: Dynamic Main Panel UI (Reverted to tableOutput) -----------
     output$dynamic_mainpanel <- renderUI({
       design <- active_design()
       if (is.null(design)) return(NULL)
@@ -460,10 +460,10 @@ analysisServer <- function(id, home_inputs) {
           tabPanel(
             title = trait,
             tabsetPanel(
-              tabPanel("Summary Table", DT::dataTableOutput(ns(paste0("crd_sum_", trait_id)))),
-              tabPanel("ANOVA Table", DT::dataTableOutput(ns(paste0("crd_anova_", trait_id)))),
-              tabPanel("Post-Hoc Test (Tukey HSD)", DT::dataTableOutput(ns(paste0("crd_posthoc_", trait_id)))),
-              tabPanel("Missing Combinations", DT::dataTableOutput(ns(paste0("crd_missing_", trait_id)))),
+              tabPanel("Summary Table", tableOutput(ns(paste0("crd_sum_", trait_id)))),
+              tabPanel("ANOVA Table", tableOutput(ns(paste0("crd_anova_", trait_id)))),
+              tabPanel("Post-Hoc Test (Tukey HSD)", tableOutput(ns(paste0("crd_posthoc_", trait_id)))),
+              tabPanel("Missing Combinations", tableOutput(ns(paste0("crd_missing_", trait_id)))),
               tabPanel("Interaction Plots", uiOutput(ns(paste0("crd_interaction_panel_", trait_id))))
             )
           )
@@ -483,7 +483,7 @@ analysisServer <- function(id, home_inputs) {
     # -------- Section 2.4: Server Logic for Analyses and Rendering --------
     # ===================================================================
     
-    # --- Block E6: EDA Descriptive Analysis (Non-CRD) ---
+    # --- Block E6: EDA Descriptive Analysis (CORRECTED GROUPING) ---
     observeEvent(input$run_descriptive, {
       req(raw_data(), input$traits)
       
@@ -496,12 +496,17 @@ analysisServer <- function(id, home_inputs) {
         env_col <- input$env
       }
       
+      entry_col <- input$entry
+      
       results_list <- purrr::map(input$traits, function(trait) {
         df_trait <- df[!is.na(df[[trait]]), ]
-        df_trait$Environment <- if (is.null(env_col)) factor("All") else as.factor(df_trait[[env_col]])
         
+        # --- FIX: Define grouping variables ---
+        grouping_cols <- c(env_col, entry_col) %>% purrr::discard(is.null)
+        
+        # --- FIX: Group by all relevant factors ---
         summary_tbl <- df_trait %>%
-          dplyr::group_by(Environment) %>%
+          dplyr::group_by(across(all_of(grouping_cols))) %>%
           dplyr::summarise(
             Trait = trait,
             Mean = round(mean(.data[[trait]], na.rm = TRUE), 2),
@@ -510,9 +515,12 @@ analysisServer <- function(id, home_inputs) {
             CV = round(100 * SD / Mean, 2),
             Min = round(min(.data[[trait]], na.rm = TRUE), 2),
             Max = round(max(.data[[trait]], na.rm = TRUE), 2),
-            N = n()
+            N = n(),
+            .groups = "drop"
           )
         
+        # This part remains the same, showing overall boxplot per environment
+        df_trait$Environment <- if (is.null(env_col)) factor("All") else as.factor(df_trait[[env_col]])
         boxplot <- ggplot(df_trait, aes(x = Environment, y = .data[[trait]], fill = Environment)) +
           geom_boxplot(color = "black", width = 0.5) +
           theme_minimal(base_size = 16) +
@@ -791,11 +799,9 @@ analysisServer <- function(id, home_inputs) {
               .groups = "drop"
             )
           
-          # Assign the result directly to a named slot (e.g., crd_results$summary_Trait1)
           crd_results[[paste0("summary_", trait_id)]] <- summary_tbl
           
-          # Render the output immediately
-          output[[paste0("crd_sum_", trait_id)]] <- DT::renderDataTable({
+          output[[paste0("crd_sum_", trait_id)]] <- renderTable({
             req(crd_results[[paste0("summary_", trait_id)]])
           })
         })
@@ -804,7 +810,7 @@ analysisServer <- function(id, home_inputs) {
     })
     
     
-    # --- Block C5: ANOVA + Post-Hoc (FORMATTING IMPROVED) ---
+    # --- Block C5: ANOVA + Post-Hoc (FORMATTING IMPROVED & REVERTED TO PLAIN TABLE) ---
     observeEvent(input$run_crd_anova, {
       req(raw_data(), input$crd_traits, input$crd_n_factors > 0)
       df <- raw_data(); nfac <- as.numeric(input$crd_n_factors)
@@ -855,9 +861,9 @@ analysisServer <- function(id, home_inputs) {
                     df <- df %>%
                       mutate(across(where(is.numeric), ~round(.x, 2))) %>%
                       mutate(Significance = add_significance_stars(`p adj`))
+                    df$Term <- term # Add term name for combining later
                     return(df)
                   })
-                  names(posthoc_list) <- names(tukey_hsd)
                 } else {
                   posthoc_list <- list(error = data.frame(Message = "Tukey HSD could not be computed."))
                 }
@@ -871,36 +877,27 @@ analysisServer <- function(id, home_inputs) {
             crd_results[[paste0("posthoc_tables_", trait_id)]] <- posthoc_list
             crd_results[[paste0("missing_combinations_", trait_id)]] <- missing
             
-            # Render outputs
-            output[[paste0("crd_anova_", trait_id)]] <- DT::renderDataTable({
-              req(crd_results[[paste0("anova_table_", trait_id)]])
-            }, options = list(pageLength = 10))
+            # Render outputs as plain tables
+            output[[paste0("crd_anova_", trait_id)]] <- renderTable({ req(crd_results[[paste0("anova_table_", trait_id)]]) })
             
-            output[[paste0("crd_posthoc_", trait_id)]] <- DT::renderDataTable({
+            output[[paste0("crd_posthoc_", trait_id)]] <- renderTable({
               req(crd_results[[paste0("posthoc_tables_", trait_id)]])
-              # This will now be a list of data frames
               tables <- crd_results[[paste0("posthoc_tables_", trait_id)]]
               if (length(tables) > 0 && !is.null(names(tables))) {
-                # Combine tables for display
-                bind_rows(lapply(names(tables), function(name) {
-                  df <- tables[[name]]
-                  df$Term <- name # Add a column to indicate which term it is
-                  df
-                }), .id = NULL)
+                bind_rows(tables, .id = NULL)
               } else {
                 data.frame(Message = "No post-hoc results to display.")
               }
-            }, options = list(pageLength = 10))
+            })
             
-            output[[paste0("crd_missing_", trait_id)]] <- DT::renderDataTable({
-              req(crd_results[[paste0("missing_combinations_", trait_id)]])
-            }, options = list(pageLength = 10))
+            output[[paste0("crd_missing_", trait_id)]] <- renderTable({ req(crd_results[[paste0("missing_combinations_", trait_id)]]) })
           })
         }
       })
       crd_anova_finished(crd_anova_finished() + 1)
       showNotification("ANOVA and Post-Hoc analysis complete.", type = "message")
     })
+    
     
     
     # -------- Block C6: CRD Interaction Plots (DEFINITIVE FIX for reactiveValues) --------
@@ -1201,10 +1198,17 @@ analysisServer <- function(id, home_inputs) {
           }
           
           # --- Save Post-Hoc Text File ---
-          posthoc_key <- paste0("posthoc_text_", trait_id)
-          if (!is.null(res[[posthoc_key]]) && nzchar(res[[posthoc_key]])) {
+          posthoc_key <- paste0("posthoc_tables_", trait_id)
+          if (!is.null(res[[posthoc_key]]) && length(res[[posthoc_key]]) > 0) {
+            # Combine all post-hoc tables into one text block
+            all_posthoc_text <- paste(sapply(names(res[[posthoc_key]]), function(term) {
+              term_header <- paste(rep("=", 20), collapse = "")
+              paste(term_header, "\nTukey HSD for term:", term, "\n", term_header, "\n",
+                    paste(utils::capture.output(res[[posthoc_key]][[term]]), collapse = "\n"))
+            }), collapse = "\n\n")
+            
             fname <- file.path(tmp_dir, paste0(tname, "_posthoc_results.txt"))
-            writeLines(res[[posthoc_key]], fname)
+            writeLines(all_posthoc_text, fname)
             files_to_zip <- c(files_to_zip, fname)
           }
           
@@ -1341,14 +1345,10 @@ analysisServer <- function(id, home_inputs) {
             corrplot::corrplot(cor(corr_data, use="complete.obs"), method="number", type="upper")
             dev.off()
             
-            pdf(file.path(tmp_dir, "Correlation_Pairs.pdf"))
-            PerformanceAnalytics::chart.Correlation(corr_data, histogram = FALSE)
-            dev.off()
-            
             write.csv(cor(corr_data, use="complete.obs"), file.path(tmp_dir, "Correlation_Matrix.csv"))
             
             files_to_zip <- c(files_to_zip, file.path(tmp_dir, "Correlation_MatrixPlot.pdf"), 
-                              file.path(tmp_dir, "Correlation_Pairs.pdf"), file.path(tmp_dir, "Correlation_Matrix.csv"))
+                              file.path(tmp_dir, "Correlation_Matrix.csv"))
           }
         }, error = function(e) {
           showNotification(paste("Error saving Analysis 2 results:", e$message), type = "error")
