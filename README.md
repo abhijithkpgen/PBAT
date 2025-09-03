@@ -79,10 +79,10 @@ You can install the development version of PbAT directly from GitHub using `devt
 if (!require("devtools")) install.packages("devtools")
 
 # Install PbAT from GitHub
-devtools::install_github("abhijithkpgen/PBAT")
+devtools::install_github("abhijithkpgen/PbAT")
 
 # Load the library
-library(PBAT)
+library(PbAT)
 
 # Run the application
 run_app()
