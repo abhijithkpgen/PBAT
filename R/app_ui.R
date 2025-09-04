@@ -311,9 +311,9 @@ app_ui <- function() {
                                   tags$ul(
                                     tags$li(HTML("<b>1. Reload and Rerun:</b><br>This is the easiest and most common fix. If the results area or input area is blank, simply reload the entire web page and run the analysis again. This resolves most temporary rendering issues.")),
                                     tags$li(HTML("<b>2. Ensure a Stable Internet Connection:</b><br>Since these analyses involve sending data and waiting for results, a stable connection is key. If you are on a weak Wi-Fi signal, try moving closer to your router or connect to a more reliable network before rerunning the analysis.")),
-                                    tags$li(HTML("<b>3. Reduce the Analysis Workload:</b><br>The more traits you select, the longer the server needs to compute. If the analysis is still failing, try reducing the complexity by selecting fewer traits at a time.")),
+                                
                                     tags$li(HTML("<b>4. Be Patient:</b><br>A complex mixed-model analysis on a large dataset can take some time. After clicking 'Run,' please allow up to a minute for the server to process before assuming there is an error.")),
-                                    tags$li(HTML("<b>5. Use the R Package Locally:</b><br>For very large datasets or complex multi-trait analyses, consider installing the PBAT R package (instructions on the Home tab) and running it on your own computer for the smoothest and fastest experience."))
+                                    tags$li(HTML("<b>5. Use the R Package Locally:</b><br>For very large datasets or complex multi-trait analyses, consider installing the PbAT R package  and running it on your own computer for the smoothest and fastest experience."))
                                     
                                     
                                   )
