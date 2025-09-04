@@ -3,7 +3,7 @@
 app_ui <- function() {
   navbarPage(
     title = div(
-      style = "display: flex; align-items-center; gap: 16px;",
+      style = "display: flex; align-items: center; gap: 16px;",
       tags$img(src = "www/LogoNobg.png", height = "50px", style = "margin-right: 8px;"),
       span("PbAT: Plant breeding Analytical Tools v1.0.5", style = "font-weight: 800; font-size: 1.4rem;")
     ),
@@ -220,7 +220,6 @@ app_ui <- function() {
     ")))
     ),
     
-    # --- UPDATED HOME TAB ---
     tabPanel("Home", homeUI(id = "home")),
     
     designExperimentUI(id = "design_experiment"), 
@@ -238,56 +237,30 @@ app_ui <- function() {
     
     multivariate_analysis_ui(id = "multi"),
     
-    # <<< START OF NEW CODE >>>
+    # <<< START OF MODIFIED SECTION >>>
     tabPanel("About",
              fluidPage(
-               div(style = "padding: 30px; max-width: 800px; margin: 30px auto; background-color: transparent; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);",
-                   h2("About PbAT", style = "color: #1F4E79; text-align: center; font-weight: bold;"),
-                   br(),
-                   p("Hi,"),
-                   p("Thanks for checking out, PbAT."),
-                   p("Statistical analysis is at the heart of plant breeding, but too often, the complexity of coding stands in the way. We understand that, sometimes researchers end up spending more time wrestling with programming than advancing their science."),
-                   p("Thats why we created PbAT (Plant Breeding Analytical Tools)."),
-                   p("PbAT is a free, open-access web application designed to break down those barriers. It unifies the entire analytical pipeline: trial design, data curation, experimental design analyses, stability assessments, multivariate approaches, and mating designs into one seamless, code-free workflow."),
-                   p("We hope PbAT makes your analyses simpler, and we would be delighted if you could share your feedback, constraints, suggestions and obviously the bugs at ",
-                     tags$a(href="mailto:abhijithkpgen@gmail.com", "abhijithkpgen@gmail.com"),
-                     " to help us further improve the application."),
-                   p("We invite you to explore PbAT, streamline your analysis, and spend more time where it matters most, on discovery and innovation in plant breeding."),
-                   br(),
-                   p("Sincerely,"),
-                   p(tags$b("The PbAT Team"))
-               )
-             )
-    ),
-    # <<< END >>>
-    
-    tabPanel("Help & Guide",
-             fluidPage(
                div(style = "padding: 30px;",
-                   h2("Help & Guide", style = "color: #23272b;"),
+                   h2("About PbAT", style = "color: #1F4E79; font-weight: bold;"),
                    tabsetPanel(
-                     id = "help_tabs",
-                     tabPanel("Sample Data",
-                              div(style = "padding-top: 20px;",
-                                  h3("Sample Data Downloads"),
-                                  p("Disclaimer: The example datasets provided in this application are simulated for demonstration purposes only. They do not represent actual experimental results and should not be used for research conclusions."),
-                                  tags$ul(
-                                    tags$li(tags$a(href = "www/Alpha_lattice_sample.csv", "Alpha Lattice Sample CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/Augmented_RCBD_Sample.csv", "Augmented RCBD Sample CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/Diallel_Griffing_Method1_Sample.csv", "Griffing Method I Diallel Sample CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/Diallel_Griffing_Method2_Sample.csv", "Griffing Method II Diallel Sample CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/Diallel_Griffing_Method3_Sample.csv", "Griffing Method III Diallel Sample CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/Diallel_Griffing_Method4_Sample.csv", "Griffing Method IV Diallel Sample CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/Factorial_CRD_sample.csv", "Factorial CRD Sample CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/Line_x_Tester_Sample.csv", "Line x Tester Sample CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/Partial_diallel_dummy.csv", "Partial Diallel Sample CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/AMMI_GGE_Sample_Data.csv", "Biplot Sample Format CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/Mult_Variate_sample_format.csv", "Multivariate Analysis Sample Format CSV", download = NA, target = "_blank")),
-                                    tags$li(tags$a(href = "www/RCBD_sample.csv", "RCBD Sample CSV", download = NA, target = "_blank"))
-                                  )
+                     id = "about_tabs",
+                     tabPanel("Our Mission",
+                              div(style = "padding: 20px; max-width: 800px; margin: 20px auto; background-color: transparent; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);",
+                                  br(),
+                                  p("Hi,"),
+                                  p("Thanks for checking out, PbAT."),
+                                  p("Statistical analysis lies at the heart of plant breeding, but too often, the complexity of coding stands in the way. We understand that, sometimes researchers end up spending more time wrestling with programming than advancing their science."),
+                                  p("Thats why we created PbAT (Plant Breeding Analytical Tools)."),
+                                  p("PbAT is a free, open-access web application designed to break down those barriers. It unifies the entire analytical pipeline, trial design, data curation, experimental design analyses, stability assessments, multivariate approaches, and mating designs into one seamless, code free workflow."),
+                                  p("We hope PbAT makes your analyses simpler, and we would be delighted if you could share your feedback, constraints, suggestions and obviously the bugs at ",
+                                    tags$a(href="mailto:abhijithkpgen@gmail.com", "abhijithkpgen@gmail.com"),
+                                    " to help us further improve the application."),
+                                  p("We invite you to explore PbAT, streamline your analysis, and spend more time where it matters most, on discovery and innovation in plant breeding."),
+                                  br(),
+                                  p("Sincerely,"),
+                                  p(tags$b("The PbAT Team"))
                               )
                      ),
-                     # ---  CITATION TAB ---
                      tabPanel("Citation Recommendation",
                               div(style = "padding-top: 20px;",
                                   h3("Citation Recommendations"),
@@ -321,6 +294,38 @@ app_ui <- function() {
                                   div(
                                     h4("For Graphical Outputs:", style="color:#1F4E79;"),
                                     tags$blockquote("Wickham, H. (2016). ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York.")
+                                  )
+                              )
+                     )
+                   )
+               )
+             )
+    ),
+    # <<< END OF MODIFIED SECTION >>>
+    
+    tabPanel("Help & Guide",
+             fluidPage(
+               div(style = "padding: 30px;",
+                   h2("Help & Guide", style = "color: #23272b;"),
+                   tabsetPanel(
+                     id = "help_tabs",
+                     tabPanel("Sample Data",
+                              div(style = "padding-top: 20px;",
+                                  h3("Sample Data Downloads"),
+                                  p("Disclaimer: The example datasets provided in this application are simulated for demonstration purposes only. They do not represent actual experimental results and should not be used for research conclusions."),
+                                  tags$ul(
+                                    tags$li(tags$a(href = "www/Alpha_lattice_sample.csv", "Alpha Lattice Sample CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/Augmented_RCBD_Sample.csv", "Augmented RCBD Sample CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/Diallel_Griffing_Method1_Sample.csv", "Griffing Method I Diallel Sample CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/Diallel_Griffing_Method2_Sample.csv", "Griffing Method II Diallel Sample CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/Diallel_Griffing_Method3_Sample.csv", "Griffing Method III Diallel Sample CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/Diallel_Griffing_Method4_Sample.csv", "Griffing Method IV Diallel Sample CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/Factorial_CRD_sample.csv", "Factorial CRD Sample CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/Line_x_Tester_Sample.csv", "Line x Tester Sample CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/Partial_diallel_dummy.csv", "Partial Diallel Sample CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/AMMI_GGE_Sample_Data.csv", "Biplot Sample Format CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/Mult_Variate_sample_format.csv", "Multivariate Analysis Sample Format CSV", download = NA, target = "_blank")),
+                                    tags$li(tags$a(href = "www/RCBD_sample.csv", "RCBD Sample CSV", download = NA, target = "_blank"))
                                   )
                               )
                      ),
