@@ -247,7 +247,7 @@ app_ui <- function() {
                    p("Hi,"),
                    p("Thanks for checking out, PbAT."),
                    p("Statistical analysis is at the heart of plant breeding, but too often, the complexity of coding stands in the way. We understand that, sometimes researchers end up spending more time wrestling with programming than advancing their science."),
-                   p("That’s why we created PbAT (Plant Breeding Analytical Tools)."),
+                   p("Thats why we created PbAT (Plant Breeding Analytical Tools)."),
                    p("PbAT is a free, open-access web application designed to break down those barriers. It unifies the entire analytical pipeline: trial design, data curation, experimental design analyses, stability assessments, multivariate approaches, and mating designs into one seamless, code-free workflow."),
                    p("We hope PbAT makes your analyses simpler, and we would be delighted if you could share your feedback, constraints, suggestions and obviously the bugs at ",
                      tags$a(href="mailto:abhijithkpgen@gmail.com", "abhijithkpgen@gmail.com"),
