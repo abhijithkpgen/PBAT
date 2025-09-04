@@ -3,7 +3,7 @@
 app_ui <- function() {
   navbarPage(
     title = div(
-      style = "display: flex; align-items: center; gap: 16px;",
+      style = "display: flex; align-items-center; gap: 16px;",
       tags$img(src = "www/LogoNobg.png", height = "50px", style = "margin-right: 8px;"),
       span("PbAT: Plant breeding Analytical Tools v1.0.5", style = "font-weight: 800; font-size: 1.4rem;")
     ),
@@ -238,6 +238,29 @@ app_ui <- function() {
     
     multivariate_analysis_ui(id = "multi"),
     
+    # <<< START OF NEW CODE >>>
+    tabPanel("About",
+             fluidPage(
+               div(style = "padding: 30px; max-width: 800px; margin: 30px auto; background-color: transparent; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);",
+                   h2("About PbAT", style = "color: #1F4E79; text-align: center; font-weight: bold;"),
+                   br(),
+                   p("Hi,"),
+                   p("Thanks for checking out, PbAT."),
+                   p("Statistical analysis is at the heart of plant breeding, but too often, the complexity of coding stands in the way. We understand that, sometimes researchers end up spending more time wrestling with programming than advancing their science."),
+                   p("That’s why we created PbAT (Plant Breeding Analytical Tools)."),
+                   p("PbAT is a free, open-access web application designed to break down those barriers. It unifies the entire analytical pipeline: trial design, data curation, experimental design analyses, stability assessments, multivariate approaches, and mating designs into one seamless, code-free workflow."),
+                   p("We hope PbAT makes your analyses simpler, and we would be delighted if you could share your feedback, constraints, suggestions and obviously the bugs at ",
+                     tags$a(href="mailto:abhijithkpgen@gmail.com", "abhijithkpgen@gmail.com"),
+                     " to help us further improve the application."),
+                   p("We invite you to explore PbAT, streamline your analysis, and spend more time where it matters most, on discovery and innovation in plant breeding."),
+                   br(),
+                   p("Sincerely,"),
+                   p(tags$b("The PbAT Team"))
+               )
+             )
+    ),
+    # <<< END >>>
+    
     tabPanel("Help & Guide",
              fluidPage(
                div(style = "padding: 30px;",
@@ -264,7 +287,7 @@ app_ui <- function() {
                                   )
                               )
                      ),
-                     # --- NEW: CITATION TAB ---
+                     # ---  CITATION TAB ---
                      tabPanel("Citation Recommendation",
                               div(style = "padding-top: 20px;",
                                   h3("Citation Recommendations"),
@@ -311,7 +334,7 @@ app_ui <- function() {
                                   tags$ul(
                                     tags$li(HTML("<b>1. Reload and Rerun:</b><br>This is the easiest and most common fix. If the results area or input area is blank, simply reload the entire web page and run the analysis again. This resolves most temporary rendering issues.")),
                                     tags$li(HTML("<b>2. Ensure a Stable Internet Connection:</b><br>Since these analyses involve sending data and waiting for results, a stable connection is key. If you are on a weak Wi-Fi signal, try moving closer to your router or connect to a more reliable network before rerunning the analysis.")),
-                                
+                                    
                                     tags$li(HTML("<b>4. Be Patient:</b><br>A complex mixed-model analysis on a large dataset can take some time. After clicking 'Run,' please allow up to a minute for the server to process before assuming there is an error.")),
                                     tags$li(HTML("<b>5. Use the R Package Locally:</b><br>For very large datasets or complex multi-trait analyses, consider installing the PbAT R package  and running it on your own computer for the smoothest and fastest experience."))
                                     
