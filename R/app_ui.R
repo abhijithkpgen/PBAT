@@ -5,7 +5,7 @@ app_ui <- function() {
     title = div(
       style = "display: flex; align-items: center; gap: 16px;",
       tags$img(src = "www/LogoNobg.png", height = "50px", style = "margin-right: 8px;"),
-      span("PbAT: Plant Breeding Analytical Tools v1.0.5", style = "font-weight: 800; font-size: 1.4rem;")
+      span("PbAT: Plant breeding Analytical Tools v1.0.5", style = "font-weight: 800; font-size: 1.4rem;")
     ),
     id = "main_navbar", 
     theme = bslib::bs_theme(
